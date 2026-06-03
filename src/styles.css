@@ -143,3 +143,38 @@
     color: var(--color-foreground);
   }
 }
+
+/* Acessibilidade: escala de fonte ajustável pelo usuário */
+:root {
+  --escala-fonte: 1;
+}
+html {
+  font-size: calc(100% * var(--escala-fonte));
+}
+
+/* Acessibilidade: alto contraste */
+.alto-contraste {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.12 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.12 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.12 0 0);
+  --primary: oklch(0.32 0.15 38);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.92 0 0);
+  --secondary-foreground: oklch(0.12 0 0);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.25 0 0);
+  --accent: oklch(0.32 0.15 38);
+  --accent-foreground: oklch(1 0 0);
+  --border: oklch(0.3 0 0);
+  --input: oklch(0.3 0 0);
+  --ring: oklch(0.12 0 0);
+}
+
+/* Foco sempre visível para navegação por teclado */
+:where(a, button, [role="button"], input, select, textarea):focus-visible {
+  outline: 3px solid var(--color-ring);
+  outline-offset: 2px;
+}
