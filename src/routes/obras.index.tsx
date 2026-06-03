@@ -5,7 +5,7 @@ import { obras, obrasPorParede } from "@/data/obras";
 import { ObraCard } from "@/components/ObraCard";
 import { Input } from "@/components/ui/input";
 
-export const Route = createFileRoute("/obras")({
+export const Route = createFileRoute("/obras/")({
   head: () => ({
     meta: [
       { title: "Acervo — Elifas Andreato: Sem Moldura" },
