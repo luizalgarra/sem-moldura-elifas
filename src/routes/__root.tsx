@@ -80,14 +80,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Elifas Andreato: Sem Moldura — Catálogo Virtual" },
+      {
+        name: "description",
+        content:
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura. Obras com áudio-descrição e acesso por QR Code.",
+      },
+      { name: "author", content: "Elifas Andreato" },
+      { property: "og:title", content: "Elifas Andreato: Sem Moldura — Catálogo Virtual" },
+      {
+        property: "og:description",
+        content:
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura, com áudio-descrição e acesso por QR Code.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
