@@ -33,7 +33,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 1",
     imagem: imagemDaObra(1),
-    descricao: "Obra número 1: Secos e Molhados, Opinião. Elifas Andreato, 1973. Técnica: Nanquim, aerografo. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 1: Secos e Molhados, Opinião. Elifas Andreato, 1973. Técnica: Nanquim, aerografo. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 2,
@@ -44,7 +44,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 1",
     imagem: imagemDaObra(2),
-    descricao: "Obra número 2: Arca de Noé. Elifas Andreato, 1980. Técnica: Recortes gráficos e papel. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 2: Arca de Noé. Elifas Andreato, 1980. Técnica: Recortes gráficos e papel. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 3,
@@ -55,7 +55,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 1",
     imagem: imagemDaObra(3),
-    descricao: "Obra número 3: Equus. Elifas Andreato, 1975. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 3: Equus. Elifas Andreato, 1975. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 4,
@@ -66,7 +66,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 1",
     imagem: imagemDaObra(4),
-    descricao: "Obra número 4: Festival de Inverno Campos do Jordão. Elifas Andreato, 1991. Técnica: Recorte de papel e acrilica. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 4: Festival de Inverno Campos do Jordão. Elifas Andreato, 1991. Técnica: Recorte de papel e acrilica. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 5,
@@ -77,7 +77,7 @@ export const obras: Obra[] = [
     dimensao: "2m x 2m",
     parede: "Parede 1",
     imagem: imagemDaObra(5),
-    descricao: "Obra número 5: Reza de Sol. Elifas Andreato, 1980. Técnica: Ossada de cavalo e fotografia. Dimensão do original: 2metros por 2metros.",
+    descricao: "Obra número 5: Reza de Sol. Elifas Andreato, 1980. Técnica: Ossada de cavalo e fotografia. Dimensão do original: 2 metros por 2 metros.",
   },
   {
     num: 6,
@@ -88,7 +88,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 1",
     imagem: imagemDaObra(6),
-    descricao: "Obra número 6: Veja. Elifas Andreato, 1974. Técnica: Aerografo, nanquim e acrilica sob papel cartão. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 6: Veja. Elifas Andreato, 1974. Técnica: Aerografo, nanquim e acrilica sob papel cartão. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 7,
@@ -99,7 +99,7 @@ export const obras: Obra[] = [
     dimensao: "29cm x 21cm",
     parede: "Parede 1",
     imagem: imagemDaObra(7),
-    descricao: "Obra número 7: Capa nº1 Almanaque Brasil. Elifas Andreato, 1999. Técnica: Ilustração e recursos digitais. Dimensão do original: 29centímetrosetros por 21centímetrosetros.",
+    descricao: "Obra número 7: Capa nº1 Almanaque Brasil. Elifas Andreato, 1999. Técnica: Ilustração e recursos digitais. Dimensão do original: 29 centímetros por 21 centímetros.",
   },
   {
     num: 8,
@@ -110,7 +110,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 1",
     imagem: imagemDaObra(8),
-    descricao: "Obra número 8: Ultima Hora. Elifas Andreato, 1969. Técnica: Ecoline, nanquim, acrilica sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 8: Ultima Hora. Elifas Andreato, 1969. Técnica: Ecoline, nanquim, acrilica sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 9,
@@ -121,7 +121,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 1",
     imagem: imagemDaObra(9),
-    descricao: "Obra número 9: Incrivel o Meu Reino. Elifas Andreato, 1976. Técnica: Nanquim, aerografo sob papel cartão. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 9: Incrivel o Meu Reino. Elifas Andreato, 1976. Técnica: Nanquim, aerografo sob papel cartão. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 10,
@@ -132,7 +132,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 1",
     imagem: imagemDaObra(10),
-    descricao: "Obra número 10: Rosa caneta. Elifas Andreato, Decada 1980. Técnica: Aquarela, lapis. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 10: Rosa caneta. Elifas Andreato, Decada 1980. Técnica: Aquarela, lapis. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 11,
@@ -143,7 +143,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 2",
     imagem: imagemDaObra(11),
-    descricao: "Obra número 11: Capa Revista Argumento. Elifas Andreato, 1974. Técnica: Acrilica e lápis sob tela. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 11: Capa Revista Argumento. Elifas Andreato, 1974. Técnica: Acrilica e lápis sob tela. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 12,
@@ -154,7 +154,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(12),
-    descricao: "Obra número 12: SOS Mulher. Elifas Andreato, 1982. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 12: SOS Mulher. Elifas Andreato, 1982. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 13,
@@ -165,7 +165,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(13),
-    descricao: "Obra número 13: Gil. Elifas Andreato, 1996. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 13: Gil. Elifas Andreato, 1996. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 14,
@@ -176,7 +176,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 2",
     imagem: imagemDaObra(14),
-    descricao: "Obra número 14: Pirotecnico Zacarias. Elifas Andreato, 1974. Técnica: Acrilica e lápis sob tela. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 14: Pirotecnico Zacarias. Elifas Andreato, 1974. Técnica: Acrilica e lápis sob tela. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 15,
@@ -187,7 +187,7 @@ export const obras: Obra[] = [
     dimensao: "60cm x 40cm",
     parede: "Parede 2",
     imagem: imagemDaObra(15),
-    descricao: "Obra número 15: Sonho Civico. Elifas Andreato, 1999. Técnica: Acrilica e lapis sob tela. Dimensão do original: 60centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 15: Sonho Civico. Elifas Andreato, 1999. Técnica: Acrilica e lapis sob tela. Dimensão do original: 60 centímetros por 40 centímetros.",
   },
   {
     num: 16,
@@ -198,7 +198,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(16),
-    descricao: "Obra número 16: Clara Nunes Nação. Elifas Andreato, 1979. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 16: Clara Nunes Nação. Elifas Andreato, 1979. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 17,
@@ -209,7 +209,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 2",
     imagem: imagemDaObra(17),
-    descricao: "Obra número 17: Cantora. Elifas Andreato, 2010. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 17: Cantora. Elifas Andreato, 2010. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 18,
@@ -220,7 +220,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 2",
     imagem: imagemDaObra(18),
-    descricao: "Obra número 18: Virginia Wolf. Elifas Andreato, 1977. Técnica: Acrilica e lápis sob papel cartão. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 18: Virginia Wolf. Elifas Andreato, 1977. Técnica: Acrilica e lápis sob papel cartão. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 19,
@@ -231,7 +231,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(19),
-    descricao: "Obra número 19: Chico Palhaço. Elifas Andreato, 1984. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 19: Chico Palhaço. Elifas Andreato, 1984. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 20,
@@ -242,7 +242,7 @@ export const obras: Obra[] = [
     dimensao: "60cm x 60cm",
     parede: "Parede 2",
     imagem: imagemDaObra(20),
-    descricao: "Obra número 20: Caipira. Elifas Andreato, 1981. Técnica: Acrilica e lápis sob tela. Dimensão do original: 60centímetrosetros por 60centímetrosetros.",
+    descricao: "Obra número 20: Caipira. Elifas Andreato, 1981. Técnica: Acrilica e lápis sob tela. Dimensão do original: 60 centímetros por 60 centímetros.",
   },
   {
     num: 21,
@@ -253,7 +253,7 @@ export const obras: Obra[] = [
     dimensao: "30 cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(21),
-    descricao: "Obra número 21: Vinicius e Toquinho. Elifas Andreato, 1974. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 21: Vinicius e Toquinho. Elifas Andreato, 1974. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 22,
@@ -264,7 +264,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(22),
-    descricao: "Obra número 22: Agua da Minha Sede, Zeca Pagodinho. Elifas Andreato, 2000. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 22: Agua da Minha Sede, Zeca Pagodinho. Elifas Andreato, 2000. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 23,
@@ -275,7 +275,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(23),
-    descricao: "Obra número 23: Roberto Carlos. Elifas Andreato, 1988. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 23: Roberto Carlos. Elifas Andreato, 1988. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 24,
@@ -286,7 +286,7 @@ export const obras: Obra[] = [
     dimensao: "50cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(24),
-    descricao: "Obra número 24: 7 Dias de Agonia. Elifas Andreato, 1983. Técnica: Acrilica e lapis sob tela. Dimensão do original: 50centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 24: 7 Dias de Agonia. Elifas Andreato, 1983. Técnica: Acrilica e lapis sob tela. Dimensão do original: 50 centímetros por 30 centímetros.",
   },
   {
     num: 25,
@@ -297,7 +297,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(25),
-    descricao: "Obra número 25: Batuque na Cozinha. Elifas Andreato, 1972. Técnica: Caneta ecoline, nanquim, recortes gráficos. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 25: Batuque na Cozinha. Elifas Andreato, 1972. Técnica: Caneta ecoline, nanquim, recortes gráficos. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 26,
@@ -308,7 +308,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 2",
     imagem: imagemDaObra(26),
-    descricao: "Obra número 26: Pirotecnico Zacarias. Elifas Andreato, 1976. Técnica: Aerografo, nanquim. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 26: Pirotecnico Zacarias. Elifas Andreato, 1976. Técnica: Aerografo, nanquim. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 27,
@@ -319,7 +319,7 @@ export const obras: Obra[] = [
     dimensao: "50cm x 25cm",
     parede: "Parede 2",
     imagem: imagemDaObra(27),
-    descricao: "Obra número 27: Cartaz Canta Canta Minha Gente. Elifas Andreato, 1974. Técnica: Acrilica e lápis sob tela. Dimensão do original: 50centímetrosetros por 25centímetrosetros.",
+    descricao: "Obra número 27: Cartaz Canta Canta Minha Gente. Elifas Andreato, 1974. Técnica: Acrilica e lápis sob tela. Dimensão do original: 50 centímetros por 25 centímetros.",
   },
   {
     num: 28,
@@ -330,7 +330,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(28),
-    descricao: "Obra número 28: Caetano, encarte História da Música Brasileira. Elifas Andreato, 1970. Técnica: Ecoline, Nanquim e acriloica sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 28: Caetano, encarte História da Música Brasileira. Elifas Andreato, 1970. Técnica: Ecoline, Nanquim e acriloica sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 29,
@@ -341,7 +341,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(29),
-    descricao: "Obra número 29: Nave Maria, Tom Zé. Elifas Andreato, 1986. Técnica: Foto, faca grafica. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 29: Nave Maria, Tom Zé. Elifas Andreato, 1986. Técnica: Foto, faca grafica. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 30,
@@ -352,7 +352,7 @@ export const obras: Obra[] = [
     dimensao: "60cm x 40cm",
     parede: "Parede 2",
     imagem: imagemDaObra(30),
-    descricao: "Obra número 30: Trem Azul, Elis. Elifas Andreato, 1980. Técnica: Foto e recursos graficos. Dimensão do original: 60centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 30: Trem Azul, Elis. Elifas Andreato, 1980. Técnica: Foto e recursos graficos. Dimensão do original: 60 centímetros por 40 centímetros.",
   },
   {
     num: 31,
@@ -363,7 +363,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 2",
     imagem: imagemDaObra(31),
-    descricao: "Obra número 31: Bebadosamba Verso. Elifas Andreato, 1995. Técnica: Lapis, vetor computador e texturas. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 31: Bebadosamba Verso. Elifas Andreato, 1995. Técnica: Lapis, vetor computador e texturas. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 32,
@@ -374,7 +374,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(32),
-    descricao: "Obra número 32: João Bosco. Elifas Andreato, 1996. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 32: João Bosco. Elifas Andreato, 1996. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 33,
@@ -385,7 +385,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 2",
     imagem: imagemDaObra(33),
-    descricao: "Obra número 33: Folia de Reis. Elifas Andreato, 2015. Técnica: Acrilica e plapis sob tela e recursos digitais. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 33: Folia de Reis. Elifas Andreato, 2015. Técnica: Acrilica e plapis sob tela e recursos digitais. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 34,
@@ -396,7 +396,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(34),
-    descricao: "Obra número 34: Auto Retrato. Elifas Andreato, 1995. Técnica: Acrilica sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 34: Auto Retrato. Elifas Andreato, 1995. Técnica: Acrilica sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 35,
@@ -407,7 +407,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(35),
-    descricao: "Obra número 35: Almanaque. Elifas Andreato, 1986. Técnica: Colagens gráficas e fotografia. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 35: Almanaque. Elifas Andreato, 1986. Técnica: Colagens gráficas e fotografia. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 36,
@@ -418,7 +418,7 @@ export const obras: Obra[] = [
     dimensao: "60cm x 40cm",
     parede: "Parede 2",
     imagem: imagemDaObra(36),
-    descricao: "Obra número 36: Calabar. Elifas Andreato, 1974. Técnica: Couro, pirografo, acrilica e colagens. Dimensão do original: 60centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 36: Calabar. Elifas Andreato, 1974. Técnica: Couro, pirografo, acrilica e colagens. Dimensão do original: 60 centímetros por 40 centímetros.",
   },
   {
     num: 37,
@@ -429,7 +429,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 2",
     imagem: imagemDaObra(37),
-    descricao: "Obra número 37: Djavan. Elifas Andreato, 1996. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 37: Djavan. Elifas Andreato, 1996. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 38,
@@ -440,7 +440,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(38),
-    descricao: "Obra número 38: Luis Gonzaga. Elifas Andreato, 1996. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 38: Luis Gonzaga. Elifas Andreato, 1996. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 39,
@@ -451,7 +451,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 3",
     imagem: imagemDaObra(39),
-    descricao: "Obra número 39: Gonzaguinha. Elifas Andreato, 2016. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 39: Gonzaguinha. Elifas Andreato, 2016. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 40,
@@ -462,7 +462,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 3",
     imagem: imagemDaObra(40),
-    descricao: "Obra número 40: Mascara Africa. Elifas Andreato, 1987. Técnica: Recorte em papel. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 40: Mascara Africa. Elifas Andreato, 1987. Técnica: Recorte em papel. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 41,
@@ -473,7 +473,7 @@ export const obras: Obra[] = [
     dimensao: "60cm x 60cm",
     parede: "Parede 3",
     imagem: imagemDaObra(41),
-    descricao: "Obra número 41: 25 de Outubro. Elifas Andreato, 1981. Técnica: Acrilica e lapis sob tela. Dimensão do original: 60centímetrosetros por 60centímetrosetros.",
+    descricao: "Obra número 41: 25 de Outubro. Elifas Andreato, 1981. Técnica: Acrilica e lapis sob tela. Dimensão do original: 60 centímetros por 60 centímetros.",
   },
   {
     num: 42,
@@ -484,7 +484,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(42),
-    descricao: "Obra número 42: Cartola. Elifas Andreato, 1996. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 42: Cartola. Elifas Andreato, 1996. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 43,
@@ -495,7 +495,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(43),
-    descricao: "Obra número 43: Genero e Raça. Elifas Andreato, 1990. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 43: Genero e Raça. Elifas Andreato, 1990. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 44,
@@ -506,7 +506,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(44),
-    descricao: "Obra número 44: Canta Canta Minha Gente. Elifas Andreato, 1974. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 44: Canta Canta Minha Gente. Elifas Andreato, 1974. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 45,
@@ -517,7 +517,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(45),
-    descricao: "Obra número 45: Elis Regina. Elifas Andreato, 1982. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 45: Elis Regina. Elifas Andreato, 1982. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 46,
@@ -528,7 +528,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(46),
-    descricao: "Obra número 46: Paulo Autran. Elifas Andreato, 2011. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 46: Paulo Autran. Elifas Andreato, 2011. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 47,
@@ -539,7 +539,7 @@ export const obras: Obra[] = [
     dimensao: "50 cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(47),
-    descricao: "Obra número 47: Alceu Valença. Elifas Andreato, 2002. Técnica: Acrilica e lapis sob tela. Dimensão do original: 50 centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 47: Alceu Valença. Elifas Andreato, 2002. Técnica: Acrilica e lapis sob tela. Dimensão do original: 50 centímetros por 30 centímetros.",
   },
   {
     num: 48,
@@ -550,7 +550,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(48),
-    descricao: "Obra número 48: Noel Rosa. Elifas Andreato, 1988. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 48: Noel Rosa. Elifas Andreato, 1988. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 49,
@@ -561,7 +561,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(49),
-    descricao: "Obra número 49: Murro em Ponta de Faca. Elifas Andreato, 1978. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 49: Murro em Ponta de Faca. Elifas Andreato, 1978. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 50,
@@ -572,7 +572,7 @@ export const obras: Obra[] = [
     dimensao: "50cm x 50cm",
     parede: "Parede 3",
     imagem: imagemDaObra(50),
-    descricao: "Obra número 50: Lambendo a Colher. Elifas Andreato, 2016. Técnica: Acrilica e lápis sob tela. Dimensão do original: 50centímetrosetros por 50centímetrosetros.",
+    descricao: "Obra número 50: Lambendo a Colher. Elifas Andreato, 2016. Técnica: Acrilica e lápis sob tela. Dimensão do original: 50 centímetros por 50 centímetros.",
   },
   {
     num: 51,
@@ -583,7 +583,7 @@ export const obras: Obra[] = [
     dimensao: "30cm 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(51),
-    descricao: "Obra número 51: Alma do Brasil, Beth Carvalho. Elifas Andreato, 1988. Técnica: Recorte grafico. Dimensão do original: 30centímetrosetros 30centímetrosetros.",
+    descricao: "Obra número 51: Alma do Brasil, Beth Carvalho. Elifas Andreato, 1988. Técnica: Recorte grafico. Dimensão do original: 30 centímetros 30 centímetros.",
   },
   {
     num: 52,
@@ -594,7 +594,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(52),
-    descricao: "Obra número 52: Aqualouco. Elifas Andreato, 1987. Técnica: Caneta, nanquim e colagens. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 52: Aqualouco. Elifas Andreato, 1987. Técnica: Caneta, nanquim e colagens. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 53,
@@ -605,7 +605,7 @@ export const obras: Obra[] = [
     dimensao: "50cm x 50cm",
     parede: "Parede 3",
     imagem: imagemDaObra(53),
-    descricao: "Obra número 53: Adoniran Palhaço. Elifas Andreato, 1980. Técnica: Acrilica e lapis sob tela. Dimensão do original: 50centímetrosetros por 50centímetrosetros.",
+    descricao: "Obra número 53: Adoniran Palhaço. Elifas Andreato, 1980. Técnica: Acrilica e lapis sob tela. Dimensão do original: 50 centímetros por 50 centímetros.",
   },
   {
     num: 54,
@@ -616,7 +616,7 @@ export const obras: Obra[] = [
     dimensao: "20cm 20cm",
     parede: "Parede 3",
     imagem: imagemDaObra(54),
-    descricao: "Obra número 54: Bebadosamba. Elifas Andreato, 1995. Técnica: Lapis, vetor computador e texturas. Dimensão do original: 20centímetrosetros 20centímetrosetros.",
+    descricao: "Obra número 54: Bebadosamba. Elifas Andreato, 1995. Técnica: Lapis, vetor computador e texturas. Dimensão do original: 20 centímetros 20 centímetros.",
   },
   {
     num: 55,
@@ -627,7 +627,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 3",
     imagem: imagemDaObra(55),
-    descricao: "Obra número 55: Pandeirista. Elifas Andreato, 2007. Técnica: Colagem em papel. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 55: Pandeirista. Elifas Andreato, 2007. Técnica: Colagem em papel. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 56,
@@ -638,7 +638,7 @@ export const obras: Obra[] = [
     dimensao: "50cm x 40cm",
     parede: "Parede 3",
     imagem: imagemDaObra(56),
-    descricao: "Obra número 56: Clementina PES. Elifas Andreato, 1979. Técnica: Fotografia, caixa de argila, terra, lantejolas. Dimensão do original: 50centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 56: Clementina PES. Elifas Andreato, 1979. Técnica: Fotografia, caixa de argila, terra, lantejolas. Dimensão do original: 50 centímetros por 40 centímetros.",
   },
   {
     num: 57,
@@ -649,7 +649,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 40cm",
     parede: "Parede 3",
     imagem: imagemDaObra(57),
-    descricao: "Obra número 57: Almir Sater. Elifas Andreato, 1982. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 57: Almir Sater. Elifas Andreato, 1982. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 40 centímetros.",
   },
   {
     num: 58,
@@ -660,7 +660,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(58),
-    descricao: "Obra número 58: Bandahismo, João Bosco. Elifas Andreato, 1981. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 58: Bandahismo, João Bosco. Elifas Andreato, 1981. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 59,
@@ -671,7 +671,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(59),
-    descricao: "Obra número 59: Pé do Meu Samba. Elifas Andreato, 2017. Técnica: Aquarela e lapis. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 59: Pé do Meu Samba. Elifas Andreato, 2017. Técnica: Aquarela e lapis. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 60,
@@ -682,7 +682,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(60),
-    descricao: "Obra número 60: Clementina de Jesus. Elifas Andreato, 1990. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 60: Clementina de Jesus. Elifas Andreato, 1990. Técnica: Acrilica e plapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 61,
@@ -693,7 +693,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(61),
-    descricao: "Obra número 61: A Morte do Caixeiro Viajante. Elifas Andreato, 1984. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 61: A Morte do Caixeiro Viajante. Elifas Andreato, 1984. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 62,
@@ -704,7 +704,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(62),
-    descricao: "Obra número 62: Paulinho da Viola. Elifas Andreato, 1982. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 62: Paulinho da Viola. Elifas Andreato, 1982. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 63,
@@ -715,7 +715,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(63),
-    descricao: "Obra número 63: Aquarela, verso. Elifas Andreato, 1986. Técnica: Aquarela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 63: Aquarela, verso. Elifas Andreato, 1986. Técnica: Aquarela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 64,
@@ -726,7 +726,7 @@ export const obras: Obra[] = [
     dimensao: "35cm x 35cm",
     parede: "Parede 3",
     imagem: imagemDaObra(64),
-    descricao: "Obra número 64: Canção dos Direitos das Crianças. Elifas Andreato, 1987. Técnica: Acrilica e lápis sob tela. Dimensão do original: 35centímetrosetros por 35centímetrosetros.",
+    descricao: "Obra número 64: Canção dos Direitos das Crianças. Elifas Andreato, 1987. Técnica: Acrilica e lápis sob tela. Dimensão do original: 35 centímetros por 35 centímetros.",
   },
   {
     num: 65,
@@ -737,7 +737,7 @@ export const obras: Obra[] = [
     dimensao: "50cm x 40cm",
     parede: "Parede 3",
     imagem: imagemDaObra(65),
-    descricao: "Obra número 65: Colombina. Elifas Andreato, 2015. Técnica: Acrilica e plapis sob tela e recursos digitais. Dimensão do original: 50centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 65: Colombina. Elifas Andreato, 2015. Técnica: Acrilica e plapis sob tela e recursos digitais. Dimensão do original: 50 centímetros por 40 centímetros.",
   },
   {
     num: 66,
@@ -748,7 +748,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(66),
-    descricao: "Obra número 66: Elisete Cardoso. Elifas Andreato, 1996. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 66: Elisete Cardoso. Elifas Andreato, 1996. Técnica: Acrilica e plapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 67,
@@ -759,7 +759,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(67),
-    descricao: "Obra número 67: Aquarela, capa. Elifas Andreato, 1986. Técnica: Aquarela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 67: Aquarela, capa. Elifas Andreato, 1986. Técnica: Aquarela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 68,
@@ -770,7 +770,7 @@ export const obras: Obra[] = [
     dimensao: "40 cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(68),
-    descricao: "Obra número 68: Violão. Elifas Andreato, 1979. Técnica: Colagens em madeira pointadas. Dimensão do original: 40 centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 68: Violão. Elifas Andreato, 1979. Técnica: Colagens em madeira pointadas. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 69,
@@ -781,7 +781,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(69),
-    descricao: "Obra número 69: João Nogueira, Pelas Terras do Pau Brasil. Elifas Andreato, 1986. Técnica: Escultura em madeira. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 69: João Nogueira, Pelas Terras do Pau Brasil. Elifas Andreato, 1986. Técnica: Escultura em madeira. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 70,
@@ -792,7 +792,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(70),
-    descricao: "Obra número 70: Tom Jobim. Elifas Andreato, 1986. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 70: Tom Jobim. Elifas Andreato, 1986. Técnica: Acrilica e lapis sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 71,
@@ -803,7 +803,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(71),
-    descricao: "Obra número 71: Um Brasileiro Errante, Renato Teixeira. Elifas Andreato, 1985. Técnica: Colagem em fotolitos. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 71: Um Brasileiro Errante, Renato Teixeira. Elifas Andreato, 1985. Técnica: Colagem em fotolitos. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 72,
@@ -814,7 +814,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(72),
-    descricao: "Obra número 72: João Bá, Carrancas. Elifas Andreato, 1989. Técnica: Acrilica sob madeira. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 72: João Bá, Carrancas. Elifas Andreato, 1989. Técnica: Acrilica sob madeira. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 73,
@@ -825,7 +825,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(73),
-    descricao: "Obra número 73: Zumbido. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 73: Zumbido. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 74,
@@ -836,7 +836,7 @@ export const obras: Obra[] = [
     dimensao: "60cm x 40cm",
     parede: "Parede 3",
     imagem: imagemDaObra(74),
-    descricao: "Obra número 74: Cartaz, Tendinha. Elifas Andreato, 1979. Técnica: Colagens em madeira pointadas. Dimensão do original: 60centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 74: Cartaz, Tendinha. Elifas Andreato, 1979. Técnica: Colagens em madeira pointadas. Dimensão do original: 60 centímetros por 40 centímetros.",
   },
   {
     num: 75,
@@ -847,7 +847,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(75),
-    descricao: "Obra número 75: MPB, Elton Medeiros. Elifas Andreato, 1970. Técnica: Ecoline, nanquim, acrilica sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 75: MPB, Elton Medeiros. Elifas Andreato, 1970. Técnica: Ecoline, nanquim, acrilica sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 76,
@@ -858,7 +858,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(76),
-    descricao: "Obra número 76: Raimundo Fagner. Elifas Andreato, 1983. Técnica: Oleo sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 76: Raimundo Fagner. Elifas Andreato, 1983. Técnica: Oleo sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 77,
@@ -869,7 +869,7 @@ export const obras: Obra[] = [
     dimensao: "50cm x 40cm",
     parede: "Parede 3",
     imagem: imagemDaObra(77),
-    descricao: "Obra número 77: Lampada madeira. Elifas Andreato, 1974. Técnica: Marchetaria em madeira. Dimensão do original: 50centímetrosetros por 40centímetrosetros.",
+    descricao: "Obra número 77: Lampada madeira. Elifas Andreato, 1974. Técnica: Marchetaria em madeira. Dimensão do original: 50 centímetros por 40 centímetros.",
   },
   {
     num: 78,
@@ -880,7 +880,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(78),
-    descricao: "Obra número 78: Passaros, Paulinho da viola. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 78: Passaros, Paulinho da viola. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 79,
@@ -891,7 +891,7 @@ export const obras: Obra[] = [
     dimensao: "60cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(79),
-    descricao: "Obra número 79: Opera do Malandro. Elifas Andreato, 1980. Técnica: Fotografia. Dimensão do original: 60centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 79: Opera do Malandro. Elifas Andreato, 1980. Técnica: Fotografia. Dimensão do original: 60 centímetros por 30 centímetros.",
   },
   {
     num: 80,
@@ -902,7 +902,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(80),
-    descricao: "Obra número 80: Passaros, Paulinho da viola. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 80: Passaros, Paulinho da viola. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 81,
@@ -913,7 +913,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(81),
-    descricao: "Obra número 81: Passaros, Paulinho da viola. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 81: Passaros, Paulinho da viola. Elifas Andreato, 1980. Técnica: Marchetaria em madeira. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 82,
@@ -924,7 +924,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(82),
-    descricao: "Obra número 82: Ney Matogrosso. Elifas Andreato, 1990. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 82: Ney Matogrosso. Elifas Andreato, 1990. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 83,
@@ -935,7 +935,7 @@ export const obras: Obra[] = [
     dimensao: "40cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(83),
-    descricao: "Obra número 83: Artesã. Elifas Andreato, 2015. Técnica: Acrilica sob tela. Dimensão do original: 40centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 83: Artesã. Elifas Andreato, 2015. Técnica: Acrilica sob tela. Dimensão do original: 40 centímetros por 30 centímetros.",
   },
   {
     num: 84,
@@ -946,7 +946,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 20cm",
     parede: "Parede 3",
     imagem: imagemDaObra(84),
-    descricao: "Obra número 84: Carlito Natal. Elifas Andreato, 1986. Técnica: Acrilica e lápis sob tela. Dimensão do original: 30centímetrosetros por 20centímetrosetros.",
+    descricao: "Obra número 84: Carlito Natal. Elifas Andreato, 1986. Técnica: Acrilica e lápis sob tela. Dimensão do original: 30 centímetros por 20 centímetros.",
   },
   {
     num: 85,
@@ -957,7 +957,7 @@ export const obras: Obra[] = [
     dimensao: "30cm x 30cm",
     parede: "Trainel Martinho",
     imagem: imagemDaObra(85),
-    descricao: "Obra número 85: Martinho da Vida. Elifas Andreato, 1990. Técnica: Lapis e fotografia. Dimensão do original: 30centímetrosetros por 30centímetrosetros.",
+    descricao: "Obra número 85: Martinho da Vida. Elifas Andreato, 1990. Técnica: Lapis e fotografia. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
 ];
 
