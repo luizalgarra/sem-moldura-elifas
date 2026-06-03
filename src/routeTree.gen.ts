@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as QrcodesRouteImport } from './routes/qrcodes'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
 
+const QrcodesRoute = QrcodesRouteImport.update({
+  id: '/qrcodes',
+  path: '/qrcodes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComoUsarRoute = ComoUsarRouteImport.update({
   id: '/como-usar',
   path: '/como-usar',
@@ -38,12 +44,14 @@ const ObrasNumRoute = ObrasNumRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/como-usar': typeof ComoUsarRoute
+  '/qrcodes': typeof QrcodesRoute
   '/obras/$num': typeof ObrasNumRoute
   '/obras/': typeof ObrasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/como-usar': typeof ComoUsarRoute
+  '/qrcodes': typeof QrcodesRoute
   '/obras/$num': typeof ObrasNumRoute
   '/obras': typeof ObrasIndexRoute
 }
@@ -51,26 +59,35 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/como-usar': typeof ComoUsarRoute
+  '/qrcodes': typeof QrcodesRoute
   '/obras/$num': typeof ObrasNumRoute
   '/obras/': typeof ObrasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/como-usar' | '/obras/$num' | '/obras/'
+  fullPaths: '/' | '/como-usar' | '/qrcodes' | '/obras/$num' | '/obras/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/como-usar' | '/obras/$num' | '/obras'
-  id: '__root__' | '/' | '/como-usar' | '/obras/$num' | '/obras/'
+  to: '/' | '/como-usar' | '/qrcodes' | '/obras/$num' | '/obras'
+  id: '__root__' | '/' | '/como-usar' | '/qrcodes' | '/obras/$num' | '/obras/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ComoUsarRoute: typeof ComoUsarRoute
+  QrcodesRoute: typeof QrcodesRoute
   ObrasNumRoute: typeof ObrasNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/qrcodes': {
+      id: '/qrcodes'
+      path: '/qrcodes'
+      fullPath: '/qrcodes'
+      preLoaderRoute: typeof QrcodesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/como-usar': {
       id: '/como-usar'
       path: '/como-usar'
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComoUsarRoute: ComoUsarRoute,
+  QrcodesRoute: QrcodesRoute,
   ObrasNumRoute: ObrasNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
 }
