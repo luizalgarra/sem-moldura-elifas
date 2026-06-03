@@ -1,0 +1,102 @@
+import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Search } from "lucide-react";
+import { obras, obrasPorParede } from "@/data/obras";
+import { ObraCard } from "@/components/ObraCard";
+import { Input } from "@/components/ui/input";
+
+export const Route = createFileRoute("/obras/")({
+  head: () => ({
+    meta: [
+      { title: "Acervo — Elifas Andreato: Sem Moldura" },
+      {
+        name: "description",
+        content:
+          "Navegue pelas 85 obras da exposição Elifas Andreato: Sem Moldura, organizadas por parede.",
+      },
+    ],
+  }),
+  component: Acervo,
+});
+
+function Acervo() {
+  const [busca, setBusca] = useState("");
+  const grupos = useMemo(() => obrasPorParede(), []);
+  const termo = busca.trim().toLowerCase();
+
+  const gruposFiltrados = useMemo(() => {
+    if (!termo) return grupos;
+    return grupos
+      .map((g) => ({
+        ...g,
+        obras: g.obras.filter(
+          (o) =>
+            o.titulo.toLowerCase().includes(termo) ||
+            o.ano.toLowerCase().includes(termo) ||
+            String(o.num) === termo,
+        ),
+      }))
+      .filter((g) => g.obras.length > 0);
+  }, [grupos, termo]);
+
+  const total = gruposFiltrados.reduce((s, g) => s + g.obras.length, 0);
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      <header className="mb-8">
+        <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
+          Acervo da exposição
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {obras.length} obras organizadas pelas paredes da exposição.
+        </p>
+        <div className="relative mt-5 max-w-md">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar por título, ano ou número"
+            aria-label="Buscar obras por título, ano ou número"
+            className="h-12 pl-10 text-base"
+          />
+        </div>
+        {termo && (
+          <p className="mt-3 text-sm text-muted-foreground" role="status">
+            {total} {total === 1 ? "obra encontrada" : "obras encontradas"}.
+          </p>
+        )}
+      </header>
+
+      {gruposFiltrados.length === 0 ? (
+        <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+          Nenhuma obra encontrada para “{busca}”.
+        </p>
+      ) : (
+        <div className="space-y-12">
+          {gruposFiltrados.map((grupo) => (
+            <section key={grupo.parede} aria-labelledby={`parede-${grupo.parede}`}>
+              <h2
+                id={`parede-${grupo.parede}`}
+                className="mb-4 border-b border-border pb-2 font-serif text-2xl font-semibold text-foreground"
+              >
+                {grupo.parede}
+                <span className="ml-2 text-base font-normal text-muted-foreground">
+                  ({grupo.obras.length})
+                </span>
+              </h2>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {grupo.obras.map((obra) => (
+                  <ObraCard key={obra.num} obra={obra} />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
