@@ -45,14 +45,8 @@ function QrCodes() {
                 tamanho={150}
                 rotulo={`QR Code da obra ${obra.num}: ${obra.titulo}`}
               />
-              <p className="text-xs font-medium uppercase tracking-wide text-primary">
-                Obra {obra.num}
-              </p>
               <p className="line-clamp-2 font-serif text-sm font-semibold text-card-foreground">
                 {obra.titulo}
-              </p>
-              <p className="break-all text-[10px] text-muted-foreground">
-                {url}
               </p>
             </div>
           );
