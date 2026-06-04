@@ -146,7 +146,7 @@ function EditarPagina() {
 
       <NovaObra onCriada={() => refetch()} />
 
-      <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
+      <div className="sticky top-0 z-10 -mx-4 mt-6 space-y-3 bg-background/95 px-4 py-3 backdrop-blur">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -159,6 +159,86 @@ function EditarPagina() {
             className="pl-9"
             aria-label="Buscar obra"
           />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Parede
+            </span>
+            <select
+              value={paredeFiltro}
+              onChange={(e) => setParedeFiltro(e.target.value)}
+              aria-label="Filtrar por parede"
+              className="h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+            >
+              <option value="">Todas</option>
+              {paredes.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <FiltroTri
+            rotulo="Tipo"
+            valor={tipoFiltro}
+            onChange={setTipoFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todos" },
+              { valor: "fixa", texto: "Fixas" },
+              { valor: "nova", texto: "Novas" },
+            ]}
+          />
+          <FiltroTri
+            rotulo="Imagem"
+            valor={imagemFiltro}
+            onChange={setImagemFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todas" },
+              { valor: "com", texto: "Com" },
+              { valor: "sem", texto: "Sem" },
+            ]}
+          />
+          <FiltroTri
+            rotulo="Áudio"
+            valor={audioFiltro}
+            onChange={setAudioFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todos" },
+              { valor: "com", texto: "Com" },
+              { valor: "sem", texto: "Sem" },
+            ]}
+          />
+          <FiltroTri
+            rotulo="Descrição"
+            valor={descricaoFiltro}
+            onChange={setDescricaoFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todas" },
+              { valor: "com", texto: "Com" },
+              { valor: "sem", texto: "Sem" },
+            ]}
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-muted-foreground">
+            {filtradas.length}{" "}
+            {filtradas.length === 1 ? "resultado" : "resultados"}
+          </span>
+          {filtrosAtivos && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={limparFiltros}
+            >
+              Limpar filtros
+            </Button>
+          )}
         </div>
       </div>
 
