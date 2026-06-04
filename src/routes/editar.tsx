@@ -113,7 +113,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
   const [autor, setAutor] = useState("Elifas Andreato");
   const [tecnica, setTecnica] = useState("");
   const [dimensao, setDimensao] = useState("");
-  const [parede, setParede] = useState("Obras adicionais");
+  const [parede, setParede] = useState("Parede 4");
   const [descricao, setDescricao] = useState("");
   const [arquivo, setArquivo] = useState<File | null>(null);
 
@@ -127,7 +127,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
     setAutor("Elifas Andreato");
     setTecnica("");
     setDimensao("");
-    setParede("Obras adicionais");
+    setParede("Parede 4");
     setDescricao("");
     setArquivo(null);
   };

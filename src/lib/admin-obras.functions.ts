@@ -103,7 +103,7 @@ async function construirAcervo(
       autor: ex.autor ?? "Elifas Andreato",
       tecnica: ex.tecnica ?? "",
       dimensao: ex.dimensao ?? "",
-      parede: ex.parede ?? "Obras adicionais",
+      parede: ex.parede ?? "Parede 4",
       descricao: ex.descricao ?? "",
       imagem: ex.imagem_path
         ? `/api/public/obra-imagem/${ex.num}?v=${versaoDe(ex.updated_at)}`
