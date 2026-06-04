@@ -60,6 +60,9 @@ function EditarPagina() {
   const [descricaoFiltro, setDescricaoFiltro] = useState<
     "todos" | "com" | "sem"
   >("todos");
+  const [tamanhoFiltro, setTamanhoFiltro] = useState<
+    "todos" | "curta" | "longa"
+  >("todos");
 
   const paredes = useMemo(() => {
     const set = new Set<string>();
@@ -77,7 +80,8 @@ function EditarPagina() {
     tipoFiltro !== "todos" ||
     imagemFiltro !== "todos" ||
     audioFiltro !== "todos" ||
-    descricaoFiltro !== "todos";
+    descricaoFiltro !== "todos" ||
+    tamanhoFiltro !== "todos";
 
   const limparFiltros = () => {
     setBusca("");
@@ -86,6 +90,7 @@ function EditarPagina() {
     setImagemFiltro("todos");
     setAudioFiltro("todos");
     setDescricaoFiltro("todos");
+    setTamanhoFiltro("todos");
   };
 
   const filtradas = useMemo(() => {
@@ -121,6 +126,13 @@ function EditarPagina() {
           : !o.descricao?.trim(),
       );
     }
+    if (tamanhoFiltro !== "todos") {
+      lista = lista.filter((o) => {
+        const len = o.descricao?.trim().length ?? 0;
+        if (len === 0) return false;
+        return tamanhoFiltro === "curta" ? len <= 300 : len > 300;
+      });
+    }
     return lista;
   }, [
     acervo,
@@ -130,6 +142,7 @@ function EditarPagina() {
     imagemFiltro,
     audioFiltro,
     descricaoFiltro,
+    tamanhoFiltro,
   ]);
 
   return (
@@ -219,6 +232,16 @@ function EditarPagina() {
               { valor: "todos", texto: "Todas" },
               { valor: "com", texto: "Com" },
               { valor: "sem", texto: "Sem" },
+            ]}
+          />
+          <FiltroTri
+            rotulo="Tamanho"
+            valor={tamanhoFiltro}
+            onChange={setTamanhoFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todas" },
+              { valor: "curta", texto: "Curta" },
+              { valor: "longa", texto: "Longa" },
             ]}
           />
         </div>
