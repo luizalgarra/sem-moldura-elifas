@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      obra_overrides: {
+        Row: {
+          audio_url: string | null
+          descricao: string | null
+          num: number
+          updated_at: string
+          voz_id: string
+        }
+        Insert: {
+          audio_url?: string | null
+          descricao?: string | null
+          num: number
+          updated_at?: string
+          voz_id?: string
+        }
+        Update: {
+          audio_url?: string | null
+          descricao?: string | null
+          num?: number
+          updated_at?: string
+          voz_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
