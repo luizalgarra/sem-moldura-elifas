@@ -1,50 +1,42 @@
 ## Objetivo
 
-Substituir, apenas para a **Obra 2 – Arca de Noé**, tanto o **áudio narrado** quanto o **texto da descrição** exibido na página, usando o novo texto de audiodescrição imersiva. A locução será feita na voz **Daniel** (masculina, suave) da ElevenLabs, com as marcações `[/]` e `[//]` convertidas em pausas naturais.
+Ampliar a áudio-descrição da **Obra 2 – Arca de Noé** com um segundo bloco: a **análise interpretativa** enviada. Esse bloco será narrado por uma **voz feminina (Matilda, calorosa)** e **emendado em sequência direta** ao áudio masculino (Daniel) já gerado, formando um único MP3 contínuo. O texto da análise também será acrescentado ao texto escrito da página.
 
 ## Etapas
 
-### 1. Preparar dois textos a partir do roteiro
+### 1. Recuperar o áudio masculino atual (Parte 1)
+- Baixar o MP3 atualmente referenciado em `src/assets/audio/obra-2.mp3.asset.json` (descrição, voz Daniel) para o sandbox, para reaproveitá-lo como primeira parte — sem regerar a descrição.
 
-A partir do texto enviado, gero duas versões:
-
-- **Texto para narração (TTS)**: removo a linha de "Orientações ao locutor" e converto as marcações em pausas naturais:
-  - `[/]` → vírgula / pausa curta de respiração
-  - `[//]` → ponto final + quebra de parágrafo (pausa média entre blocos)
-  - As aspas de títulos viram pausa de entonação natural.
-- **Texto para a página** (`descricao` em `obras.ts`): versão limpa, sem marcações nem orientações, em parágrafos corridos (mantém a mesma redação descritiva).
-
-### 2. Gerar o novo MP3 (sandbox, voz Daniel)
-
+### 2. Gerar o áudio da análise (Parte 2, voz feminina)
+- Preparar o texto da análise interpretativa para narração: remover títulos/marcações que não devem ser lidos como rótulo, normalizar números (ex.: "1980", "1981" → por extenso) e ajustar pontuação para pausas naturais.
 - Chamar a API Text-to-Speech da ElevenLabs com:
-  - Voz **Daniel** (`onwK4e9ZLuTAKqWW03F9`)
+  - Voz **Matilda** (`XrExE9yKIg1WjnnlVkGX`)
   - Modelo `eleven_multilingual_v2`, saída `mp3_44100_128`
-  - Ajustes para audiodescrição: `stability ~0.6`, `similarity_boost 0.75`, `style ~0.2`, `use_speaker_boost true`, ritmo levemente reduzido
-- Conferir o áudio gerado (idioma, pausas, qualidade).
+  - Ajustes para audiodescrição: `stability ~0.6`, `similarity_boost 0.75`, `style ~0.2`, `use_speaker_boost true`, ritmo levemente reduzido (`speed 0.95`)
+- Conferir idioma, pausas e qualidade.
 
-### 3. Substituir o asset da Obra 2
+### 3. Unir os dois áudios sem cortes
+- Concatenar Parte 1 (Daniel) + Parte 2 (Matilda) em um único MP3 contínuo, **emendado direto** (sem pausa nem separação), usando `ffmpeg` (concat reencodando para um stream homogêneo).
+- Conferir o arquivo final (duração = soma das partes, transição limpa).
 
-- Apagar o asset atual `src/assets/audio/obra-2.mp3.asset.json`.
-- Fazer upload do novo MP3 via `lovable-assets`, gerando novamente `src/assets/audio/obra-2.mp3.asset.json` (a URL/asset_id muda; o mapeamento em `obras.ts` já carrega por glob, então continua funcionando sem alterações de código).
+### 4. Substituir o asset da Obra 2
+- Fazer upload do MP3 unificado via `lovable-assets`, regenerando `src/assets/audio/obra-2.mp3.asset.json` (a URL/asset_id muda; o mapeamento por glob em `obras.ts` continua funcionando sem mudança de código).
 
-### 4. Atualizar a descrição da Obra 2
+### 5. Atualizar a descrição da Obra 2 na página
+- Em `src/data/obras.ts`, no campo `descricao` da Obra 2, acrescentar a **análise interpretativa** após a descrição visual existente, separada por quebra de parágrafo, em texto corrido e limpo (sem marcações).
 
-- Em `src/data/obras.ts`, substituir o campo `descricao` da Obra 2 pela versão limpa do novo texto.
-- Os demais campos (título, autor, ano, técnica, dimensão) permanecem inalterados.
-
-### 5. Verificação
-
+### 6. Verificação
 - Abrir `/obras/2` no preview e validar:
-  - O player toca o novo áudio na voz Daniel.
-  - O texto da descrição reflete o novo roteiro.
+  - O player toca um único áudio que começa na voz masculina (descrição) e segue, sem corte, na voz feminina (análise).
+  - O texto da página mostra a descrição visual seguida da análise interpretativa.
 
 ## Detalhes técnicos
-
-- A geração roda no sandbox via script (`code--exec`), usando o secret `ELEVENLABS_API_KEY` já configurado — sem expor a chave no front-end e sem custo por visita.
+- Geração e concatenação rodam no sandbox via `code--exec`, usando o secret `ELEVENLABS_API_KEY` — sem expor chave no front-end e sem custo por visita.
+- `ffmpeg` já está disponível no ambiente.
 - Apenas a Obra 2 é afetada; as outras 84 obras permanecem como estão.
-- O componente `AudioDescricao.tsx` e a página `obras.$num.tsx` não precisam mudar — já consomem `obra.audio` e `obra.descricao`.
+- `AudioDescricao.tsx` e `obras.$num.tsx` não precisam mudar — já consomem `obra.audio` e `obra.descricao`.
 
 ## Fora de escopo
-
-- Trocar a voz das outras obras (continuam com Sarah).
-- Mudanças visuais/layout da página da obra.
+- Regerar a descrição (Parte 1) — será reaproveitada como está.
+- Trocar a voz das outras obras.
+- Mudanças visuais/layout da página.
