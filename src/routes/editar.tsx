@@ -215,16 +215,20 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="nova-num">Número</Label>
+          <Label htmlFor="nova-posicao">Posição na sequência</Label>
           <Input
-            id="nova-num"
+            id="nova-posicao"
             inputMode="numeric"
-            value={num}
-            onChange={(e) => setNum(e.target.value.replace(/[^0-9]/g, ""))}
-            placeholder="Ex.: 117"
+            value={posicao}
+            onChange={(e) => setPosicao(e.target.value.replace(/[^0-9]/g, ""))}
+            placeholder="Ex.: 5 (entra como nº 5)"
             className="mt-1"
           />
+          <p className="mt-1 text-xs text-muted-foreground">
+            As obras desta posição em diante sobem um número.
+          </p>
         </div>
+
         <div>
           <Label htmlFor="nova-titulo">Título</Label>
           <Input
