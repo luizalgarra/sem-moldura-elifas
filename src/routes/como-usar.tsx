@@ -26,7 +26,7 @@ function Passo({
 }) {
   return (
     <div className="rounded-lg border border-border bg-card p-6">
-      <Icone className="size-7 text-primary" aria-hidden="true" />
+      <Icone className="size-7 text-accent" aria-hidden="true" />
       <h2 className="mt-3 font-serif text-xl font-semibold text-card-foreground">{titulo}</h2>
       <div className="mt-2 text-muted-foreground">{children}</div>
     </div>
@@ -64,7 +64,7 @@ function ComoUsar() {
 
       <div className="mt-8 rounded-lg border border-border bg-secondary/40 p-6">
         <div className="flex items-center gap-2">
-          <Contrast className="size-6 text-primary" aria-hidden="true" />
+          <Contrast className="size-6 text-accent" aria-hidden="true" />
           <h2 className="font-serif text-xl font-semibold text-foreground">
             Acessibilidade
           </h2>

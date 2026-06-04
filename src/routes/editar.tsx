@@ -305,7 +305,7 @@ function FiltroTri<T extends string>({
             className={
               "px-2 py-1 text-xs transition-colors " +
               (valor === op.valor
-                ? "bg-primary text-primary-foreground"
+                ? "bg-primary text-accent-foreground"
                 : "bg-background text-foreground hover:bg-muted")
             }
           >
@@ -709,7 +709,7 @@ function ObraEditor({
     <li className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="font-medium text-foreground">
-          <span className="text-primary">#{obra.num}</span> {obra.titulo}
+          <span className="text-accent">#{obra.num}</span> {obra.titulo}
           {obra.extra && (
             <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
               Nova

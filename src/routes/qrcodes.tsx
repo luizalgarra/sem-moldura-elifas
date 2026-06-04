@@ -32,7 +32,7 @@ function QrCodes() {
         </p>
         <Link
           to="/qrcodes/imprimir"
-          className="mt-3 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline print:hidden"
+          className="mt-3 inline-block text-sm font-medium text-accent underline-offset-4 hover:underline print:hidden"
         >
           Gerar PDF para impressão →
         </Link>

@@ -48,7 +48,7 @@ function ObraPagina() {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8">
-      <Link to="/obras" className="text-sm font-medium text-primary hover:underline">
+      <Link to="/obras" className="text-sm font-medium text-accent hover:underline">
         ← Voltar ao acervo
       </Link>
 
@@ -80,7 +80,7 @@ function ObraPagina() {
       </div>
 
       <header className="mt-6">
-        <p className="text-sm font-medium uppercase tracking-wide text-primary">
+        <p className="text-sm font-medium uppercase tracking-wide text-accent">
           Obra {obra.num} · {obra.parede}
         </p>
         <h1 className="mt-1 font-serif text-3xl font-bold text-foreground sm:text-4xl">
