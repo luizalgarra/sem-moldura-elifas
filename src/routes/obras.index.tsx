@@ -71,6 +71,30 @@ function Acervo() {
         )}
       </header>
 
+      {grupos.length > 0 && (
+        <nav
+          aria-label="Saltar para parede"
+          className="mb-8 rounded-lg border border-border bg-card p-4"
+        >
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Paredes</h2>
+          <ul className="flex flex-wrap gap-2">
+            {grupos.map((grupo) => (
+              <li key={grupo.parede}>
+                <a
+                  href={`#parede-${grupo.parede}`}
+                  className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  {grupo.parede}
+                  <span className="ml-1.5 text-xs text-muted-foreground">
+                    {grupo.obras.length}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
       {gruposFiltrados.length === 0 ? (
         <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
           Nenhuma obra encontrada para “{busca}”.
@@ -81,7 +105,7 @@ function Acervo() {
             <section key={grupo.parede} aria-labelledby={`parede-${grupo.parede}`}>
               <h2
                 id={`parede-${grupo.parede}`}
-                className="mb-4 border-b border-border pb-2 font-serif text-2xl font-semibold text-foreground"
+                className="mb-4 scroll-mt-24 border-b border-border pb-2 font-serif text-2xl font-semibold text-foreground"
               >
                 {grupo.parede}
                 <span className="ml-2 text-base font-normal text-muted-foreground">
