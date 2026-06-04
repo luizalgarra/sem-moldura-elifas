@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getObra, ehObraFixa, type Obra } from "@/data/obras";
+import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
 
 const VOZ_PADRAO = "EXAVITQu4vr4xnSDxMaL"; // Sarah (suave)
-const OBRA_PROTEGIDA = 2; // áudio especial com duas vozes unidas
-const MAX_OBRA = 116; // maior número do catálogo fixo
-const MAX_NUM = 9999; // limite para obras novas (extras)
+const OBRA_PROTEGIDA = 2; // áudio especial com duas vozes unidas (chave fixa)
+const PRIMEIRA_CHAVE_EXTRA = 1000; // identidades internas das obras novas começam aqui
+const MAX_CHAVE = 999999; // limite das identidades internas
 
 export interface OverrideObra {
   num: number;
@@ -22,8 +22,13 @@ export interface OverrideObra {
   updatedAt: string | null;
 }
 
-/** Obra já mesclada (fixa + edições, ou extra) pronta para exibição. */
+/**
+ * Obra pronta para exibição.
+ * - `num`: número EXIBIDO (a posição na sequência; 1, 2, 3, ...).
+ * - `chave`: identidade interna estável (nunca muda; usada para mídia/edição).
+ */
 export interface ObraAcervo extends Obra {
+  chave: number;
   extra: boolean;
 }
 
@@ -31,6 +36,142 @@ function versaoDe(updatedAt: string | null | undefined): string {
   return updatedAt
     ? new Date(updatedAt).getTime().toString()
     : Date.now().toString();
+}
+
+type SupabaseAdmin = Awaited<
+  typeof import("@/integrations/supabase/client.server")
+>["supabaseAdmin"];
+
+/**
+ * Monta o acervo completo (fixas + extras), já com edições aplicadas e
+ * ordenado pela tabela `acervo_ordem`. O `num` de cada obra é a POSIÇÃO
+ * exibida (contígua: 1..N). A `chave` é a identidade interna.
+ */
+async function construirAcervo(
+  supabaseAdmin: SupabaseAdmin,
+): Promise<ObraAcervo[]> {
+  const [ocultasRes, overridesRes, extrasRes, ordemRes] = await Promise.all([
+    supabaseAdmin.from("obras_ocultas").select("num"),
+    supabaseAdmin
+      .from("obra_overrides")
+      .select(
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
+      ),
+    supabaseAdmin
+      .from("obras_extras")
+      .select(
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
+      ),
+    supabaseAdmin.from("acervo_ordem").select("chave, posicao"),
+  ]);
+
+  const ocultas = new Set((ocultasRes.data ?? []).map((r) => r.num));
+  const overrides = new Map((overridesRes.data ?? []).map((r) => [r.num, r]));
+
+  // Monta o mapa chave -> obra disponível.
+  const disponiveis = new Map<number, ObraAcervo>();
+
+  for (const obra of obras) {
+    if (ocultas.has(obra.num)) continue;
+    const ov = overrides.get(obra.num);
+    disponiveis.set(obra.num, {
+      num: obra.num, // provisório; será sobrescrito pela posição
+      chave: obra.num,
+      titulo: ov?.titulo ?? obra.titulo,
+      ano: ov?.ano ?? obra.ano,
+      autor: ov?.autor ?? obra.autor,
+      tecnica: ov?.tecnica ?? obra.tecnica,
+      dimensao: ov?.dimensao ?? obra.dimensao,
+      parede: ov?.parede ?? obra.parede,
+      descricao: ov?.descricao ?? obra.descricao,
+      imagem: ov?.imagem_path
+        ? `/api/public/obra-imagem/${obra.num}?v=${versaoDe(ov.updated_at)}`
+        : obra.imagem,
+      audio: ov?.audio_url
+        ? `/api/public/obra-audio/${obra.num}?v=${versaoDe(ov.updated_at)}`
+        : obra.audio,
+      extra: false,
+    });
+  }
+
+  for (const ex of extrasRes.data ?? []) {
+    disponiveis.set(ex.num, {
+      num: ex.num,
+      chave: ex.num,
+      titulo: ex.titulo ?? `Obra ${ex.num}`,
+      ano: ex.ano ?? "",
+      autor: ex.autor ?? "Elifas Andreato",
+      tecnica: ex.tecnica ?? "",
+      dimensao: ex.dimensao ?? "",
+      parede: ex.parede ?? "Obras adicionais",
+      descricao: ex.descricao ?? "",
+      imagem: ex.imagem_path
+        ? `/api/public/obra-imagem/${ex.num}?v=${versaoDe(ex.updated_at)}`
+        : null,
+      audio: ex.audio_url
+        ? `/api/public/obra-audio/${ex.num}?v=${versaoDe(ex.updated_at)}`
+        : null,
+      extra: true,
+    });
+  }
+
+  // Define a ordem das chaves.
+  const ordemRows = (ordemRes.data ?? [])
+    .slice()
+    .sort((a, b) => a.posicao - b.posicao || a.chave - b.chave);
+
+  const chavesOrdenadas: number[] = [];
+  const vistas = new Set<number>();
+
+  if (ordemRows.length > 0) {
+    for (const row of ordemRows) {
+      if (disponiveis.has(row.chave) && !vistas.has(row.chave)) {
+        chavesOrdenadas.push(row.chave);
+        vistas.add(row.chave);
+      }
+    }
+  }
+
+  // Acrescenta qualquer obra disponível ainda não ordenada, na ordem natural
+  // (fixas pelo número original; extras pela chave). Garante consistência
+  // mesmo antes da ordem ser materializada.
+  for (const obra of obras) {
+    if (disponiveis.has(obra.num) && !vistas.has(obra.num)) {
+      chavesOrdenadas.push(obra.num);
+      vistas.add(obra.num);
+    }
+  }
+  for (const ex of (extrasRes.data ?? [])
+    .slice()
+    .sort((a, b) => a.num - b.num)) {
+    if (disponiveis.has(ex.num) && !vistas.has(ex.num)) {
+      chavesOrdenadas.push(ex.num);
+      vistas.add(ex.num);
+    }
+  }
+
+  // Atribui o número exibido (posição contígua).
+  return chavesOrdenadas.map((chave, i) => {
+    const obra = disponiveis.get(chave)!;
+    return { ...obra, num: i + 1 };
+  });
+}
+
+/**
+ * Garante que `acervo_ordem` reflita o acervo atual. Insere as chaves que
+ * ainda não estiverem na tabela, mantendo as posições existentes. Usado antes
+ * de incluir/remover para que as operações sejam determinísticas.
+ */
+async function materializarOrdem(supabaseAdmin: SupabaseAdmin): Promise<void> {
+  const acervo = await construirAcervo(supabaseAdmin);
+  // `acervo` já está na ordem correta; grava posição = índice + 1 para todas.
+  const linhas = acervo.map((o, i) => ({ chave: o.chave, posicao: i + 1 }));
+
+  // Limpa e regrava para garantir posições contíguas e sem órfãos.
+  await supabaseAdmin.from("acervo_ordem").delete().gte("chave", 0);
+  if (linhas.length > 0) {
+    await supabaseAdmin.from("acervo_ordem").insert(linhas);
+  }
 }
 
 /** Lista todos os overrides salvos no banco. */
@@ -68,160 +209,27 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
   },
 );
 
-/**
- * Monta o acervo final: obras fixas (sem as ocultas, com edições aplicadas)
- * mais as obras extras criadas no painel. Usado nas páginas públicas e na
- * página de edição.
- */
+/** Acervo final ordenado (público e página de edição). */
 export const listarAcervo = createServerFn({ method: "GET" }).handler(
   async (): Promise<ObraAcervo[]> => {
-    const { obras } = await import("@/data/obras");
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
-
-    const [ocultasRes, overridesRes, extrasRes] = await Promise.all([
-      supabaseAdmin.from("obras_ocultas").select("num"),
-      supabaseAdmin
-        .from("obra_overrides")
-        .select(
-          "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
-        ),
-      supabaseAdmin
-        .from("obras_extras")
-        .select(
-          "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
-        ),
-    ]);
-
-    const ocultas = new Set((ocultasRes.data ?? []).map((r) => r.num));
-    const overrides = new Map(
-      (overridesRes.data ?? []).map((r) => [r.num, r]),
-    );
-
-    const lista: ObraAcervo[] = [];
-
-    for (const obra of obras) {
-      if (ocultas.has(obra.num)) continue;
-      const ov = overrides.get(obra.num);
-      lista.push({
-        num: obra.num,
-        titulo: ov?.titulo ?? obra.titulo,
-        ano: ov?.ano ?? obra.ano,
-        autor: ov?.autor ?? obra.autor,
-        tecnica: ov?.tecnica ?? obra.tecnica,
-        dimensao: ov?.dimensao ?? obra.dimensao,
-        parede: ov?.parede ?? obra.parede,
-        descricao: ov?.descricao ?? obra.descricao,
-        imagem: ov?.imagem_path
-          ? `/api/public/obra-imagem/${obra.num}?v=${versaoDe(ov.updated_at)}`
-          : obra.imagem,
-        audio: ov?.audio_url
-          ? `/api/public/obra-audio/${obra.num}?v=${versaoDe(ov.updated_at)}`
-          : obra.audio,
-        extra: false,
-      });
-    }
-
-    for (const ex of extrasRes.data ?? []) {
-      lista.push({
-        num: ex.num,
-        titulo: ex.titulo ?? `Obra ${ex.num}`,
-        ano: ex.ano ?? "",
-        autor: ex.autor ?? "Elifas Andreato",
-        tecnica: ex.tecnica ?? "",
-        dimensao: ex.dimensao ?? "",
-        parede: ex.parede ?? "Obras adicionais",
-        descricao: ex.descricao ?? "",
-        imagem: ex.imagem_path
-          ? `/api/public/obra-imagem/${ex.num}?v=${versaoDe(ex.updated_at)}`
-          : null,
-        audio: ex.audio_url
-          ? `/api/public/obra-audio/${ex.num}?v=${versaoDe(ex.updated_at)}`
-          : null,
-        extra: true,
-      });
-    }
-
-    lista.sort((a, b) => a.num - b.num);
-    return lista;
+    return construirAcervo(supabaseAdmin);
   },
 );
 
-/** Busca uma única obra pronta para exibição pública (ou null). */
+/** Busca uma única obra pronta para exibição pública pelo número EXIBIDO. */
 export const getObraPublica = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
-    z.object({ num: z.number().int().min(1).max(MAX_NUM) }).parse(input),
+    z.object({ num: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
   .handler(async ({ data }): Promise<ObraAcervo | null> => {
-    const { num } = data;
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
-
-    if (ehObraFixa(num)) {
-      const { data: oculta } = await supabaseAdmin
-        .from("obras_ocultas")
-        .select("num")
-        .eq("num", num)
-        .maybeSingle();
-      if (oculta) return null;
-
-      const obra = getObra(num)!;
-      const { data: ov } = await supabaseAdmin
-        .from("obra_overrides")
-        .select(
-          "titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
-        )
-        .eq("num", num)
-        .maybeSingle();
-
-      return {
-        num,
-        titulo: ov?.titulo ?? obra.titulo,
-        ano: ov?.ano ?? obra.ano,
-        autor: ov?.autor ?? obra.autor,
-        tecnica: ov?.tecnica ?? obra.tecnica,
-        dimensao: ov?.dimensao ?? obra.dimensao,
-        parede: ov?.parede ?? obra.parede,
-        descricao: ov?.descricao ?? obra.descricao,
-        imagem: ov?.imagem_path
-          ? `/api/public/obra-imagem/${num}?v=${versaoDe(ov.updated_at)}`
-          : obra.imagem,
-        audio: ov?.audio_url
-          ? `/api/public/obra-audio/${num}?v=${versaoDe(ov.updated_at)}`
-          : obra.audio,
-        extra: false,
-      };
-    }
-
-    const { data: ex } = await supabaseAdmin
-      .from("obras_extras")
-      .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
-      )
-      .eq("num", num)
-      .maybeSingle();
-
-    if (!ex) return null;
-
-    return {
-      num: ex.num,
-      titulo: ex.titulo ?? `Obra ${ex.num}`,
-      ano: ex.ano ?? "",
-      autor: ex.autor ?? "Elifas Andreato",
-      tecnica: ex.tecnica ?? "",
-      dimensao: ex.dimensao ?? "",
-      parede: ex.parede ?? "Obras adicionais",
-      descricao: ex.descricao ?? "",
-      imagem: ex.imagem_path
-        ? `/api/public/obra-imagem/${ex.num}?v=${versaoDe(ex.updated_at)}`
-        : null,
-      audio: ex.audio_url
-        ? `/api/public/obra-audio/${ex.num}?v=${versaoDe(ex.updated_at)}`
-        : null,
-      extra: true,
-    };
+    const acervo = await construirAcervo(supabaseAdmin);
+    return acervo.find((o) => o.num === data.num) ?? null;
   });
 
 const campoOpcional = z
@@ -231,8 +239,8 @@ const campoOpcional = z
   .optional()
   .transform((v) => (v && v.length > 0 ? v : null));
 
-const dadosSchema = z.object({
-  num: z.number().int().min(1).max(MAX_NUM),
+const dadosNovaSchema = z.object({
+  posicao: z.number().int().min(1).max(MAX_CHAVE),
   titulo: campoOpcional,
   ano: campoOpcional,
   autor: campoOpcional,
@@ -247,36 +255,53 @@ const dadosSchema = z.object({
     .transform((v) => (v && v.length > 0 ? v : null)),
 });
 
-/** Cria uma nova obra (extra) com o número escolhido pelo administrador. */
-export const criarObra = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => dadosSchema.parse(input))
-  .handler(async ({ data }) => {
-    if (ehObraFixa(data.num)) {
-      return {
-        ok: false as const,
-        erro: `O número ${data.num} já pertence a uma obra do catálogo.`,
-      };
-    }
+const dadosEdicaoSchema = z.object({
+  chave: z.number().int().min(1).max(MAX_CHAVE),
+  titulo: campoOpcional,
+  ano: campoOpcional,
+  autor: campoOpcional,
+  tecnica: campoOpcional,
+  dimensao: campoOpcional,
+  parede: campoOpcional,
+  descricao: z
+    .string()
+    .trim()
+    .max(20000)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : null)),
+});
 
+/**
+ * Cria uma nova obra na posição escolhida, empurrando as seguintes (+1).
+ * A obra recebe uma identidade interna (chave) automática (>= 1000).
+ */
+export const criarObra = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => dadosNovaSchema.parse(input))
+  .handler(async ({ data }) => {
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
 
-    const { data: existente } = await supabaseAdmin
+    // Garante a ordem materializada para inserir de forma determinística.
+    await materializarOrdem(supabaseAdmin);
+
+    const { count } = await supabaseAdmin
+      .from("acervo_ordem")
+      .select("chave", { count: "exact", head: true });
+    const total = count ?? 0;
+    const posicao = Math.min(Math.max(1, data.posicao), total + 1);
+
+    // Próxima identidade interna livre.
+    const { data: maxRow } = await supabaseAdmin
       .from("obras_extras")
       .select("num")
-      .eq("num", data.num)
+      .order("num", { ascending: false })
+      .limit(1)
       .maybeSingle();
+    const chave = Math.max(PRIMEIRA_CHAVE_EXTRA, (maxRow?.num ?? 0) + 1);
 
-    if (existente) {
-      return {
-        ok: false as const,
-        erro: `Já existe uma obra com o número ${data.num}.`,
-      };
-    }
-
-    const { error } = await supabaseAdmin.from("obras_extras").insert({
-      num: data.num,
+    const { error: insErr } = await supabaseAdmin.from("obras_extras").insert({
+      num: chave,
       titulo: data.titulo,
       ano: data.ano,
       autor: data.autor,
@@ -286,73 +311,95 @@ export const criarObra = createServerFn({ method: "POST" })
       descricao: data.descricao,
     });
 
-    if (error) {
-      console.error("criarObra:", error.message);
+    if (insErr) {
+      console.error("criarObra insert:", insErr.message);
       return { ok: false as const, erro: "Não foi possível criar a obra." };
     }
-    return { ok: true as const };
+
+    const { error: ordErr } = await supabaseAdmin.rpc("inserir_na_ordem", {
+      p_chave: chave,
+      p_posicao: posicao,
+    });
+
+    if (ordErr) {
+      console.error("criarObra ordem:", ordErr.message);
+      // desfaz a inserção da obra para não deixar item fora da ordem
+      await supabaseAdmin.from("obras_extras").delete().eq("num", chave);
+      return { ok: false as const, erro: "Não foi possível posicionar a obra." };
+    }
+
+    return { ok: true as const, chave, posicao };
   });
 
-/** Remove uma obra: oculta se for fixa, apaga de vez se for extra. */
+/** Remove uma obra (pela identidade interna) e fecha o espaço na sequência. */
 export const removerObra = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z.object({ num: z.number().int().min(1).max(MAX_NUM) }).parse(input),
+    z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
   .handler(async ({ data }) => {
-    const { num } = data;
+    const { chave } = data;
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
 
-    if (ehObraFixa(num)) {
+    await materializarOrdem(supabaseAdmin);
+
+    if (ehObraFixa(chave)) {
       const { error } = await supabaseAdmin
         .from("obras_ocultas")
-        .upsert({ num }, { onConflict: "num" });
+        .upsert({ num: chave }, { onConflict: "num" });
       if (error) {
         console.error("removerObra ocultar:", error.message);
         return { ok: false as const, erro: "Não foi possível remover a obra." };
       }
-      return { ok: true as const };
+    } else {
+      const { data: ex } = await supabaseAdmin
+        .from("obras_extras")
+        .select("imagem_path, audio_url")
+        .eq("num", chave)
+        .maybeSingle();
+
+      if (ex?.imagem_path) {
+        await supabaseAdmin.storage
+          .from("imagens-obras")
+          .remove([ex.imagem_path]);
+      }
+      if (ex?.audio_url) {
+        await supabaseAdmin.storage.from("audios-obras").remove([ex.audio_url]);
+      }
+
+      const { error } = await supabaseAdmin
+        .from("obras_extras")
+        .delete()
+        .eq("num", chave);
+      if (error) {
+        console.error("removerObra apagar:", error.message);
+        return { ok: false as const, erro: "Não foi possível apagar a obra." };
+      }
     }
 
-    // Obra extra: apaga registro e arquivos do storage.
-    const { data: ex } = await supabaseAdmin
-      .from("obras_extras")
-      .select("imagem_path, audio_url")
-      .eq("num", num)
-      .maybeSingle();
-
-    if (ex?.imagem_path) {
-      await supabaseAdmin.storage.from("imagens-obras").remove([ex.imagem_path]);
-    }
-    if (ex?.audio_url) {
-      await supabaseAdmin.storage.from("audios-obras").remove([ex.audio_url]);
+    const { error: ordErr } = await supabaseAdmin.rpc("remover_da_ordem", {
+      p_chave: chave,
+    });
+    if (ordErr) {
+      console.error("removerObra ordem:", ordErr.message);
     }
 
-    const { error } = await supabaseAdmin
-      .from("obras_extras")
-      .delete()
-      .eq("num", num);
-
-    if (error) {
-      console.error("removerObra apagar:", error.message);
-      return { ok: false as const, erro: "Não foi possível apagar a obra." };
-    }
     return { ok: true as const };
   });
 
 /** Salva os campos de dados (título, ano, etc.) e a descrição de uma obra. */
 export const salvarDados = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => dadosSchema.parse(input))
+  .inputValidator((input: unknown) => dadosEdicaoSchema.parse(input))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
 
-    const tabela = ehObraFixa(data.num) ? "obra_overrides" : "obras_extras";
+    const tabela = ehObraFixa(data.chave) ? "obra_overrides" : "obras_extras";
     const { error } = await supabaseAdmin.from(tabela).upsert(
       {
-        num: data.num,
+        num: data.chave,
         titulo: data.titulo,
         ano: data.ano,
         autor: data.autor,
@@ -376,7 +423,7 @@ export const salvarImagem = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        num: z.number().int().min(1).max(MAX_NUM),
+        chave: z.number().int().min(1).max(MAX_CHAVE),
         base64: z.string().min(1).max(15_000_000),
         contentType: z
           .string()
@@ -405,7 +452,7 @@ export const salvarImagem = createServerFn({ method: "POST" })
         : data.contentType === "image/webp"
           ? "webp"
           : "jpg";
-    const path = `obra-${data.num}-${Date.now()}.${ext}`;
+    const path = `obra-${data.chave}-${Date.now()}.${ext}`;
 
     const { error: upErr } = await supabaseAdmin.storage
       .from("imagens-obras")
@@ -416,10 +463,10 @@ export const salvarImagem = createServerFn({ method: "POST" })
       return { ok: false as const, erro: "Não foi possível enviar a imagem." };
     }
 
-    const tabela = ehObraFixa(data.num) ? "obra_overrides" : "obras_extras";
+    const tabela = ehObraFixa(data.chave) ? "obra_overrides" : "obras_extras";
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
-      .upsert({ num: data.num, imagem_path: path }, { onConflict: "num" })
+      .upsert({ num: data.chave, imagem_path: path }, { onConflict: "num" })
       .select("updated_at")
       .single();
 
@@ -439,7 +486,7 @@ export const salvarTexto = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        num: z.number().int().min(1).max(MAX_NUM),
+        chave: z.number().int().min(1).max(MAX_CHAVE),
         descricao: z.string().min(1).max(20000),
       })
       .parse(input),
@@ -448,11 +495,11 @@ export const salvarTexto = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
-    const tabela = ehObraFixa(data.num) ? "obra_overrides" : "obras_extras";
+    const tabela = ehObraFixa(data.chave) ? "obra_overrides" : "obras_extras";
     const { error } = await supabaseAdmin
       .from(tabela)
       .upsert(
-        { num: data.num, descricao: data.descricao },
+        { num: data.chave, descricao: data.descricao },
         { onConflict: "num" },
       );
 
@@ -466,13 +513,13 @@ export const salvarTexto = createServerFn({ method: "POST" })
 /** Regenera o áudio de uma obra via ElevenLabs e salva no storage. */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z.object({ num: z.number().int().min(1).max(MAX_NUM) }).parse(input),
+    z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
   .handler(async ({ data }) => {
-    const { num } = data;
-    const fixa = ehObraFixa(num);
+    const { chave } = data;
+    const fixa = ehObraFixa(chave);
 
-    if (num === OBRA_PROTEGIDA) {
+    if (chave === OBRA_PROTEGIDA) {
       return {
         ok: false as const,
         erro: "Esta obra tem áudio especial e não pode ser regenerada aqui.",
@@ -494,10 +541,10 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     const { data: existente } = await supabaseAdmin
       .from(tabela)
       .select("descricao, voz_id")
-      .eq("num", num)
+      .eq("num", chave)
       .maybeSingle();
 
-    const estatica = fixa ? getObra(num) : undefined;
+    const estatica = fixa ? getObra(chave) : undefined;
     const texto = existente?.descricao ?? estatica?.descricao ?? "";
     const vozId = existente?.voz_id ?? VOZ_PADRAO;
 
@@ -545,7 +592,7 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     }
 
     // Faz upload no storage (bucket privado).
-    const path = `obra-${num}-${Date.now()}.mp3`;
+    const path = `obra-${chave}-${Date.now()}.mp3`;
     const { error: upErr } = await supabaseAdmin.storage
       .from("audios-obras")
       .upload(path, new Uint8Array(audioBuffer), {
@@ -561,7 +608,7 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     // Grava a referência no banco.
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
-      .upsert({ num, audio_url: path, voz_id: vozId }, { onConflict: "num" })
+      .upsert({ num: chave, audio_url: path, voz_id: vozId }, { onConflict: "num" })
       .select("updated_at")
       .single();
 
