@@ -794,10 +794,9 @@ function ObraEditor({
           </span>
         ) : (
           <Button
-            variant="outline"
             onClick={handleRegenerar}
             disabled={gerando}
-            className="min-h-11"
+            className="min-h-11 bg-accent text-accent-foreground hover:bg-accent/90"
           >
             {gerando ? (
               <Loader2 className="animate-spin" aria-hidden="true" />
