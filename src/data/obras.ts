@@ -1448,3 +1448,11 @@ export function obrasPorParede(): { parede: string; obras: Obra[] }[] {
 export function getObra(num: number): Obra | undefined {
   return obras.find((o) => o.num === num);
 }
+
+/** Conjunto com os números das obras fixas (do catálogo original). */
+export const numerosFixos: Set<number> = new Set(obras.map((o) => o.num));
+
+/** Indica se um número pertence ao catálogo fixo (não é obra extra). */
+export function ehObraFixa(num: number): boolean {
+  return numerosFixos.has(num);
+}
