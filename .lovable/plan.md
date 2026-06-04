@@ -1,25 +1,32 @@
 ## Objetivo
 
-Reestruturar o grupo "Realização" no rodapé para que o rótulo "REALIZAÇÃO" fique centralizado **diretamente sobre o logo do IEA** (formando um conjunto), com o selo SECOM como item irmão à esquerda, alinhado pela base e **sem rótulo** — fiel ao cartaz.
+Incluir a marca **CAIXA CULTURAL** à esquerda da marca Elifas Andreato no cabeçalho do site.
 
-## Mudança (apenas `src/components/SiteFooter.tsx`)
+## Contexto
 
-Hoje o grupo Realização tem um único `<span>REALIZAÇÃO</span>` acima dos dois logos juntos. Será trocado para:
+O cabeçalho (`src/components/SiteHeader.tsx`) atualmente exibe apenas o logo Elifas (`marca.logoFirmaBranco`) dentro de um `<Link>` para a página inicial. O selo `marca.seloCaixaCultural` já existe nos assets do projeto e está pronto para uso.
+
+## Mudança
+
+No `src/components/SiteHeader.tsx`, adicionar a imagem do selo CAIXA CULTURAL imediatamente à esquerda da marca Elifas, dentro do mesmo bloco do cabeçalho:
 
 ```text
-<div flex items-end gap-4>          ← linha base alinhada
-  <img SECOM />                     ← sem rótulo
-  <div flex-col items-center gap-3> ← conjunto IEA
-     <span>REALIZAÇÃO</span>        ← centralizado sobre o IEA
-     <img IEA />
-  </div>
-</div>
+[ CAIXA CULTURAL ] | [ Logo Elifas ]   Além da Moldura · 80 anos
 ```
 
-O `<span>` de "REALIZAÇÃO" perde o `text-right` e passa a `text-center`, pois agora fica centralizado sobre o logo do IEA.
+Detalhes:
 
-O grupo "Patrocínio" permanece intacto. Nenhum dado, rota ou lógica é alterado — somente o agrupamento visual.
+- Inserir `<img src={marca.seloCaixaCultural} alt="Caixa Cultural" />` à esquerda do logo Elifas.
+- Dimensionar com altura compatível (`h-9 sm:h-11`, igual à marca Elifas) e `w-auto`.
+- Adicionar um separador visual sutil (ex.: borda à direita do selo CAIXA com leve padding/margin) para distinguir as duas marcas — opcional, a confirmar visualmente.
+- Manter o `<Link to="/">` envolvendo apenas a marca Elifas, deixando o selo CAIXA como elemento estático ao lado (já que é uma marca de patrocinador, não um link de navegação).
 
 ## Verificação
 
-Conferir no preview que "REALIZAÇÃO" aparece centralizado sobre o IEA e o SECOM fica à esquerda alinhado pela base, sem rótulo.
+Conferir no preview que ambas as marcas aparecem alinhadas verticalmente, com tamanho equilibrado, e que o layout permanece responsivo em telas pequenas.   
+  
+  
+INclua a palavra APRESENTA logo em seguida, antes do logo Elifas  
+
+
+&nbsp;
