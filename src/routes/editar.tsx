@@ -256,6 +256,46 @@ function EditarPagina() {
   );
 }
 
+function FiltroTri<T extends string>({
+  rotulo,
+  valor,
+  onChange,
+  opcoes,
+}: {
+  rotulo: string;
+  valor: T;
+  onChange: (v: T) => void;
+  opcoes: { valor: T; texto: string }[];
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-muted-foreground">
+        {rotulo}
+      </span>
+      <div className="inline-flex overflow-hidden rounded-md border border-input">
+        {opcoes.map((op) => (
+          <button
+            key={op.valor}
+            type="button"
+            onClick={() => onChange(op.valor)}
+            aria-pressed={valor === op.valor}
+            className={
+              "px-2 py-1 text-xs transition-colors " +
+              (valor === op.valor
+                ? "bg-primary text-primary-foreground"
+                : "bg-background text-foreground hover:bg-muted")
+            }
+          >
+            {op.texto}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
 function NovaObra({ onCriada }: { onCriada: () => void }) {
   const criar = useServerFn(criarObra);
   const enviarImagem = useServerFn(salvarImagem);
