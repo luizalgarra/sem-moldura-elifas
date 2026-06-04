@@ -4,7 +4,7 @@ import { QrCode as QrIcon, Headphones, Contrast, Type, LayoutGrid } from "lucide
 export const Route = createFileRoute("/como-usar")({
   head: () => ({
     meta: [
-      { title: "Como usar — Elifas Andreato: Sem Moldura" },
+      { title: "Como usar — Elifas Andreato: Além da Moldura" },
       {
         name: "description",
         content:

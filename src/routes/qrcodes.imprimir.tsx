@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/site";
 export const Route = createFileRoute("/qrcodes/imprimir")({
   head: () => ({
     meta: [
-      { title: "Impressão de QR Codes — Elifas Andreato: Sem Moldura" },
+      { title: "Impressão de QR Codes — Elifas Andreato: Além da Moldura" },
       {
         name: "description",
         content:

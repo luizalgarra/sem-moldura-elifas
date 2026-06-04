@@ -1,5 +1,5 @@
 // Arquivo gerado a partir da planilha 'geral elifas.xlsx'.
-// Catálogo da exposição '80 anos de Elifas Andreato: Sem Moldura'.
+// Catálogo da exposição '80 anos de Elifas Andreato: Além da Moldura'.
 
 const imagens = import.meta.glob<{ default: { url: string } }>(
   "../assets/obras/*.asset.json",

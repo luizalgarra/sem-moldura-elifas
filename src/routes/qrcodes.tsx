@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/site";
 export const Route = createFileRoute("/qrcodes")({
   head: () => ({
     meta: [
-      { title: "QR Codes — Elifas Andreato: Sem Moldura" },
+      { title: "QR Codes — Elifas Andreato: Além da Moldura" },
       {
         name: "description",
         content:

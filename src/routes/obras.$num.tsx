@@ -23,7 +23,7 @@ export const Route = createFileRoute("/obras/$num")({
   head: ({ loaderData }) => ({
     meta: loaderData?.obra
       ? [
-          { title: `${loaderData.obra.titulo} — Elifas Andreato: Sem Moldura` },
+          { title: `${loaderData.obra.titulo} — Elifas Andreato: Além da Moldura` },
           {
             name: "description",
             content: `${loaderData.obra.titulo} (${loaderData.obra.ano}), de Elifas Andreato. ${loaderData.obra.tecnica}.`,
