@@ -1,28 +1,44 @@
 ## Objetivo
 
-Garantir que os QR Codes impressos de cada obra apontem **sempre** para a página publicada da obra (com áudio-descrição), independente de onde a página `/qrcodes` for aberta.
+Gerar, uma única vez, um arquivo de áudio (MP3) da audiodescrição de cada obra usando a voz **Sarah** da ElevenLabs (modelo multilíngue, pt-BR) e servir esses áudios prontos no site. O player passa a tocar o MP3 de alta qualidade em vez da voz sintética do navegador.
 
-## Situação atual
+## Como vai funcionar
 
-- A página `/qrcodes` gera os QR Codes com `window.location.origin`, ou seja, eles apontam para o endereço onde a página está aberta (preview, sandbox ou publicado). Isso é arriscado para impressão: um QR gerado no preview levaria a um link temporário.
-- Cada QR já leva para `/obras/{num}`, que é a página da obra com player de áudio-descrição. Esse destino está correto.
+```text
+texto da obra  ->  ElevenLabs (voz Sarah)  ->  MP3
+MP3            ->  Lovable Assets (CDN)     ->  obra-{n}.mp3.asset.json
+página da obra ->  player toca o MP3 (fallback: voz do navegador)
+```
 
-## Mudança
+## Etapas
 
-Fixar a URL base de produção para os QR Codes impressos.
+1. **Chave da ElevenLabs**: solicitar o secret `ELEVENLABS_API_KEY` (você gera em elevenlabs.io → Profile → API Keys). É necessário antes de gerar os áudios.
 
-1. Definir uma constante de URL pública do site: `https://sem-moldura-elifas.lovable.app`.
-2. Na página `/qrcodes`, usar essa base fixa para montar `https://sem-moldura-elifas.lovable.app/obras/{num}` em vez de `window.location.origin`.
-3. Mostrar abaixo de cada QR a URL final em texto (apoio/conferência na impressão).
-4. Manter o destino em `/obras/{num}` (página com áudio-descrição) — sem alteração de rota.
+2. **Script de geração (executado uma vez no sandbox)**:
+   - Lê todas as obras de `src/data/obras.ts` (número + texto da descrição).
+   - Para cada obra, chama a API de Text-to-Speech da ElevenLabs com a voz Sarah (`EXAVITQu4vr4xnSDxMaL`), modelo `eleven_multilingual_v2`, saída `mp3_44100_128`.
+   - Salva cada MP3 e faz upload via `lovable-assets`, gravando `src/assets/audio/obra-{n}.mp3.asset.json`.
+   - Pula obras que já tiverem o áudio gerado (permite reexecução incremental).
+
+3. **Mapear áudio por obra**: em `src/data/obras.ts`, carregar os `*.asset.json` de áudio (mesmo padrão já usado para imagens) e adicionar o campo `audio: string | null` em cada obra.
+
+4. **Atualizar o player `AudioDescricao.tsx`**:
+   - Receber também a URL do áudio pré-gerado.
+   - Quando houver MP3: usar um elemento `<audio>` (play/pausar/parar, controle de velocidade) tocando o arquivo da ElevenLabs.
+   - Quando não houver MP3: manter o comportamento atual com `speechSynthesis` como fallback.
+   - Passar `obra.audio` a partir de `src/routes/obras.$num.tsx`.
+
+5. **Verificação**: conferir alguns áudios gerados (qualidade/idioma) e validar o player na página da obra.
 
 ## Detalhes técnicos
 
-- Criar `SITE_URL = "https://sem-moldura-elifas.lovable.app"` (constante simples, podendo ficar em `src/data/obras.ts` ou um pequeno `src/lib/site.ts`).
-- Editar `src/routes/qrcodes.tsx`: remover a dependência de `window.location.origin` para a geração dos QRs e usar `SITE_URL`. O `useEffect`/`useState` de origem deixa de ser necessário.
-- Nenhuma mudança em `QrCode.tsx`, nas obras ou na página da obra.
+- A geração roda no sandbox via script (`code--exec`), não no app — evita expor a chave no front-end e não gera custo a cada acesso do visitante.
+- Os MP3 ficam no CDN da Lovable (assets), então o site só serve arquivos estáticos; nenhuma chamada à ElevenLabs em produção.
+- São ~85 obras; a geração é sequencial com pequeno intervalo entre chamadas para respeitar limites de taxa.
+- Custo da ElevenLabs: consome créditos da sua conta apenas na geração (uma vez por texto). Reexecuções só geram o que faltar.
+- Caso algum texto de obra seja editado depois, basta apagar o `*.mp3.asset.json` correspondente e rodar o script de novo para regenerar só aquele.
 
 ## Fora de escopo
 
-- Domínio personalizado (caso adote um domínio próprio no futuro, basta atualizar a constante `SITE_URL`).
-- Mudanças no conteúdo/áudio-descrição das obras.
+- Voz por visitante / em tempo real (escolhemos pré-gerar).
+- Troca de voz depois de gerado exige regerar os áudios (rodar o script novamente).
