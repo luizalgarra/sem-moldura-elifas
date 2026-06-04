@@ -90,10 +90,11 @@ function EditarPagina() {
       <ul className="mt-4 space-y-4">
         {filtradas.map((obra) => (
           <ObraEditor
-            key={obra.num}
+            key={obra.chave}
             obra={obra}
             onChanged={() => refetch()}
           />
+
         ))}
       </ul>
     </div>
