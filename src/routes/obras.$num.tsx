@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ImageOff, ZoomIn, X } from "lucide-react";
-import { getObra, obras } from "@/data/obras";
-import { getOverridePublico } from "@/lib/admin-obras.functions";
+import { obras } from "@/data/obras";
+import { getObraPublica } from "@/lib/admin-obras.functions";
 import { AudioDescricao } from "@/components/AudioDescricao";
 import { NavegacaoSequencial } from "@/components/NavegacaoSequencial";
 import { Button } from "@/components/ui/button";
@@ -10,42 +10,12 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/obras/$num")({
   loader: async ({ params }) => {
     const num = Number(params.num);
-    const obra = getObra(num);
+    if (!Number.isInteger(num) || num < 1) throw notFound();
+
+    const obra = await getObraPublica({ data: { num } });
     if (!obra) throw notFound();
 
-    let override = {
-      titulo: null as string | null,
-      ano: null as string | null,
-      autor: null as string | null,
-      tecnica: null as string | null,
-      dimensao: null as string | null,
-      parede: null as string | null,
-      descricao: null as string | null,
-      imagemVersao: null as string | null,
-      audioVersao: null as string | null,
-    };
-    try {
-      override = await getOverridePublico({ data: { num } });
-    } catch {
-      // mantém o conteúdo estático em caso de falha
-    }
-
-    return {
-      ...obra,
-      titulo: override.titulo ?? obra.titulo,
-      ano: override.ano ?? obra.ano,
-      autor: override.autor ?? obra.autor,
-      tecnica: override.tecnica ?? obra.tecnica,
-      dimensao: override.dimensao ?? obra.dimensao,
-      parede: override.parede ?? obra.parede,
-      descricao: override.descricao ?? obra.descricao,
-      imagem: override.imagemVersao
-        ? `/api/public/obra-imagem/${num}?v=${override.imagemVersao}`
-        : obra.imagem,
-      audio: override.audioVersao
-        ? `/api/public/obra-audio/${num}?v=${override.audioVersao}`
-        : obra.audio,
-    };
+    return obra;
   },
 
   head: ({ loaderData }) => ({

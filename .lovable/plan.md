@@ -1,47 +1,36 @@
-# Página de edição de obras
+# Incluir e remover obras
 
-Criar uma página separada em `/editar` (link aberto, sem login, como a `/admin` atual) que permite editar **todos os dados** de cada obra: título, ano, autor, técnica, dimensão, parede, descrição, **imagem** e **áudio**. As alterações ficam salvas no banco e aparecem para os visitantes nas páginas das obras.
+Hoje as 116 obras são fixas no código (`src/data/obras.ts`) e o banco só guarda *edições* (tabela `obra_overrides`). Para incluir obras novas e remover existentes, vou criar uma **camada dinâmica no banco** que é mesclada com as obras fixas em todas as páginas.
 
-## Situação atual
+## Como vai funcionar
 
-- Os dados das 116 obras vivem estáticos em `src/data/obras.ts`.
-- Já existe a tabela `obra_overrides` que guarda apenas `descricao`, `audio_url` e `voz_id`.
-- A `/admin` edita só descrição e regenera áudio. A página pública (`/obras/$num`) já mescla a descrição/áudio editados sobre o estático.
-- Hoje vários pontos limitam o número da obra a 1–85; existem obras até 116.
+- **Incluir**: na página `/editar`, um bloco "Nova obra" no topo onde você digita o número (você escolhe), título, ano, autor, técnica, dimensão, parede, descrição e envia a imagem. A obra passa a aparecer no acervo e na página individual.
+- **Remover**: um botão "Remover" em cada obra.
+  - Se for uma das 116 originais → ela é **ocultada** do site (as originais vivem no código e não podem ser apagadas de lá, mas somem para os visitantes; reversível no banco).
+  - Se for uma obra que você criou → é **apagada de vez** (registro e imagem removidos).
+- Cada remoção pede confirmação para evitar engano.
 
-## O que será feito
+## Banco de dados (migração)
 
-### 1. Banco de dados
-Ampliar a tabela `obra_overrides` para guardar todos os campos editáveis:
-- Novas colunas: `titulo`, `ano`, `autor`, `tecnica`, `dimensao`, `parede`, `imagem_path` (todas opcionais — quando vazias, vale o valor estático).
-- Criar um bucket de armazenamento para as imagens enviadas das obras.
+- Nova tabela `obras_extras`: guarda as obras criadas por você — `num` (escolhido, único), `titulo`, `ano`, `autor`, `tecnica`, `dimensao`, `parede`, `descricao`, `imagem_path`, `audio_url`, `voz_id`.
+- Nova tabela `obras_ocultas`: lista os números das obras originais que foram removidas (ocultadas) do site.
+- Ambas com GRANT para `service_role` e RLS habilitada (acesso só pelo servidor, como já é feito hoje).
 
-### 2. Página `/editar` (nova rota)
-- Lista todas as 116 obras com busca por número/título (mesmo padrão visual da `/admin`).
-- Para cada obra, um formulário com:
-  - Campos de texto: título, ano, autor, técnica, dimensão, parede.
-  - Área de texto da descrição.
-  - Envio de **nova imagem** (com pré-visualização da imagem atual).
-  - Áudio: regenerar (como hoje) — a obra 2 continua protegida.
-- Botão "Salvar" por obra; indica quando um campo foi editado.
-- Marcada como `noindex` (não aparece em buscadores).
+## Servidor (`src/lib/admin-obras.functions.ts`)
 
-### 3. Lógica de servidor
-- Nova função para salvar os campos de dados da obra.
-- Nova função para receber e guardar a imagem enviada no bucket e registrar o caminho.
-- Reaproveitar as funções existentes de salvar texto e regenerar áudio (ampliando o limite de obra de 85 para 116).
+- `listarAcervo` (GET público): devolve a lista final = 116 fixas − ocultas + extras, já com as edições do `obra_overrides` aplicadas. Será a fonte única do acervo e da página de edição.
+- `criarObra` (POST): valida que o número não colide com uma obra fixa nem com outra extra; grava em `obras_extras`.
+- `removerObra` (POST): se o número é fixo → registra em `obras_ocultas`; se é extra → apaga o registro e a imagem no storage.
+- Ajustar `salvarDados`, `salvarImagem` e `regenerarAudio` para também funcionar com obras extras (gravando em `obras_extras` quando o número não pertence às fixas).
 
-### 4. Refletir nas páginas públicas
-- No carregamento da página da obra (`/obras/$num`), mesclar os campos editados (título, ano, técnica, dimensão, parede, descrição, imagem, áudio) sobre os dados estáticos.
-- Servir a imagem editada por uma rota pública (igual ao áudio), com fallback para a imagem estática.
+## Páginas
 
-## Detalhes técnicos
+- **`/editar`**: passa a carregar o acervo via `listarAcervo`; adiciona o formulário "Nova obra" e o botão "Remover" (com confirmação) em cada cartão.
+- **`/obras` (acervo)**: passa a carregar a lista via `listarAcervo` (em vez do array fixo direto), para refletir inclusões e remoções.
+- **`/obras/$num`**: o loader passa a considerar obras extras e a retornar "não encontrada" para obras ocultas/removidas.
+- **`/api/public/obra-imagem/$num`**: além de `obra_overrides`, passa a servir também a imagem de obras extras.
 
-- Migração `obra_overrides`: `ADD COLUMN` para os campos novos; bucket de imagens via storage; manter GRANTs e RLS existentes.
-- Funções em `src/lib/admin-obras.functions.ts`: `salvarDados`, `salvarImagem` (upload), e elevar o `max` de validação de `85` para `116` nas funções e na rota `api/public/obra-audio.$num.ts`.
-- Nova rota pública `src/routes/api/public/obra-imagem.$num.ts` para servir a imagem do bucket.
-- Nova rota `src/routes/editar.tsx` reutilizando `Input`, `Textarea`, `Button`.
-- Ajustar o loader de `src/routes/obras.$num.tsx` para aplicar os overrides de todos os campos.
+## Observações
 
-## Observação
-A página fica acessível por link sem senha, exatamente como a `/admin` atual. Se mais tarde quiser proteger ambas com login, dá para adicionar autenticação depois.
+- As obras novas começam sem áudio; depois você pode gerar a narração pelo botão "Regenerar áudio" já existente, que passará a funcionar para elas.
+- Nenhuma mudança visual no site público além de obras aparecerem/sumirem conforme você incluir/remover.

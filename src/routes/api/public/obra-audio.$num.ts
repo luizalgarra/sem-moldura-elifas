@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ehObraFixa } from "@/data/obras";
 
 export const Route = createFileRoute("/api/public/obra-audio/$num")({
   server: {
     handlers: {
       GET: async ({ params }) => {
         const num = Number(params.num);
-        if (!Number.isInteger(num) || num < 1 || num > 116) {
+        if (!Number.isInteger(num) || num < 1 || num > 9999) {
           return new Response("Not found", { status: 404 });
         }
 
@@ -13,8 +14,9 @@ export const Route = createFileRoute("/api/public/obra-audio/$num")({
           "@/integrations/supabase/client.server"
         );
 
+        const tabela = ehObraFixa(num) ? "obra_overrides" : "obras_extras";
         const { data: row, error } = await supabaseAdmin
-          .from("obra_overrides")
+          .from(tabela)
           .select("audio_url")
           .eq("num", num)
           .maybeSingle();

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { obras, obrasPorParede } from "@/data/obras";
+import { paredesOrdem } from "@/data/obras";
+import { listarAcervo, type ObraAcervo } from "@/lib/admin-obras.functions";
 import { ObraCard } from "@/components/ObraCard";
 import { Input } from "@/components/ui/input";
 
@@ -12,16 +13,38 @@ export const Route = createFileRoute("/obras/")({
       {
         name: "description",
         content:
-          "Navegue pelas 116 obras da exposição Elifas Andreato: Sem Moldura, organizadas por parede.",
+          "Navegue pelas obras da exposição Elifas Andreato: Sem Moldura, organizadas por parede.",
       },
     ],
   }),
+  loader: () => listarAcervo(),
   component: Acervo,
 });
 
+function agruparPorParede(
+  lista: ObraAcervo[],
+): { parede: string; obras: ObraAcervo[] }[] {
+  const grupos = new Map<string, ObraAcervo[]>();
+  for (const obra of lista) {
+    const arr = grupos.get(obra.parede) ?? [];
+    arr.push(obra);
+    grupos.set(obra.parede, arr);
+  }
+  // Ordena: primeiro as paredes conhecidas, depois quaisquer outras (A→Z).
+  const conhecidas = paredesOrdem.filter((p) => grupos.has(p));
+  const extras = [...grupos.keys()]
+    .filter((p) => !paredesOrdem.includes(p))
+    .sort((a, b) => a.localeCompare(b, "pt-BR"));
+  return [...conhecidas, ...extras].map((parede) => ({
+    parede,
+    obras: grupos.get(parede)!,
+  }));
+}
+
 function Acervo() {
+  const lista = Route.useLoaderData();
   const [busca, setBusca] = useState("");
-  const grupos = useMemo(() => obrasPorParede(), []);
+  const grupos = useMemo(() => agruparPorParede(lista), [lista]);
   const termo = busca.trim().toLowerCase();
 
   const gruposFiltrados = useMemo(() => {
@@ -48,7 +71,7 @@ function Acervo() {
           Acervo da exposição
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {obras.length} obras organizadas pelas paredes da exposição.
+          {lista.length} obras organizadas pelas paredes da exposição.
         </p>
         <div className="relative mt-5 max-w-md">
           <Search

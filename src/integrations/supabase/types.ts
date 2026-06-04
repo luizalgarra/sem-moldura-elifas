@@ -59,6 +59,69 @@ export type Database = {
         }
         Relationships: []
       }
+      obras_extras: {
+        Row: {
+          ano: string | null
+          audio_url: string | null
+          autor: string | null
+          created_at: string
+          descricao: string | null
+          dimensao: string | null
+          imagem_path: string | null
+          num: number
+          parede: string | null
+          tecnica: string | null
+          titulo: string | null
+          updated_at: string
+          voz_id: string
+        }
+        Insert: {
+          ano?: string | null
+          audio_url?: string | null
+          autor?: string | null
+          created_at?: string
+          descricao?: string | null
+          dimensao?: string | null
+          imagem_path?: string | null
+          num: number
+          parede?: string | null
+          tecnica?: string | null
+          titulo?: string | null
+          updated_at?: string
+          voz_id?: string
+        }
+        Update: {
+          ano?: string | null
+          audio_url?: string | null
+          autor?: string | null
+          created_at?: string
+          descricao?: string | null
+          dimensao?: string | null
+          imagem_path?: string | null
+          num?: number
+          parede?: string | null
+          tecnica?: string | null
+          titulo?: string | null
+          updated_at?: string
+          voz_id?: string
+        }
+        Relationships: []
+      }
+      obras_ocultas: {
+        Row: {
+          created_at: string
+          num: number
+        }
+        Insert: {
+          created_at?: string
+          num: number
+        }
+        Update: {
+          created_at?: string
+          num?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

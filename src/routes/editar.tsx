@@ -10,14 +10,17 @@ import {
   Lock,
   Upload,
   ImageOff,
+  Plus,
+  Trash2,
 } from "lucide-react";
-import { obras } from "@/data/obras";
 import {
-  listarOverrides,
+  listarAcervo,
+  criarObra,
+  removerObra,
   salvarDados,
   salvarImagem,
   regenerarAudio,
-  type OverrideObra,
+  type ObraAcervo,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,27 +40,22 @@ export const Route = createFileRoute("/editar")({
 });
 
 function EditarPagina() {
-  const fetchOverrides = useServerFn(listarOverrides);
-  const { data: overrides, refetch } = useQuery({
-    queryKey: ["overrides-editar"],
-    queryFn: () => fetchOverrides(),
+  const fetchAcervo = useServerFn(listarAcervo);
+  const { data: acervo, refetch } = useQuery({
+    queryKey: ["acervo-editar"],
+    queryFn: () => fetchAcervo(),
   });
-
-  const mapa = useMemo(() => {
-    const m = new Map<number, OverrideObra>();
-    (overrides ?? []).forEach((o) => m.set(o.num, o));
-    return m;
-  }, [overrides]);
 
   const [busca, setBusca] = useState("");
 
   const filtradas = useMemo(() => {
+    const lista = acervo ?? [];
     const q = busca.trim().toLowerCase();
-    if (!q) return obras;
-    return obras.filter(
+    if (!q) return lista;
+    return lista.filter(
       (o) => String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
     );
-  }, [busca]);
+  }, [acervo, busca]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -66,10 +64,12 @@ function EditarPagina() {
           Editar obras
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Altere os dados, a descrição, a imagem e o áudio de cada obra. As
-          mudanças ficam salvas e aparecem para os visitantes.
+          Inclua, edite ou remova obras. Altere os dados, a descrição, a imagem
+          e o áudio. As mudanças aparecem para os visitantes.
         </p>
       </header>
+
+      <NovaObra onCriada={() => refetch()} />
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
         <div className="relative">
@@ -92,7 +92,6 @@ function EditarPagina() {
           <ObraEditor
             key={obra.num}
             obra={obra}
-            override={mapa.get(obra.num)}
             onChanged={() => refetch()}
           />
         ))}
@@ -101,50 +100,279 @@ function EditarPagina() {
   );
 }
 
+function NovaObra({ onCriada }: { onCriada: () => void }) {
+  const criar = useServerFn(criarObra);
+  const enviarImagem = useServerFn(salvarImagem);
+  const inputImagem = useRef<HTMLInputElement>(null);
+
+  const [aberto, setAberto] = useState(false);
+  const [num, setNum] = useState("");
+  const [titulo, setTitulo] = useState("");
+  const [ano, setAno] = useState("");
+  const [autor, setAutor] = useState("Elifas Andreato");
+  const [tecnica, setTecnica] = useState("");
+  const [dimensao, setDimensao] = useState("");
+  const [parede, setParede] = useState("Obras adicionais");
+  const [descricao, setDescricao] = useState("");
+  const [arquivo, setArquivo] = useState<File | null>(null);
+
+  const [salvando, setSalvando] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const limpar = () => {
+    setNum("");
+    setTitulo("");
+    setAno("");
+    setAutor("Elifas Andreato");
+    setTecnica("");
+    setDimensao("");
+    setParede("Obras adicionais");
+    setDescricao("");
+    setArquivo(null);
+  };
+
+  const lerBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("leitura"));
+      reader.readAsDataURL(file);
+    });
+
+  const handleCriar = async () => {
+    const n = Number(num);
+    if (!Number.isInteger(n) || n < 1) {
+      setMsg("Informe um número válido para a obra.");
+      return;
+    }
+    if (!titulo.trim()) {
+      setMsg("Informe o título da obra.");
+      return;
+    }
+    if (arquivo && !/^image\/(jpeg|png|webp)$/.test(arquivo.type)) {
+      setMsg("Use uma imagem JPG, PNG ou WebP.");
+      return;
+    }
+    if (arquivo && arquivo.size > 10_000_000) {
+      setMsg("Imagem muito grande (máx. 10MB).");
+      return;
+    }
+
+    setSalvando(true);
+    setMsg(null);
+    try {
+      const r = await criar({
+        data: {
+          num: n,
+          titulo,
+          ano,
+          autor,
+          tecnica,
+          dimensao,
+          parede,
+          descricao,
+        },
+      });
+      if (!r.ok) {
+        setMsg(r.erro ?? "Não foi possível criar a obra.");
+        return;
+      }
+      if (arquivo) {
+        const base64 = await lerBase64(arquivo);
+        await enviarImagem({
+          data: { num: n, base64, contentType: arquivo.type },
+        });
+      }
+      setMsg("Obra criada.");
+      limpar();
+      setAberto(false);
+      onCriada();
+    } catch {
+      setMsg("Não foi possível criar a obra.");
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  if (!aberto) {
+    return (
+      <div className="mt-6">
+        <Button onClick={() => setAberto(true)} className="min-h-11">
+          <Plus aria-hidden="true" />
+          <span>Incluir nova obra</span>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 rounded-lg border border-primary/40 bg-card p-4">
+      <h2 className="font-serif text-lg font-semibold text-foreground">
+        Nova obra
+      </h2>
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="nova-num">Número</Label>
+          <Input
+            id="nova-num"
+            inputMode="numeric"
+            value={num}
+            onChange={(e) => setNum(e.target.value.replace(/[^0-9]/g, ""))}
+            placeholder="Ex.: 117"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nova-titulo">Título</Label>
+          <Input
+            id="nova-titulo"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nova-ano">Ano</Label>
+          <Input
+            id="nova-ano"
+            value={ano}
+            onChange={(e) => setAno(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nova-autor">Autor</Label>
+          <Input
+            id="nova-autor"
+            value={autor}
+            onChange={(e) => setAutor(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nova-tecnica">Técnica</Label>
+          <Input
+            id="nova-tecnica"
+            value={tecnica}
+            onChange={(e) => setTecnica(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nova-dimensao">Dimensão</Label>
+          <Input
+            id="nova-dimensao"
+            value={dimensao}
+            onChange={(e) => setDimensao(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nova-parede">Parede</Label>
+          <Input
+            id="nova-parede"
+            value={parede}
+            onChange={(e) => setParede(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nova-imagem">Imagem</Label>
+          <input
+            id="nova-imagem"
+            ref={inputImagem}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-1 w-full min-h-11"
+            onClick={() => inputImagem.current?.click()}
+          >
+            <Upload aria-hidden="true" />
+            <span className="truncate">
+              {arquivo ? arquivo.name : "Escolher imagem"}
+            </span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <Label htmlFor="nova-descricao">Descrição</Label>
+        <Textarea
+          id="nova-descricao"
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
+          rows={5}
+          className="mt-1"
+        />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button onClick={handleCriar} disabled={salvando} className="min-h-11">
+          {salvando ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Plus aria-hidden="true" />
+          )}
+          <span>Criar obra</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="min-h-11"
+          onClick={() => {
+            setAberto(false);
+            setMsg(null);
+          }}
+          disabled={salvando}
+        >
+          Cancelar
+        </Button>
+        {msg && (
+          <span className="text-sm text-muted-foreground" role="status">
+            {msg}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ObraEditor({
   obra,
-  override,
   onChanged,
 }: {
-  obra: (typeof obras)[number];
-  override: OverrideObra | undefined;
+  obra: ObraAcervo;
   onChanged: () => void;
 }) {
   const salvar = useServerFn(salvarDados);
   const enviarImagem = useServerFn(salvarImagem);
   const regenerar = useServerFn(regenerarAudio);
+  const remover = useServerFn(removerObra);
   const inputImagem = useRef<HTMLInputElement>(null);
 
-  const [titulo, setTitulo] = useState(override?.titulo ?? obra.titulo);
-  const [ano, setAno] = useState(override?.ano ?? obra.ano);
-  const [autor, setAutor] = useState(override?.autor ?? obra.autor);
-  const [tecnica, setTecnica] = useState(override?.tecnica ?? obra.tecnica);
-  const [dimensao, setDimensao] = useState(override?.dimensao ?? obra.dimensao);
-  const [parede, setParede] = useState(override?.parede ?? obra.parede);
-  const [descricao, setDescricao] = useState(
-    override?.descricao ?? obra.descricao,
-  );
+  const [titulo, setTitulo] = useState(obra.titulo);
+  const [ano, setAno] = useState(obra.ano);
+  const [autor, setAutor] = useState(obra.autor);
+  const [tecnica, setTecnica] = useState(obra.tecnica);
+  const [dimensao, setDimensao] = useState(obra.dimensao);
+  const [parede, setParede] = useState(obra.parede);
+  const [descricao, setDescricao] = useState(obra.descricao);
 
   const [salvando, setSalvando] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [gerando, setGerando] = useState(false);
+  const [removendo, setRemovendo] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
-  const [versaoImagem, setVersaoImagem] = useState<string | null>(
-    override?.imagemPath ? Date.now().toString() : null,
-  );
-  const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioPath ? Date.now().toString() : null,
-  );
+  const [imagemUrl, setImagemUrl] = useState<string | null>(obra.imagem);
+  const [audioUrl, setAudioUrl] = useState<string | null>(obra.audio);
 
   const protegida = obra.num === OBRA_PROTEGIDA;
-
-  const imagemSrc = versaoImagem
-    ? `/api/public/obra-imagem/${obra.num}?v=${versaoImagem}`
-    : obra.imagem;
-  const audioSrc = versaoAudio
-    ? `/api/public/obra-audio/${obra.num}?v=${versaoAudio}`
-    : obra.audio;
 
   const handleSalvar = async () => {
     setSalvando(true);
@@ -198,7 +426,7 @@ function ObraEditor({
         data: { num: obra.num, base64, contentType: file.type },
       });
       if (r.ok) {
-        setVersaoImagem(r.versao);
+        setImagemUrl(`/api/public/obra-imagem/${obra.num}?v=${r.versao}`);
         setMsg("Imagem atualizada.");
         onChanged();
       } else {
@@ -217,7 +445,7 @@ function ObraEditor({
     try {
       const r = await regenerar({ data: { num: obra.num } });
       if (r.ok) {
-        setVersaoAudio(Date.now().toString());
+        setAudioUrl(`/api/public/obra-audio/${obra.num}?v=${r.versao}`);
         setMsg("Áudio regenerado.");
         onChanged();
       } else {
@@ -230,20 +458,47 @@ function ObraEditor({
     }
   };
 
+  const handleRemover = async () => {
+    const aviso = obra.extra
+      ? `Apagar de vez a obra #${obra.num} “${obra.titulo}”? Esta ação não pode ser desfeita.`
+      : `Remover a obra #${obra.num} “${obra.titulo}” do site? Ela deixará de aparecer para os visitantes.`;
+    if (!window.confirm(aviso)) return;
+
+    setRemovendo(true);
+    setMsg(null);
+    try {
+      const r = await remover({ data: { num: obra.num } });
+      if (r.ok) {
+        onChanged();
+      } else {
+        setMsg(r.erro ?? "Erro ao remover.");
+        setRemovendo(false);
+      }
+    } catch {
+      setMsg("Erro ao remover.");
+      setRemovendo(false);
+    }
+  };
+
   return (
     <li className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="font-medium text-foreground">
           <span className="text-primary">#{obra.num}</span> {obra.titulo}
+          {obra.extra && (
+            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+              Nova
+            </span>
+          )}
         </h2>
       </div>
 
       <div className="mt-4 flex flex-col gap-4 sm:flex-row">
         <div className="sm:w-40 sm:shrink-0">
           <div className="aspect-square overflow-hidden rounded-md border border-border bg-muted">
-            {imagemSrc ? (
+            {imagemUrl ? (
               <img
-                src={imagemSrc}
+                src={imagemUrl}
                 alt={`Imagem atual da obra ${obra.num}`}
                 className="size-full object-cover"
               />
@@ -328,6 +583,20 @@ function ObraEditor({
           </Button>
         )}
 
+        <Button
+          variant="destructive"
+          onClick={handleRemover}
+          disabled={removendo}
+          className="min-h-11"
+        >
+          {removendo ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Trash2 aria-hidden="true" />
+          )}
+          <span>{obra.extra ? "Apagar" : "Remover"}</span>
+        </Button>
+
         {msg && (
           <span className="text-sm text-muted-foreground" role="status">
             {msg}
@@ -335,8 +604,8 @@ function ObraEditor({
         )}
       </div>
 
-      {audioSrc && (
-        <audio controls preload="none" src={audioSrc} className="mt-3 w-full">
+      {audioUrl && (
+        <audio controls preload="none" src={audioUrl} className="mt-3 w-full">
           Seu navegador não suporta áudio.
         </audio>
       )}
