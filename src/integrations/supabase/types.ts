@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      acervo_ordem: {
+        Row: {
+          chave: number
+          posicao: number
+          updated_at: string
+        }
+        Insert: {
+          chave: number
+          posicao: number
+          updated_at?: string
+        }
+        Update: {
+          chave?: number
+          posicao?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       obra_overrides: {
         Row: {
           ano: string | null
