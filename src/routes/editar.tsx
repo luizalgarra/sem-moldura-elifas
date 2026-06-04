@@ -47,15 +47,90 @@ function EditarPagina() {
   });
 
   const [busca, setBusca] = useState("");
+  const [paredeFiltro, setParedeFiltro] = useState("");
+  const [tipoFiltro, setTipoFiltro] = useState<"todos" | "fixa" | "nova">(
+    "todos",
+  );
+  const [imagemFiltro, setImagemFiltro] = useState<"todos" | "com" | "sem">(
+    "todos",
+  );
+  const [audioFiltro, setAudioFiltro] = useState<"todos" | "com" | "sem">(
+    "todos",
+  );
+  const [descricaoFiltro, setDescricaoFiltro] = useState<
+    "todos" | "com" | "sem"
+  >("todos");
+
+  const paredes = useMemo(() => {
+    const set = new Set<string>();
+    for (const o of acervo ?? []) {
+      if (o.parede?.trim()) set.add(o.parede.trim());
+    }
+    return Array.from(set).sort((a, b) =>
+      a.localeCompare(b, "pt-BR", { numeric: true }),
+    );
+  }, [acervo]);
+
+  const filtrosAtivos =
+    busca.trim() !== "" ||
+    paredeFiltro !== "" ||
+    tipoFiltro !== "todos" ||
+    imagemFiltro !== "todos" ||
+    audioFiltro !== "todos" ||
+    descricaoFiltro !== "todos";
+
+  const limparFiltros = () => {
+    setBusca("");
+    setParedeFiltro("");
+    setTipoFiltro("todos");
+    setImagemFiltro("todos");
+    setAudioFiltro("todos");
+    setDescricaoFiltro("todos");
+  };
 
   const filtradas = useMemo(() => {
-    const lista = acervo ?? [];
+    let lista = acervo ?? [];
     const q = busca.trim().toLowerCase();
-    if (!q) return lista;
-    return lista.filter(
-      (o) => String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
-    );
-  }, [acervo, busca]);
+    if (q) {
+      lista = lista.filter(
+        (o) => String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
+      );
+    }
+    if (paredeFiltro) {
+      lista = lista.filter((o) => (o.parede?.trim() ?? "") === paredeFiltro);
+    }
+    if (tipoFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        tipoFiltro === "nova" ? o.extra : !o.extra,
+      );
+    }
+    if (imagemFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        imagemFiltro === "com" ? !!o.imagem : !o.imagem,
+      );
+    }
+    if (audioFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        audioFiltro === "com" ? !!o.audio : !o.audio,
+      );
+    }
+    if (descricaoFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        descricaoFiltro === "com"
+          ? !!o.descricao?.trim()
+          : !o.descricao?.trim(),
+      );
+    }
+    return lista;
+  }, [
+    acervo,
+    busca,
+    paredeFiltro,
+    tipoFiltro,
+    imagemFiltro,
+    audioFiltro,
+    descricaoFiltro,
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -71,7 +146,7 @@ function EditarPagina() {
 
       <NovaObra onCriada={() => refetch()} />
 
-      <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
+      <div className="sticky top-0 z-10 -mx-4 mt-6 space-y-3 bg-background/95 px-4 py-3 backdrop-blur">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -84,6 +159,86 @@ function EditarPagina() {
             className="pl-9"
             aria-label="Buscar obra"
           />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Parede
+            </span>
+            <select
+              value={paredeFiltro}
+              onChange={(e) => setParedeFiltro(e.target.value)}
+              aria-label="Filtrar por parede"
+              className="h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+            >
+              <option value="">Todas</option>
+              {paredes.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <FiltroTri
+            rotulo="Tipo"
+            valor={tipoFiltro}
+            onChange={setTipoFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todos" },
+              { valor: "fixa", texto: "Fixas" },
+              { valor: "nova", texto: "Novas" },
+            ]}
+          />
+          <FiltroTri
+            rotulo="Imagem"
+            valor={imagemFiltro}
+            onChange={setImagemFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todas" },
+              { valor: "com", texto: "Com" },
+              { valor: "sem", texto: "Sem" },
+            ]}
+          />
+          <FiltroTri
+            rotulo="Áudio"
+            valor={audioFiltro}
+            onChange={setAudioFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todos" },
+              { valor: "com", texto: "Com" },
+              { valor: "sem", texto: "Sem" },
+            ]}
+          />
+          <FiltroTri
+            rotulo="Descrição"
+            valor={descricaoFiltro}
+            onChange={setDescricaoFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todas" },
+              { valor: "com", texto: "Com" },
+              { valor: "sem", texto: "Sem" },
+            ]}
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-muted-foreground">
+            {filtradas.length}{" "}
+            {filtradas.length === 1 ? "resultado" : "resultados"}
+          </span>
+          {filtrosAtivos && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={limparFiltros}
+            >
+              Limpar filtros
+            </Button>
+          )}
         </div>
       </div>
 
@@ -100,6 +255,46 @@ function EditarPagina() {
     </div>
   );
 }
+
+function FiltroTri<T extends string>({
+  rotulo,
+  valor,
+  onChange,
+  opcoes,
+}: {
+  rotulo: string;
+  valor: T;
+  onChange: (v: T) => void;
+  opcoes: { valor: T; texto: string }[];
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-muted-foreground">
+        {rotulo}
+      </span>
+      <div className="inline-flex overflow-hidden rounded-md border border-input">
+        {opcoes.map((op) => (
+          <button
+            key={op.valor}
+            type="button"
+            onClick={() => onChange(op.valor)}
+            aria-pressed={valor === op.valor}
+            className={
+              "px-2 py-1 text-xs transition-colors " +
+              (valor === op.valor
+                ? "bg-primary text-primary-foreground"
+                : "bg-background text-foreground hover:bg-muted")
+            }
+          >
+            {op.texto}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
 
 function NovaObra({ onCriada }: { onCriada: () => void }) {
   const criar = useServerFn(criarObra);
