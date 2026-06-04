@@ -107,7 +107,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
   const inputImagem = useRef<HTMLInputElement>(null);
 
   const [aberto, setAberto] = useState(false);
-  const [num, setNum] = useState("");
+  const [posicao, setPosicao] = useState("");
   const [titulo, setTitulo] = useState("");
   const [ano, setAno] = useState("");
   const [autor, setAutor] = useState("Elifas Andreato");
@@ -121,7 +121,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
   const [msg, setMsg] = useState<string | null>(null);
 
   const limpar = () => {
-    setNum("");
+    setPosicao("");
     setTitulo("");
     setAno("");
     setAutor("Elifas Andreato");
@@ -131,6 +131,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
     setDescricao("");
     setArquivo(null);
   };
+
 
   const lerBase64 = (file: File) =>
     new Promise<string>((resolve, reject) => {
