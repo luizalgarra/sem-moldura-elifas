@@ -80,7 +80,8 @@ function EditarPagina() {
     tipoFiltro !== "todos" ||
     imagemFiltro !== "todos" ||
     audioFiltro !== "todos" ||
-    descricaoFiltro !== "todos";
+    descricaoFiltro !== "todos" ||
+    tamanhoFiltro !== "todos";
 
   const limparFiltros = () => {
     setBusca("");
@@ -89,6 +90,7 @@ function EditarPagina() {
     setImagemFiltro("todos");
     setAudioFiltro("todos");
     setDescricaoFiltro("todos");
+    setTamanhoFiltro("todos");
   };
 
   const filtradas = useMemo(() => {
