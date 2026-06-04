@@ -60,6 +60,9 @@ function EditarPagina() {
   const [descricaoFiltro, setDescricaoFiltro] = useState<
     "todos" | "com" | "sem"
   >("todos");
+  const [tamanhoFiltro, setTamanhoFiltro] = useState<
+    "todos" | "curta" | "longa"
+  >("todos");
 
   const paredes = useMemo(() => {
     const set = new Set<string>();
