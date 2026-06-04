@@ -60,18 +60,8 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* Assinatura institucional — fiel ao cartaz (fundo escuro) */}
+      {/* Assinatura institucional — fiel ao cartaz (fundo escuro, dois grupos) */}
       <div className="border-t border-border bg-background py-8">
-        {/* Apresentação */}
-        <div className="mx-auto mb-8 flex max-w-5xl items-center justify-center gap-3 px-4">
-          <img
-            src={marca.seloCaixaCultural}
-            alt="Caixa Cultural"
-            className="h-10 w-auto object-contain"
-          />
-          <span className="text-sm font-medium text-foreground/70">Apresenta</span>
-        </div>
-
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-10 px-4 sm:flex-row sm:items-end sm:justify-between">
           {/* Realização */}
           <div className="flex flex-col items-center gap-3">
