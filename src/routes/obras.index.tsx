@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/obras/")({
   head: () => ({
     meta: [
-      { title: "Acervo — Elifas Andreato: Sem Moldura" },
+      { title: "Acervo — Elifas Andreato: Além da Moldura" },
       {
         name: "description",
         content:
-          "Navegue pelas obras da exposição Elifas Andreato: Sem Moldura, organizadas por parede.",
+          "Navegue pelas obras da exposição Elifas Andreato: Além da Moldura, organizadas por parede.",
       },
     ],
   }),

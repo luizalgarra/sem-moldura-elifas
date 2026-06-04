@@ -709,7 +709,7 @@ function ObraEditor({
     <li className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="font-medium text-foreground">
-          <span className="text-primary">#{obra.num}</span> {obra.titulo}
+          <span className="text-accent">#{obra.num}</span> {obra.titulo}
           {obra.extra && (
             <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
               Nova
@@ -794,10 +794,9 @@ function ObraEditor({
           </span>
         ) : (
           <Button
-            variant="outline"
             onClick={handleRegenerar}
             disabled={gerando}
-            className="min-h-11"
+            className="min-h-11 bg-accent text-accent-foreground hover:bg-accent/90"
           >
             {gerando ? (
               <Loader2 className="animate-spin" aria-hidden="true" />

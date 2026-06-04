@@ -162,7 +162,7 @@ function ObraEditor({
     <li className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="font-medium text-foreground">
-          <span className="text-primary">#{num}</span> {titulo}
+          <span className="text-accent">#{num}</span> {titulo}
         </h2>
         {override?.descricao && (
           <span className="text-xs text-muted-foreground">texto editado</span>

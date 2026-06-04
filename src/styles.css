@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -21,8 +20,9 @@
 
 @theme inline {
   --font-sans:
-    "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+    "Source Sans 3", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif:
+    "Source Sans 3", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -63,78 +63,91 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand-ultramar: var(--brand-ultramar);
+  --color-brand-red: var(--brand-red);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-amber: var(--brand-amber);
+  --color-brand-turquoise: var(--brand-turquoise);
+  --color-brand-deepblue: var(--brand-deepblue);
 }
 
 :root {
-  --radius: 0.625rem;
-  /* Galeria: fundo de papel quente, tinta escura, destaque terracota/ocre */
-  --background: oklch(0.985 0.008 80);
-  --foreground: oklch(0.205 0.018 50);
-  --card: oklch(0.995 0.006 85);
-  --card-foreground: oklch(0.205 0.018 50);
-  --popover: oklch(0.995 0.006 85);
-  --popover-foreground: oklch(0.205 0.018 50);
-  --primary: oklch(0.52 0.16 38);
-  --primary-foreground: oklch(0.99 0.01 85);
-  --secondary: oklch(0.94 0.02 75);
-  --secondary-foreground: oklch(0.28 0.03 45);
-  --muted: oklch(0.945 0.014 75);
-  --muted-foreground: oklch(0.44 0.03 55);
-  --accent: oklch(0.74 0.13 65);
-  --accent-foreground: oklch(0.22 0.03 45);
-  --destructive: oklch(0.55 0.2 27);
-  --destructive-foreground: oklch(0.99 0.01 85);
-  --border: oklch(0.89 0.02 70);
-  --input: oklch(0.89 0.02 70);
-  --ring: oklch(0.52 0.16 38);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --radius: 0.5rem;
+  /* Tema escuro oficial — Elifas Andreato · Além da Moldura */
+  --background: hsl(240 6% 5%); /* preto-sala #0A0A0B */
+  --foreground: hsl(60 6% 92%); /* off-white #ECECEA */
+  --card: hsl(240 6% 9%);
+  --card-foreground: hsl(60 6% 92%);
+  --popover: hsl(240 6% 9%);
+  --popover-foreground: hsl(60 6% 92%);
+  --primary: hsl(228 88% 33%); /* azul-ultramar #0A29A0 */
+  --primary-foreground: hsl(60 6% 96%);
+  --secondary: hsl(240 5% 14%);
+  --secondary-foreground: hsl(60 6% 92%);
+  --muted: hsl(240 5% 14%);
+  --muted-foreground: hsl(80 3% 66%);
+  --accent: hsl(39 89% 49%); /* âmbar #EA9E0E */
+  --accent-foreground: hsl(240 6% 5%);
+  --destructive: hsl(2 90% 44%); /* vermelho #D3130B */
+  --destructive-foreground: hsl(60 6% 96%);
+  --border: hsl(240 5% 18%);
+  --input: hsl(240 5% 16%);
+  --ring: hsl(228 90% 52%);
+  /* acentos de marca — paleta do óleo */
+  --brand-ultramar: hsl(228 88% 33%);
+  --brand-red: hsl(2 90% 44%);
+  --brand-yellow: hsl(57 90% 50%);
+  --brand-amber: hsl(39 89% 49%);
+  --brand-turquoise: hsl(180 85% 34%);
+  --brand-deepblue: hsl(226 77% 21%);
+  --chart-1: var(--brand-ultramar);
+  --chart-2: var(--brand-turquoise);
+  --chart-3: var(--brand-amber);
+  --chart-4: var(--brand-yellow);
+  --chart-5: var(--brand-red);
+  --sidebar: hsl(240 6% 9%);
+  --sidebar-foreground: hsl(60 6% 92%);
+  --sidebar-primary: hsl(228 88% 33%);
+  --sidebar-primary-foreground: hsl(60 6% 96%);
+  --sidebar-accent: hsl(240 5% 14%);
+  --sidebar-accent-foreground: hsl(60 6% 92%);
+  --sidebar-border: hsl(240 5% 18%);
+  --sidebar-ring: hsl(228 90% 52%);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --background: hsl(240 6% 5%);
+  --foreground: hsl(60 6% 92%);
+  --card: hsl(240 6% 9%);
+  --card-foreground: hsl(60 6% 92%);
+  --popover: hsl(240 6% 9%);
+  --popover-foreground: hsl(60 6% 92%);
+  --primary: hsl(228 88% 33%);
+  --primary-foreground: hsl(60 6% 96%);
+  --secondary: hsl(240 5% 14%);
+  --secondary-foreground: hsl(60 6% 92%);
+  --muted: hsl(240 5% 14%);
+  --muted-foreground: hsl(80 3% 66%);
+  --accent: hsl(39 89% 49%);
+  --accent-foreground: hsl(240 6% 5%);
+  --destructive: hsl(2 90% 44%);
+  --destructive-foreground: hsl(60 6% 96%);
+  --border: hsl(240 5% 18%);
+  --input: hsl(240 5% 16%);
+  --ring: hsl(228 90% 52%);
+  --chart-1: var(--brand-ultramar);
+  --chart-2: var(--brand-turquoise);
+  --chart-3: var(--brand-amber);
+  --chart-4: var(--brand-yellow);
+  --chart-5: var(--brand-red);
+  --sidebar: hsl(240 6% 9%);
+  --sidebar-foreground: hsl(60 6% 92%);
+  --sidebar-primary: hsl(228 88% 33%);
+  --sidebar-primary-foreground: hsl(60 6% 96%);
+  --sidebar-accent: hsl(240 5% 14%);
+  --sidebar-accent-foreground: hsl(60 6% 92%);
+  --sidebar-border: hsl(240 5% 18%);
+  --sidebar-ring: hsl(228 90% 52%);
 }
 
 @layer base {
@@ -183,4 +196,16 @@ html {
 :where(a, button, [role="button"], input, select, textarea):focus-visible {
   outline: 3px solid var(--color-ring);
   outline-offset: 2px;
+}
+
+/* Respeita usuários que preferem menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

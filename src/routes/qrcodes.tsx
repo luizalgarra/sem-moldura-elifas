@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/site";
 export const Route = createFileRoute("/qrcodes")({
   head: () => ({
     meta: [
-      { title: "QR Codes — Elifas Andreato: Sem Moldura" },
+      { title: "QR Codes — Elifas Andreato: Além da Moldura" },
       {
         name: "description",
         content:
@@ -32,7 +32,7 @@ function QrCodes() {
         </p>
         <Link
           to="/qrcodes/imprimir"
-          className="mt-3 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline print:hidden"
+          className="mt-3 inline-block text-sm font-medium text-accent underline-offset-4 hover:underline print:hidden"
         >
           Gerar PDF para impressão →
         </Link>

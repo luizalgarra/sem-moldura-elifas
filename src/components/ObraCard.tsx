@@ -9,7 +9,7 @@ export function ObraCard({ obra }: { obra: Obra }) {
       params={{ num: String(obra.num) }}
       className="group block rounded-lg focus-visible:outline-none"
     >
-      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow group-hover:shadow-md">
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-accent/60 group-hover:shadow-lg">
         <div className="aspect-square bg-muted">
           {obra.imagem ? (
             <img
@@ -25,11 +25,11 @@ export function ObraCard({ obra }: { obra: Obra }) {
             </div>
           )}
         </div>
-        <div className="p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-primary">
+        <div className="border-t-2 border-transparent p-3 transition-colors group-hover:border-accent">
+          <p className="text-xs font-medium uppercase tracking-wide text-brand-yellow">
             Obra {obra.num}
           </p>
-          <h3 className="mt-1 line-clamp-2 font-serif text-base font-semibold leading-tight text-card-foreground">
+          <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-tight text-card-foreground">
             {obra.titulo}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">{obra.ano}</p>

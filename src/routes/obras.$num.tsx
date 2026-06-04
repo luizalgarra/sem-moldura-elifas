@@ -23,7 +23,7 @@ export const Route = createFileRoute("/obras/$num")({
   head: ({ loaderData }) => ({
     meta: loaderData?.obra
       ? [
-          { title: `${loaderData.obra.titulo} — Elifas Andreato: Sem Moldura` },
+          { title: `${loaderData.obra.titulo} — Elifas Andreato: Além da Moldura` },
           {
             name: "description",
             content: `${loaderData.obra.titulo} (${loaderData.obra.ano}), de Elifas Andreato. ${loaderData.obra.tecnica}.`,
@@ -48,7 +48,7 @@ function ObraPagina() {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8">
-      <Link to="/obras" className="text-sm font-medium text-primary hover:underline">
+      <Link to="/obras" className="text-sm font-medium text-accent hover:underline">
         ← Voltar ao acervo
       </Link>
 
@@ -80,7 +80,7 @@ function ObraPagina() {
       </div>
 
       <header className="mt-6">
-        <p className="text-sm font-medium uppercase tracking-wide text-primary">
+        <p className="text-sm font-medium uppercase tracking-wide text-accent">
           Obra {obra.num} · {obra.parede}
         </p>
         <h1 className="mt-1 font-serif text-3xl font-bold text-foreground sm:text-4xl">
@@ -104,7 +104,7 @@ function ObraPagina() {
         <h2 id="descricao-titulo" className="font-serif text-xl font-semibold text-foreground">
           Descrição
         </h2>
-        <p className="mt-2 leading-relaxed text-foreground">{obra.descricao}</p>
+        <p className="mt-2 max-w-[70ch] leading-relaxed text-foreground">{obra.descricao}</p>
       </section>
 
       <div className="mt-10 border-t border-border pt-6">
