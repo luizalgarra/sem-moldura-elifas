@@ -57,7 +57,8 @@ export const obras: Obra[] = [
     parede: "Parede 1",
     imagem: imagemDaObra(2),
     audio: audioDaObra(2),
-    descricao: "Obra número 2: Arca de Noé. Elifas Andreato, 1980. Técnica: Recortes gráficos e papel. Dimensão do original: 30 centímetros por 30 centímetros.",
+    descricao:
+      "Capa quadrada de disco infantil, em estilo recorte e colagem, com cores vivas e formas chapadas. O fundo é branco no alto e amarelo embaixo, como céu e chão. No alto, em letras grandes e coloridas, lê-se \"Vinícius de Moraes\", \"Arca de Noé\" e um grande número dois, vermelho. Por todo o céu caem traços diagonais coloridos, como uma chuva alegre. No centro da imagem, uma arca laranja e marrom repousa sobre um morro de terra. Atrás dela ergue-se uma tenda de circo, com cobertura listrada de vermelho, azul, verde e amarelo. Sobre o casco da arca, um tigre caminha. À esquerda, no chão amarelo, há uma girafa alta, uma bola colorida e uma foca preta sentada, de bigodes. Lá em cima, à esquerda, uma arara colorida; à direita do número dois, um macaco trepado numa corda. À direita, embaixo, um elefante cinza e uma árvore verde com um tucano pousado no topo. No canto inferior direito, um pequeno sapo verde. No centro, na frente da arca, um palhaço de braços abertos e mãos brancas erguidas. Veste casaca verde e calça listrada de vermelho e amarelo, com chapéu-coco preto. Tem nariz vermelho e um \"x\" sobre um dos olhos. Ao lado dele, um ganso branco. Um arco-íris atravessa a cena, subindo do canto inferior esquerdo em direção à arca. No alto, à esquerda, em letras azuis: \"Cole aqui os novos bichinhos da sua arca\". Embaixo, à esquerda, em vermelho: \"Vinícius para crianças\". Ilustração de Elifas Andreato, para o disco Arca de Noé, volume dois, de 1981.",
   },
   {
     num: 3,
