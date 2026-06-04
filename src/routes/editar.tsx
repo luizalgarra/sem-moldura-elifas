@@ -234,6 +234,16 @@ function EditarPagina() {
               { valor: "sem", texto: "Sem" },
             ]}
           />
+          <FiltroTri
+            rotulo="Tamanho"
+            valor={tamanhoFiltro}
+            onChange={setTamanhoFiltro}
+            opcoes={[
+              { valor: "todos", texto: "Todas" },
+              { valor: "curta", texto: "Curta" },
+              { valor: "longa", texto: "Longa" },
+            ]}
+          />
         </div>
 
         <div className="flex items-center justify-between gap-2">
