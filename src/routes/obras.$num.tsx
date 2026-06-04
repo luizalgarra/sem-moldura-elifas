@@ -108,7 +108,7 @@ function ObraPagina() {
       </section>
 
       <div className="mt-10 border-t border-border pt-6">
-        <NavegacaoSequencial num={obra.num} />
+        <NavegacaoSequencial num={obra.num} total={total} />
       </div>
 
       {ampliada && obra.imagem && (
