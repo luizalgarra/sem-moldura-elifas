@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QrcodesRouteImport } from './routes/qrcodes'
+import { Route as EditarRouteImport } from './routes/editar'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,6 +23,11 @@ import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/o
 const QrcodesRoute = QrcodesRouteImport.update({
   id: '/qrcodes',
   path: '/qrcodes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditarRoute = EditarRouteImport.update({
+  id: '/editar',
+  path: '/editar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoUsarRoute = ComoUsarRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
+  '/editar': typeof EditarRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
+  '/editar': typeof EditarRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
+  '/editar': typeof EditarRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/como-usar'
+    | '/editar'
     | '/qrcodes'
     | '/obras/$num'
     | '/qrcodes/imprimir'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/como-usar'
+    | '/editar'
     | '/qrcodes'
     | '/obras/$num'
     | '/qrcodes/imprimir'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/como-usar'
+    | '/editar'
     | '/qrcodes'
     | '/obras/$num'
     | '/qrcodes/imprimir'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   ComoUsarRoute: typeof ComoUsarRoute
+  EditarRoute: typeof EditarRoute
   QrcodesRoute: typeof QrcodesRouteWithChildren
   ObrasNumRoute: typeof ObrasNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
@@ -153,6 +166,13 @@ declare module '@tanstack/react-router' {
       path: '/qrcodes'
       fullPath: '/qrcodes'
       preLoaderRoute: typeof QrcodesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editar': {
+      id: '/editar'
+      path: '/editar'
+      fullPath: '/editar'
+      preLoaderRoute: typeof EditarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-usar': {
@@ -229,6 +249,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ComoUsarRoute: ComoUsarRoute,
+  EditarRoute: EditarRoute,
   QrcodesRoute: QrcodesRouteWithChildren,
   ObrasNumRoute: ObrasNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
@@ -238,3 +259,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
