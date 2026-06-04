@@ -83,22 +83,22 @@ export function SiteFooter() {
           </div>
 
           {/* Patrocínio */}
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-right">
-              Patrocínio
-            </span>
-            <div className="flex items-center gap-5">
+          <div className="flex items-end gap-5">
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-center">
+                Patrocínio
+              </span>
               <img
                 src={marca.seloCaixa}
                 alt="Caixa"
                 className="h-7 w-auto object-contain"
               />
-              <img
-                src={marca.seloGovernoBrasil}
-                alt="Governo do Brasil"
-                className="h-12 w-auto object-contain"
-              />
             </div>
+            <img
+              src={marca.seloGovernoBrasil}
+              alt="Governo do Brasil"
+              className="h-12 w-auto object-contain"
+            />
           </div>
         </div>
       </div>
