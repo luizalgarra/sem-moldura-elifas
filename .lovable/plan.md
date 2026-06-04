@@ -1,44 +1,22 @@
 ## Objetivo
 
-Adicionar uma barra de filtros completa na página **Editar**, complementando a busca por número/título que já existe. Os filtros pedidos: **por parede**, **por tipo** (fixa/nova), **com/sem imagem**, **com/sem áudio** e **com/sem descrição**.
+Ajustar a planilha `elifas_80_anos_acervo_atual.xlsx` para que **todas as 82 miniaturas** caibam perfeitamente nas suas células, sem cortes nem sobreposição.
 
-## Comportamento
+## Situação atual
 
-A barra de filtros fica logo abaixo do campo de busca, dentro do mesmo cabeçalho fixo (sticky). Todos os filtros se combinam com a busca e entre si (AND). Um botão "Limpar filtros" aparece quando algum filtro está ativo, e mostramos a contagem de resultados.
+- Aba **Consolidado**: 82 imagens ancoradas na coluna de imagem (coluna B), cada uma com ~150px de altura e largura variando entre ~107 e 150px.
+- As linhas/coluna atuais não têm tamanho garantido para conter as imagens, causando cortes ou sobreposição com texto.
 
-Cada filtro é um seletor com 3 estados:
+## O que será feito
 
-```text
-Parede:     [ Todas ▾ ]   (lista de paredes existentes no acervo)
-Tipo:       [ Todos | Fixas | Novas ]
-Imagem:     [ Todos | Com  | Sem ]
-Áudio:      [ Todos | Com  | Sem ]
-Descrição:  [ Todos | Com  | Sem ]
-```
+1. Carregar a planilha com `openpyxl` preservando todo o conteúdo, fórmulas e formatação.
+2. **Largura da coluna de imagem**: definir largura suficiente para a maior miniatura (≈150px → ~22 unidades de largura do Excel), com pequena margem lateral.
+3. **Altura das linhas de dados**: para cada linha que contém imagem, definir a altura em pontos correspondente a 150px (~113 pt) mais uma pequena margem, garantindo que a miniatura completa apareça.
+4. Manter as linhas de cabeçalho e a aba "Resumo & Notas" inalteradas.
+5. Reposicionar/centralizar as imagens dentro das células se necessário, para alinhamento limpo.
+6. Salvar como **novo arquivo versionado** (`elifas_80_anos_acervo_atual_v2.xlsx`) para preservar o original.
+7. **QA**: converter a aba Consolidado em imagem e inspecionar visualmente que todas as miniaturas cabem corretamente, sem cortes nem texto sobreposto; corrigir e repetir se necessário.
 
-- **Parede**: dropdown montado dinamicamente a partir das paredes presentes no acervo (valores únicos de `obra.parede`, ordenados), mais a opção "Todas".
-- **Tipo**: usa `obra.extra` (true = Nova, false = Fixa).
-- **Imagem**: usa presença de `obra.imagem`.
-- **Áudio**: usa presença de `obra.audio`.
-- **Descrição**: usa `obra.descricao` não-vazia.
+## Entrega
 
-## Implementação técnica
-
-Tudo em `src/routes/editar.tsx` (apenas frontend — nenhuma mudança de backend, server function ou migração):
-
-1. Adicionar estados de filtro no componente `EditarPagina`:
-   - `paredeFiltro: string` ("" = todas)
-   - `tipoFiltro: "todos" | "fixa" | "nova"`
-   - `imagemFiltro: "todos" | "com" | "sem"`
-   - `audioFiltro: "todos" | "com" | "sem"`
-   - `descricaoFiltro: "todos" | "com" | "sem"`
-
-2. Derivar a lista de paredes únicas via `useMemo` sobre `acervo`.
-
-3. Estender o `useMemo` `filtradas` para aplicar busca + todos os filtros em sequência.
-
-4. Renderizar a barra de filtros dentro do bloco sticky existente. Para os filtros tri-estado, usar pequenos grupos de botões (toggle) estilizados com tokens do design system; para parede, usar o componente `Select` do shadcn (ou um `<select>` estilizado se o Select ainda não estiver no projeto — verifico antes).
-
-5. Adicionar linha com "N resultados" + botão "Limpar filtros" (reseta todos os estados e a busca).
-
-Nenhum dado novo é necessário: todos os campos (`parede`, `extra`, `imagem`, `audio`, `descricao`) já vêm de `listarAcervo`.
+Arquivo final disponibilizado para download via artifact.
