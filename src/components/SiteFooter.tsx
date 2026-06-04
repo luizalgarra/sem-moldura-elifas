@@ -65,7 +65,7 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-10 px-4 sm:flex-row sm:items-end sm:justify-between">
           {/* Realização */}
           <div className="flex flex-col items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-right">
               Realização
             </span>
             <div className="flex items-center gap-4">
@@ -84,7 +84,7 @@ export function SiteFooter() {
 
           {/* Patrocínio */}
           <div className="flex flex-col items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-right">
               Patrocínio
             </span>
             <div className="flex items-center gap-5">
