@@ -47,15 +47,90 @@ function EditarPagina() {
   });
 
   const [busca, setBusca] = useState("");
+  const [paredeFiltro, setParedeFiltro] = useState("");
+  const [tipoFiltro, setTipoFiltro] = useState<"todos" | "fixa" | "nova">(
+    "todos",
+  );
+  const [imagemFiltro, setImagemFiltro] = useState<"todos" | "com" | "sem">(
+    "todos",
+  );
+  const [audioFiltro, setAudioFiltro] = useState<"todos" | "com" | "sem">(
+    "todos",
+  );
+  const [descricaoFiltro, setDescricaoFiltro] = useState<
+    "todos" | "com" | "sem"
+  >("todos");
+
+  const paredes = useMemo(() => {
+    const set = new Set<string>();
+    for (const o of acervo ?? []) {
+      if (o.parede?.trim()) set.add(o.parede.trim());
+    }
+    return Array.from(set).sort((a, b) =>
+      a.localeCompare(b, "pt-BR", { numeric: true }),
+    );
+  }, [acervo]);
+
+  const filtrosAtivos =
+    busca.trim() !== "" ||
+    paredeFiltro !== "" ||
+    tipoFiltro !== "todos" ||
+    imagemFiltro !== "todos" ||
+    audioFiltro !== "todos" ||
+    descricaoFiltro !== "todos";
+
+  const limparFiltros = () => {
+    setBusca("");
+    setParedeFiltro("");
+    setTipoFiltro("todos");
+    setImagemFiltro("todos");
+    setAudioFiltro("todos");
+    setDescricaoFiltro("todos");
+  };
 
   const filtradas = useMemo(() => {
-    const lista = acervo ?? [];
+    let lista = acervo ?? [];
     const q = busca.trim().toLowerCase();
-    if (!q) return lista;
-    return lista.filter(
-      (o) => String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
-    );
-  }, [acervo, busca]);
+    if (q) {
+      lista = lista.filter(
+        (o) => String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
+      );
+    }
+    if (paredeFiltro) {
+      lista = lista.filter((o) => (o.parede?.trim() ?? "") === paredeFiltro);
+    }
+    if (tipoFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        tipoFiltro === "nova" ? o.extra : !o.extra,
+      );
+    }
+    if (imagemFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        imagemFiltro === "com" ? !!o.imagem : !o.imagem,
+      );
+    }
+    if (audioFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        audioFiltro === "com" ? !!o.audio : !o.audio,
+      );
+    }
+    if (descricaoFiltro !== "todos") {
+      lista = lista.filter((o) =>
+        descricaoFiltro === "com"
+          ? !!o.descricao?.trim()
+          : !o.descricao?.trim(),
+      );
+    }
+    return lista;
+  }, [
+    acervo,
+    busca,
+    paredeFiltro,
+    tipoFiltro,
+    imagemFiltro,
+    audioFiltro,
+    descricaoFiltro,
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
