@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AcessibilidadeProvider } from "../hooks/useAcessibilidade";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
+import { marca } from "../assets/marca";
 
 function NotFoundComponent() {
   return (
