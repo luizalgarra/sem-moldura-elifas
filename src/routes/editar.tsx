@@ -126,6 +126,13 @@ function EditarPagina() {
           : !o.descricao?.trim(),
       );
     }
+    if (tamanhoFiltro !== "todos") {
+      lista = lista.filter((o) => {
+        const len = o.descricao?.trim().length ?? 0;
+        if (len === 0) return false;
+        return tamanhoFiltro === "curta" ? len <= 300 : len > 300;
+      });
+    }
     return lista;
   }, [
     acervo,
@@ -135,6 +142,7 @@ function EditarPagina() {
     imagemFiltro,
     audioFiltro,
     descricaoFiltro,
+    tamanhoFiltro,
   ]);
 
   return (
