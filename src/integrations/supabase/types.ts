@@ -145,7 +145,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      inserir_na_ordem: {
+        Args: { p_chave: number; p_posicao: number }
+        Returns: undefined
+      }
+      remover_da_ordem: { Args: { p_chave: number }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
