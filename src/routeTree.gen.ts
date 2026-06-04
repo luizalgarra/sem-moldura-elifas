@@ -14,6 +14,7 @@ import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
+import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
@@ -42,6 +43,11 @@ const ObrasIndexRoute = ObrasIndexRouteImport.update({
   path: '/obras/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QrcodesImprimirRoute = QrcodesImprimirRouteImport.update({
+  id: '/imprimir',
+  path: '/imprimir',
+  getParentRoute: () => QrcodesRoute,
+} as any)
 const ObrasNumRoute = ObrasNumRouteImport.update({
   id: '/obras/$num',
   path: '/obras/$num',
@@ -57,8 +63,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
-  '/qrcodes': typeof QrcodesRoute
+  '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
+  '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
 }
@@ -66,8 +73,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
-  '/qrcodes': typeof QrcodesRoute
+  '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
+  '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
 }
@@ -76,8 +84,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
-  '/qrcodes': typeof QrcodesRoute
+  '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
+  '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/como-usar'
     | '/qrcodes'
     | '/obras/$num'
+    | '/qrcodes/imprimir'
     | '/obras/'
     | '/api/public/obra-audio/$num'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/como-usar'
     | '/qrcodes'
     | '/obras/$num'
+    | '/qrcodes/imprimir'
     | '/obras'
     | '/api/public/obra-audio/$num'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/como-usar'
     | '/qrcodes'
     | '/obras/$num'
+    | '/qrcodes/imprimir'
     | '/obras/'
     | '/api/public/obra-audio/$num'
   fileRoutesById: FileRoutesById
@@ -115,7 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   ComoUsarRoute: typeof ComoUsarRoute
-  QrcodesRoute: typeof QrcodesRoute
+  QrcodesRoute: typeof QrcodesRouteWithChildren
   ObrasNumRoute: typeof ObrasNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
   ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
@@ -158,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/qrcodes/imprimir': {
+      id: '/qrcodes/imprimir'
+      path: '/imprimir'
+      fullPath: '/qrcodes/imprimir'
+      preLoaderRoute: typeof QrcodesImprimirRouteImport
+      parentRoute: typeof QrcodesRoute
+    }
     '/obras/$num': {
       id: '/obras/$num'
       path: '/obras/$num'
@@ -175,11 +194,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface QrcodesRouteChildren {
+  QrcodesImprimirRoute: typeof QrcodesImprimirRoute
+}
+
+const QrcodesRouteChildren: QrcodesRouteChildren = {
+  QrcodesImprimirRoute: QrcodesImprimirRoute,
+}
+
+const QrcodesRouteWithChildren =
+  QrcodesRoute._addFileChildren(QrcodesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ComoUsarRoute: ComoUsarRoute,
-  QrcodesRoute: QrcodesRoute,
+  QrcodesRoute: QrcodesRouteWithChildren,
   ObrasNumRoute: ObrasNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
   ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
@@ -187,3 +217,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
