@@ -104,7 +104,7 @@ function ObraPagina() {
         <h2 id="descricao-titulo" className="font-serif text-xl font-semibold text-foreground">
           Descrição
         </h2>
-        <p className="mt-2 leading-relaxed text-foreground">{obra.descricao}</p>
+        <p className="mt-2 max-w-[70ch] leading-relaxed text-foreground">{obra.descricao}</p>
       </section>
 
       <div className="mt-10 border-t border-border pt-6">
