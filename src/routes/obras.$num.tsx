@@ -42,8 +42,9 @@ export const Route = createFileRoute("/obras/$num")({
 });
 
 function ObraPagina() {
-  const obra = Route.useLoaderData();
+  const { obra, total } = Route.useLoaderData();
   const [ampliada, setAmpliada] = useState(false);
+
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8">
