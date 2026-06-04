@@ -12,7 +12,7 @@ export const Route = createFileRoute("/obras/")({
       {
         name: "description",
         content:
-          "Navegue pelas 85 obras da exposição Elifas Andreato: Sem Moldura, organizadas por parede.",
+          "Navegue pelas 116 obras da exposição Elifas Andreato: Sem Moldura, organizadas por parede.",
       },
     ],
   }),
