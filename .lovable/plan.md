@@ -1,33 +1,43 @@
-# Gestão de impressão dos QR Codes
+# Sincronizar o acervo com a planilha
 
-Criar uma página dedicada para selecionar quais obras imprimir e baixar um arquivo PDF pronto, com 6 QR Codes por folha A4 (2 colunas × 3 linhas), cada um com o QR Code e o título da obra.
+Trazer o site (`src/data/obras.ts`) para o mesmo conjunto da planilha `LISTA DE OBRAS - ELIFAS 2`, conforme as três decisões:
 
-## Comportamento
+1. **Vídeos entram** no acervo (os 14 audiovisuais de 2015).
+2. **Nova parede** agrupa todas as obras que hoje não têm parede definida (as 31 novas).
+3. **Gravar a entrada 112 sobre a obra 68** (resolver a divergência do "Aqualouco").
 
-- Lista todas as obras em cartões selecionáveis (checkbox), com pré-visualização do QR Code e título.
-- Ações de seleção: **Selecionar todas**, **Limpar seleção** e contador de selecionadas.
-- Botão **Gerar PDF** que baixa diretamente um `.pdf` (sem caixa de impressão), com layout fixo de 6 por página.
-- Cada card no PDF: QR Code + título da obra (sem rótulo "Obra N" e sem URL), centralizados.
-- Botão desabilitado quando nenhuma obra está selecionada.
+## O que será feito
 
-## Implementação técnica
+### 1. Adicionar as 31 obras faltantes
+Cada item ausente vira uma nova entrada em `obras`, com numeração sequencial nova (a partir de **86**), preenchendo os campos disponíveis na planilha (título, ano, autor, técnica, dimensão). Inclui:
 
-1. **Dependência**: adicionar `jspdf` (`bun add jspdf`). A biblioteca `qrcode` já existe no projeto e gera data URLs via `QRCode.toDataURL`.
+- **14 vídeos** (audiovisuais 2015): Almanaque, Arca de Noé, Bandalhismo, Bebadosamba, Cavaquinho, Clara Nunes, Clementina, Zeca Pagodinho, Ópera do Malandro, João Nogueira, Tendinha, Terreiro Sala e Salão, Traço de União.
+- **Obras físicas**: Arca de Noé 2, Brasil História, Calunga, Dom Paulo (Opinião), Encarte disco Paulinho da Viola, Fátima Guedes (Caderno), Fátima Guedes (Lápis de Cor), Gabriela, Legião Estrangeira, Mão (Movimento), Movimento, Muro de Arrimo, Nervos de Aço, O Processo, Papai Noel, Pixinguinha, Samba de Dandara, Shapes 5 unidades.
 
-2. **Nova rota**: `src/routes/qrcodes.imprimir.tsx` → `/qrcodes/imprimir`.
-   - `createFileRoute("/qrcodes/imprimir")` com `head()` próprio (title/description + `robots: noindex`).
-   - Estado `selecionadas: Set<number>` para as obras marcadas.
-   - Grade de cartões reutilizando o componente `QrCode` e os dados de `@/data/obras` + `SITE_URL` de `@/lib/site`.
+Total final: **116 obras**.
 
-3. **Geração do PDF** (função client-side no clique):
-   - Para cada obra selecionada, gerar o data URL do QR Code com `QRCode.toDataURL(`${SITE_URL}/obras/${num}`, { margin: 1, color: { dark: "#2a1a12", light: "#ffffff" } })`.
-   - Criar `new jsPDF({ format: "a4", unit: "mm" })`, calcular grade 2×3, posicionar imagem do QR e o título (com quebra/truncamento via `splitTextToSize`) abaixo de cada QR.
-   - A cada 6 cards adicionar nova página (`doc.addPage()`).
-   - `doc.save("qrcodes-obras.pdf")`.
+### 2. Nova parede para as obras sem parede
+Todas as 31 novas entradas recebem o mesmo valor de `parede`, ex.: **"Obras adicionais"** (uma seção própria no acervo). Como `obrasPorParede()` agrupa por esse campo, elas aparecem juntas no fim da página `/obras`.
 
-4. **Link de navegação**: adicionar um botão/link na página `/qrcodes` apontando para `/qrcodes/imprimir` (e vice-versa), usando `<Link>` do `@tanstack/react-router`.
+- Os vídeos não têm campo distinto na planilha; serão catalogados como obras normais nesta parede. Sem player de vídeo dedicado nesta etapa (apenas ficha de catálogo), já que não há arquivos de vídeo no projeto.
+
+### 3. Gravar a entrada 112 sobre a 68 (Aqualouco)
+Atualizar os campos `ano`/`tecnica` (e demais divergentes) da **obra 68** com os valores da entrada **112** da planilha (1987; "Caneta, nanquim e colagens"), substituindo os dados antigos (1981; "Acrílica e lápis").
+
+### 4. Ajustes de contagem
+Atualizar os textos que citam "85 obras":
+- `src/routes/obras.index.tsx` (head/description e `obras.length` já é dinâmico, mas o texto fixo da meta-descrição menciona 85).
+- Quaisquer outras referências fixas a "85" (ex.: `src/routes/index.tsx`).
+
+## Campos sem dados
+As novas obras entram com `imagem: imagemDaObra(num)` e `audio: audioDaObra(num)` (retornam `null` enquanto não houver arquivos correspondentes) e `descricao` gerada no padrão de ficha (igual às obras sem descrição longa, ex.: "Obra número N: Título. Elifas Andreato, ano. Técnica: …").
+
+```text
+Planilha (116) ─┬─ 85 já no site → mantidas (68 recebe dados da 112)
+                └─ 31 faltantes → nova parede "Obras adicionais"
+                                   (14 vídeos + 17 obras físicas)
+```
 
 ## Observações
-
-- Toda a lógica é frontend; não há mudanças de backend, banco ou storage.
-- Estilização com tokens semânticos do design system existente (`border`, `card`, `muted-foreground`, etc.).
+- Mudança apenas em dados/conteúdo frontend (`src/data/obras.ts`) e textos de meta; sem backend, banco ou storage.
+- Imagens/áudios das novas obras podem ser anexados depois — basta adicionar `obra-N.jpg`/`obra-N.mp3` com a numeração nova.
