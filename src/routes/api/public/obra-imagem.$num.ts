@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api/public/obra-imagem/$num")({
     handlers: {
       GET: async ({ params }) => {
         const num = Number(params.num);
-        if (!Number.isInteger(num) || num < 1 || num > 9999) {
+        if (!Number.isInteger(num) || num < 1 || num > 999999) {
           return new Response("Not found", { status: 404 });
         }
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ImageOff, ZoomIn, X } from "lucide-react";
 import { obras } from "@/data/obras";
-import { getObraPublica } from "@/lib/admin-obras.functions";
+import { listarAcervo } from "@/lib/admin-obras.functions";
 import { AudioDescricao } from "@/components/AudioDescricao";
 import { NavegacaoSequencial } from "@/components/NavegacaoSequencial";
 import { Button } from "@/components/ui/button";
@@ -12,35 +12,39 @@ export const Route = createFileRoute("/obras/$num")({
     const num = Number(params.num);
     if (!Number.isInteger(num) || num < 1) throw notFound();
 
-    const obra = await getObraPublica({ data: { num } });
+    const acervo = await listarAcervo();
+    const obra = acervo.find((o) => o.num === num);
     if (!obra) throw notFound();
 
-    return obra;
+    return { obra, total: acervo.length };
   },
 
+
   head: ({ loaderData }) => ({
-    meta: loaderData
+    meta: loaderData?.obra
       ? [
-          { title: `${loaderData.titulo} — Elifas Andreato: Sem Moldura` },
+          { title: `${loaderData.obra.titulo} — Elifas Andreato: Sem Moldura` },
           {
             name: "description",
-            content: `${loaderData.titulo} (${loaderData.ano}), de Elifas Andreato. ${loaderData.tecnica}.`,
+            content: `${loaderData.obra.titulo} (${loaderData.obra.ano}), de Elifas Andreato. ${loaderData.obra.tecnica}.`,
           },
-          { property: "og:title", content: `${loaderData.titulo} — Elifas Andreato` },
-          ...(loaderData.imagem
-            ? [{ property: "og:image", content: loaderData.imagem }]
+          { property: "og:title", content: `${loaderData.obra.titulo} — Elifas Andreato` },
+          ...(loaderData.obra.imagem
+            ? [{ property: "og:image", content: loaderData.obra.imagem }]
             : []),
         ]
       : [],
   }),
+
   component: ObraPagina,
   errorComponent: ObraErro,
   notFoundComponent: ObraNaoEncontrada,
 });
 
 function ObraPagina() {
-  const obra = Route.useLoaderData();
+  const { obra, total } = Route.useLoaderData();
   const [ampliada, setAmpliada] = useState(false);
+
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8">
@@ -104,7 +108,7 @@ function ObraPagina() {
       </section>
 
       <div className="mt-10 border-t border-border pt-6">
-        <NavegacaoSequencial num={obra.num} />
+        <NavegacaoSequencial num={obra.num} total={total} />
       </div>
 
       {ampliada && obra.imagem && (

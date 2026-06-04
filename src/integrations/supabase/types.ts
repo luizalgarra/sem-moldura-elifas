@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      acervo_ordem: {
+        Row: {
+          chave: number
+          posicao: number
+          updated_at: string
+        }
+        Insert: {
+          chave: number
+          posicao: number
+          updated_at?: string
+        }
+        Update: {
+          chave?: number
+          posicao?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       obra_overrides: {
         Row: {
           ano: string | null
@@ -127,7 +145,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      inserir_na_ordem: {
+        Args: { p_chave: number; p_posicao: number }
+        Returns: undefined
+      }
+      remover_da_ordem: { Args: { p_chave: number }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

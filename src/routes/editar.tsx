@@ -90,10 +90,11 @@ function EditarPagina() {
       <ul className="mt-4 space-y-4">
         {filtradas.map((obra) => (
           <ObraEditor
-            key={obra.num}
+            key={obra.chave}
             obra={obra}
             onChanged={() => refetch()}
           />
+
         ))}
       </ul>
     </div>
@@ -106,7 +107,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
   const inputImagem = useRef<HTMLInputElement>(null);
 
   const [aberto, setAberto] = useState(false);
-  const [num, setNum] = useState("");
+  const [posicao, setPosicao] = useState("");
   const [titulo, setTitulo] = useState("");
   const [ano, setAno] = useState("");
   const [autor, setAutor] = useState("Elifas Andreato");
@@ -120,7 +121,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
   const [msg, setMsg] = useState<string | null>(null);
 
   const limpar = () => {
-    setNum("");
+    setPosicao("");
     setTitulo("");
     setAno("");
     setAutor("Elifas Andreato");
@@ -131,6 +132,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
     setArquivo(null);
   };
 
+
   const lerBase64 = (file: File) =>
     new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -140,9 +142,9 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
     });
 
   const handleCriar = async () => {
-    const n = Number(num);
-    if (!Number.isInteger(n) || n < 1) {
-      setMsg("Informe um número válido para a obra.");
+    const p = Number(posicao);
+    if (!Number.isInteger(p) || p < 1) {
+      setMsg("Informe a posição (número de exibição) da obra.");
       return;
     }
     if (!titulo.trim()) {
@@ -163,7 +165,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
     try {
       const r = await criar({
         data: {
-          num: n,
+          posicao: p,
           titulo,
           ano,
           autor,
@@ -180,7 +182,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
       if (arquivo) {
         const base64 = await lerBase64(arquivo);
         await enviarImagem({
-          data: { num: n, base64, contentType: arquivo.type },
+          data: { chave: r.chave, base64, contentType: arquivo.type },
         });
       }
       setMsg("Obra criada.");
@@ -193,6 +195,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
       setSalvando(false);
     }
   };
+
 
   if (!aberto) {
     return (
@@ -212,16 +215,20 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
       </h2>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="nova-num">Número</Label>
+          <Label htmlFor="nova-posicao">Posição na sequência</Label>
           <Input
-            id="nova-num"
+            id="nova-posicao"
             inputMode="numeric"
-            value={num}
-            onChange={(e) => setNum(e.target.value.replace(/[^0-9]/g, ""))}
-            placeholder="Ex.: 117"
+            value={posicao}
+            onChange={(e) => setPosicao(e.target.value.replace(/[^0-9]/g, ""))}
+            placeholder="Ex.: 5 (entra como nº 5)"
             className="mt-1"
           />
+          <p className="mt-1 text-xs text-muted-foreground">
+            As obras desta posição em diante sobem um número.
+          </p>
         </div>
+
         <div>
           <Label htmlFor="nova-titulo">Título</Label>
           <Input
@@ -372,7 +379,7 @@ function ObraEditor({
   const [imagemUrl, setImagemUrl] = useState<string | null>(obra.imagem);
   const [audioUrl, setAudioUrl] = useState<string | null>(obra.audio);
 
-  const protegida = obra.num === OBRA_PROTEGIDA;
+  const protegida = obra.chave === OBRA_PROTEGIDA;
 
   const handleSalvar = async () => {
     setSalvando(true);
@@ -380,7 +387,7 @@ function ObraEditor({
     try {
       const r = await salvar({
         data: {
-          num: obra.num,
+          chave: obra.chave,
           titulo,
           ano,
           autor,
@@ -423,10 +430,10 @@ function ObraEditor({
         reader.readAsDataURL(file);
       });
       const r = await enviarImagem({
-        data: { num: obra.num, base64, contentType: file.type },
+        data: { chave: obra.chave, base64, contentType: file.type },
       });
       if (r.ok) {
-        setImagemUrl(`/api/public/obra-imagem/${obra.num}?v=${r.versao}`);
+        setImagemUrl(`/api/public/obra-imagem/${obra.chave}?v=${r.versao}`);
         setMsg("Imagem atualizada.");
         onChanged();
       } else {
@@ -443,9 +450,9 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { num: obra.num } });
+      const r = await regenerar({ data: { chave: obra.chave } });
       if (r.ok) {
-        setAudioUrl(`/api/public/obra-audio/${obra.num}?v=${r.versao}`);
+        setAudioUrl(`/api/public/obra-audio/${obra.chave}?v=${r.versao}`);
         setMsg("Áudio regenerado.");
         onChanged();
       } else {
@@ -467,7 +474,7 @@ function ObraEditor({
     setRemovendo(true);
     setMsg(null);
     try {
-      const r = await remover({ data: { num: obra.num } });
+      const r = await remover({ data: { chave: obra.chave } });
       if (r.ok) {
         onChanged();
       } else {

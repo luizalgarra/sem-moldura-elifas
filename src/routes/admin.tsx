@@ -125,7 +125,7 @@ function ObraEditor({
     setSalvando(true);
     setMsg(null);
     try {
-      const r = await salvar({ data: { num, descricao: texto } });
+      const r = await salvar({ data: { chave: num, descricao: texto } });
       setMsg(r.ok ? "Texto salvo." : (r.erro ?? "Erro ao salvar."));
       if (r.ok) onChanged();
     } catch {
@@ -139,7 +139,7 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { num } });
+      const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
         setMsg("Áudio regenerado.");
