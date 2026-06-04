@@ -11,6 +11,16 @@ function imagemDaObra(num: number): string | null {
   return entry ? entry.default.url : null;
 }
 
+const audios = import.meta.glob<{ default: { url: string } }>(
+  "../assets/audio/*.asset.json",
+  { eager: true },
+);
+
+function audioDaObra(num: number): string | null {
+  const entry = audios[`../assets/audio/obra-${num}.mp3.asset.json`];
+  return entry ? entry.default.url : null;
+}
+
 export interface Obra {
   num: number;
   titulo: string;
@@ -20,6 +30,7 @@ export interface Obra {
   dimensao: string;
   parede: string;
   imagem: string | null;
+  audio: string | null;
   descricao: string;
 }
 
