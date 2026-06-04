@@ -2,16 +2,31 @@ import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ImageOff, ZoomIn, X } from "lucide-react";
 import { getObra, obras } from "@/data/obras";
+import { getOverridePublico } from "@/lib/admin-obras.functions";
 import { AudioDescricao } from "@/components/AudioDescricao";
 import { NavegacaoSequencial } from "@/components/NavegacaoSequencial";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/obras/$num")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const num = Number(params.num);
     const obra = getObra(num);
     if (!obra) throw notFound();
-    return obra;
+
+    let override = { descricao: null as string | null, audioVersao: null as string | null };
+    try {
+      override = await getOverridePublico({ data: { num } });
+    } catch {
+      // mantém o conteúdo estático em caso de falha
+    }
+
+    return {
+      ...obra,
+      descricao: override.descricao ?? obra.descricao,
+      audio: override.audioVersao
+        ? `/api/public/obra-audio/${num}?v=${override.audioVersao}`
+        : obra.audio,
+    };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
