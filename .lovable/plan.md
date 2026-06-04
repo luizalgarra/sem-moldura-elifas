@@ -1,43 +1,31 @@
 ## Objetivo
 
-Adicionar 5 novas obras ao final do acervo, reutilizando os dados da obra "Shapes 5 unidades" (#117) e usando o nome de cada arquivo como título.
+1. Renomear a parede "Obras adicionais" para **"Parede 4"** em todos os lugares.
+2. Criar uma nova seção **"Vídeos"** no acervo (mais um grupo, igual às paredes).
+3. Mover para "Vídeos" as 13 obras audiovisuais (posições exibidas 103 a 115 — os trabalhos "Video 1" a "Video 13", técnica Audiovisual).
 
-## As 5 obras
+## O que muda na prática
 
-Títulos (nome do arquivo, sem extensão):
+- Na página do acervo (`/obras`), o grupo "Obras adicionais" passa a se chamar **"Parede 4"**.
+- Surge um novo grupo **"Vídeos"**, exibido logo após "Parede 4", contendo as 13 obras de vídeo.
+- As 5 obras "Shape" (que estavam em "Obras adicionais") permanecem em "Parede 4".
+- A obra "Gabriela" (posição 116) continua em "Parede 4" (não é vídeo).
 
-1. Shape 1 Batuqueiro
-2. Shape 2 Cantora
-3. Shape 3 Guitarrista
-4. Shape 4 Conjunto
-5. Shape 5 Listas
+## Detalhes técnicos
 
-## Dados aplicados a todas (copiados de "Shapes 5 unidades")
+### 1. Dados das obras fixas (`src/data/obras.ts`)
+- Substituir todas as ocorrências de `parede: "Obras adicionais"` por `parede: "Parede 4"`.
+- Nas 13 obras de vídeo (entradas internas `num` 102 a 114, títulos "Video1, Almanaque" … "Video 13, Traço de União", técnica "Audiovisual"), definir `parede: "Vídeos"`.
+- Atualizar o array `paredesOrdem`: trocar `"Obras adicionais"` por `"Parede 4"` e acrescentar `"Vídeos"` logo em seguida, para garantir a ordem Parede 1 → 2 → 3 → 4 → Vídeos.
 
-- **Ano:** 2024
-- **Autor:** Elifas Andreato
-- **Técnica:** Pintura sob madeira
-- **Dimensão:** 80cm x 40cm
-- **Parede:** Obras adicionais
-- **Descrição:** gerada no mesmo padrão, por exemplo: "Obra: Shape 1 Batuqueiro. Elifas Andreato, 2024. Técnica: Pintura sob madeira. Dimensão do original: 80cm x 40cm."
+### 2. Defaults no código
+- `src/lib/admin-obras.functions.ts` (linha ~106): default de `parede` das obras extras de `"Obras adicionais"` para `"Parede 4"`.
+- `src/routes/editar.tsx` (estado inicial e reset do formulário): valor padrão de `"Obras adicionais"` para `"Parede 4"`.
 
-Cada obra recebe a imagem correspondente enviada.
+### 3. Dados existentes no banco
+- As 5 obras "Shape" em `obras_extras` (registros 1001–1005) têm `parede = "Obras adicionais"`; atualizar para `"Parede 4"`.
+- Não há registros de parede em `obra_overrides`, então nada a ajustar lá.
 
-## Como será feito
+## Observação importante sobre reprodução
 
-As 5 obras entram como "obras extras" (mesmo mecanismo do botão "Incluir nova obra" da página /editar), posicionadas em sequência ao final do acervo atual. Numeração das demais obras não muda.
-
-### Passos técnicos
-
-1. Reunir as 5 imagens enviadas (`Shape 1 Batuqueiro.png` … `Shape 5 Listas.png`).
-2. Para cada obra, atribuir uma identidade interna livre (chave ≥ 1000) e:
-   - Enviar a imagem ao armazenamento (bucket `imagens-obras`).
-   - Inserir o registro em `obras_extras` com os dados acima e o caminho da imagem.
-   - Acrescentar a chave ao final de `acervo_ordem` (posição = total atual + 1, em sequência).
-3. Executar tudo via um script único usando o cliente administrativo (service role), garantindo que a ordem fique contígua.
-
-### Observações
-
-- As novas obras começam sem áudio; a narração pode ser gerada depois pelo botão "Regenerar áudio" em /editar.
-- A imagem fica registrada como `.png` e é servida pela rota `/api/public/obra-imagem/{chave}` já existente.
-- Nada nas 117 obras anteriores é alterado; os 5 shapes apenas aparecem no fim da sequência (posições 118 a 122).
+As 13 obras audiovisuais hoje possuem apenas imagem e áudio no sistema (não há arquivo de vídeo associado). Esta tarefa apenas as reagrupa na seção "Vídeos"; a página de cada obra continuará exibindo imagem + áudio como hoje. Se você quiser reprodução de vídeo de fato (player com o arquivo .mp4 ou link), me envie os arquivos/links e eu adapto a página da obra e o modelo de dados em um passo seguinte.
