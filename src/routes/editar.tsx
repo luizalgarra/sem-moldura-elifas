@@ -379,7 +379,7 @@ function ObraEditor({
   const [imagemUrl, setImagemUrl] = useState<string | null>(obra.imagem);
   const [audioUrl, setAudioUrl] = useState<string | null>(obra.audio);
 
-  const protegida = obra.num === OBRA_PROTEGIDA;
+  const protegida = obra.chave === OBRA_PROTEGIDA;
 
   const handleSalvar = async () => {
     setSalvando(true);
@@ -387,7 +387,7 @@ function ObraEditor({
     try {
       const r = await salvar({
         data: {
-          num: obra.num,
+          chave: obra.chave,
           titulo,
           ano,
           autor,
