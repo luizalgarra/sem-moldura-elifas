@@ -305,7 +305,7 @@ function FiltroTri<T extends string>({
             className={
               "px-2 py-1 text-xs transition-colors " +
               (valor === op.valor
-                ? "bg-primary text-accent-foreground"
+                ? "bg-primary text-primary-foreground"
                 : "bg-background text-foreground hover:bg-muted")
             }
           >
