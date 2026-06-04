@@ -95,6 +95,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Elifas Andreato: Sem Moldura — Catálogo Virtual" },
+      { name: "description", content: "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura." },
+      { property: "og:description", content: "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura." },
+      { name: "twitter:description", content: "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/XIwQbZAXsjSLszZ9nIPQQDLctlc2/social-images/social-1780536824696-Img_15_SONHO_CIVICO.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/XIwQbZAXsjSLszZ9nIPQQDLctlc2/social-images/social-1780536824696-Img_15_SONHO_CIVICO.webp" },
     ],
     links: [
       {
