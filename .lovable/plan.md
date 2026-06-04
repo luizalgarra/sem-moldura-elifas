@@ -1,36 +1,53 @@
-# Incluir e remover obras
+# Incluir obra renumerando a sequência
 
-Hoje as 116 obras são fixas no código (`src/data/obras.ts`) e o banco só guarda *edições* (tabela `obra_overrides`). Para incluir obras novas e remover existentes, vou criar uma **camada dinâmica no banco** que é mesclada com as obras fixas em todas as páginas.
+Hoje cada obra tem um número fixo que serve para tudo: ordem de exibição, nome do arquivo de imagem/áudio e link/QR. Por isso, simplesmente "empurrar" os números quebra a ligação com as imagens e áudios originais.
 
-## Como vai funcionar
+Para você poder incluir uma obra em qualquer posição e fazer todas as seguintes subirem um número, vou separar dois conceitos:
 
-- **Incluir**: na página `/editar`, um bloco "Nova obra" no topo onde você digita o número (você escolhe), título, ano, autor, técnica, dimensão, parede, descrição e envia a imagem. A obra passa a aparecer no acervo e na página individual.
-- **Remover**: um botão "Remover" em cada obra.
-  - Se for uma das 116 originais → ela é **ocultada** do site (as originais vivem no código e não podem ser apagadas de lá, mas somem para os visitantes; reversível no banco).
-  - Se for uma obra que você criou → é **apagada de vez** (registro e imagem removidos).
-- Cada remoção pede confirmação para evitar engano.
+- **Identidade interna (fixa)**: um código que nunca muda, usado só para achar a imagem e o áudio certos de cada obra. Você nunca vê isso.
+- **Número exibido (posição)**: o número que aparece no site, no QR e nos links. É esse que entra em sequência e se reorganiza quando você inclui ou remove uma obra.
 
-## Banco de dados (migração)
+## Como vai funcionar para você
 
-- Nova tabela `obras_extras`: guarda as obras criadas por você — `num` (escolhido, único), `titulo`, `ano`, `autor`, `tecnica`, `dimensao`, `parede`, `descricao`, `imagem_path`, `audio_url`, `voz_id`.
-- Nova tabela `obras_ocultas`: lista os números das obras originais que foram removidas (ocultadas) do site.
-- Ambas com GRANT para `service_role` e RLS habilitada (acesso só pelo servidor, como já é feito hoje).
+- Ao incluir uma obra, em vez de digitar um número livre, você escolhe **em qual posição** ela entra (ex.: "entrar como nº 5").
+- Todas as obras da posição 5 em diante sobem +1 automaticamente (5→6, 6→7, ...), incluindo as 116 originais.
+- Ao remover uma obra, a sequência se fecha: as seguintes descem -1, sem deixar buracos.
+- A numeração fica sempre contínua (1, 2, 3, ... sem falhas).
+- Como combinado: QR codes e links já impressos podem passar a apontar para outra obra após reorganizar — isso é esperado.
 
-## Servidor (`src/lib/admin-obras.functions.ts`)
+## O que muda na prática
 
-- `listarAcervo` (GET público): devolve a lista final = 116 fixas − ocultas + extras, já com as edições do `obra_overrides` aplicadas. Será a fonte única do acervo e da página de edição.
-- `criarObra` (POST): valida que o número não colide com uma obra fixa nem com outra extra; grava em `obras_extras`.
-- `removerObra` (POST): se o número é fixo → registra em `obras_ocultas`; se é extra → apaga o registro e a imagem no storage.
-- Ajustar `salvarDados`, `salvarImagem` e `regenerarAudio` para também funcionar com obras extras (gravando em `obras_extras` quando o número não pertence às fixas).
+- A inclusão deixa de pedir "número da obra" e passa a pedir "posição na sequência".
+- A imagem e o áudio de cada obra continuam corretos mesmo depois de várias inclusões/remoções, porque eles seguem a identidade interna, não a posição.
 
-## Páginas
+## Detalhes técnicos
 
-- **`/editar`**: passa a carregar o acervo via `listarAcervo`; adiciona o formulário "Nova obra" e o botão "Remover" (com confirmação) em cada cartão.
-- **`/obras` (acervo)**: passa a carregar a lista via `listarAcervo` (em vez do array fixo direto), para refletir inclusões e remoções.
-- **`/obras/$num`**: o loader passa a considerar obras extras e a retornar "não encontrada" para obras ocultas/removidas.
-- **`/api/public/obra-imagem/$num`**: além de `obra_overrides`, passa a servir também a imagem de obras extras.
+### Banco de dados (migração)
 
-## Observações
+- Nova tabela `acervo_ordem`:
+  - `chave` (int, PK) = identidade interna da obra (para as 116 originais é o número original 1–116; para obras novas, um id ≥ 1000 gerado automaticamente).
+  - `posicao` (int, único) = número exibido.
+  - GRANT para `service_role`, RLS habilitada (acesso só via servidor, como hoje).
+- `obras_extras`: a coluna `num` passa a guardar a **identidade interna** (≥ 1000), não mais o número escolhido pelo usuário. Imagens/áudios no storage continuam nomeados por essa identidade.
+- `obra_overrides` e `obras_ocultas` permanecem chaveadas pela identidade (número original das fixas) — sem mudança estrutural.
 
-- As obras novas começam sem áudio; depois você pode gerar a narração pelo botão "Regenerar áudio" já existente, que passará a funcionar para elas.
-- Nenhuma mudança visual no site público além de obras aparecerem/sumirem conforme você incluir/remover.
+### Servidor (`src/lib/admin-obras.functions.ts`)
+
+- Helper `materializarOrdem()`: se `acervo_ordem` estiver vazia, popula com a ordem atual (fixas 1–116 menos ocultas, na ordem original; depois extras existentes). A partir daí toda inclusão/remoção opera sobre essa tabela.
+- `listarAcervo`: passa a montar a lista pela `acervo_ordem` (ordenada por `posicao`), resolvendo cada `chave` para os dados (fixa+override ou extra) e definindo o **número exibido = posicao**. URLs de imagem/áudio passam a usar a identidade interna (chave), não a posição.
+- `criarObra({ posicao, ...dados })`:
+  1. gera identidade ≥ 1000, grava em `obras_extras`;
+  2. `UPDATE acervo_ordem SET posicao = posicao + 1 WHERE posicao >= :posicao`;
+  3. insere a nova `chave` na `posicao` escolhida.
+- `removerObra({ posicao })`: resolve a `chave`; se fixa → registra em `obras_ocultas`, se extra → apaga registro + arquivos; remove a linha da ordem e compacta (`posicao = posicao - 1 WHERE posicao > removida`).
+- `salvarDados`, `salvarImagem`, `salvarTexto`, `regenerarAudio`, `getObraPublica`: passam a receber/usar a **identidade interna** (resolvida a partir da posição quando vierem da URL pública), em vez do número exibido.
+
+### Páginas e rotas
+
+- `/editar`: formulário "Nova obra" troca o campo "número" por "posição na sequência"; cada cartão usa a identidade para salvar e a posição para exibir; botão "Remover" opera por posição.
+- `/obras` e `/obras/$num`: continuam usando o número exibido na URL; o loader converte posição → identidade via `acervo_ordem`.
+- `/api/public/obra-imagem/$num` e `/api/public/obra-audio/$num`: o parâmetro passa a ser a **identidade interna** (a URL é montada pelo servidor), mantendo a mídia correta após renumeração.
+
+## Observação
+
+Por reorganizar todo o acervo, recomendo conferir o acervo após a primeira inclusão para validar a sequência. As obras novas continuam começando sem áudio e podem gerar a narração pelo botão existente.
