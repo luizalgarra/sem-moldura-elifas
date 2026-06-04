@@ -474,7 +474,7 @@ function ObraEditor({
     setRemovendo(true);
     setMsg(null);
     try {
-      const r = await remover({ data: { num: obra.num } });
+      const r = await remover({ data: { chave: obra.chave } });
       if (r.ok) {
         onChanged();
       } else {
