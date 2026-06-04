@@ -62,42 +62,38 @@ export function SiteFooter() {
 
       {/* Assinatura institucional — fiel ao cartaz (fundo escuro, dois grupos) */}
       <div className="border-t border-border bg-background py-8">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-10 px-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-10 px-4 sm:flex-row sm:items-start sm:justify-between">
           {/* Realização */}
-          <div className="flex items-end gap-4">
+          <div className="grid grid-cols-[auto_auto] items-center gap-x-4">
             <img
               src={marca.seloSecom}
               alt="Tem patrocínio, tem Governo do Brasil"
-              className="h-12 w-auto object-contain"
+              className="col-start-1 row-start-2 h-12 w-auto object-contain"
             />
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-center">
-                Realização
-              </span>
-              <img
-                src={marca.seloInstitutoElifas}
-                alt="Instituto Elifas Andreato"
-                className="h-10 w-auto object-contain"
-              />
-            </div>
+            <span className="col-start-2 row-start-1 text-center text-xs font-semibold uppercase tracking-wide text-foreground/70">
+              Realização
+            </span>
+            <img
+              src={marca.seloInstitutoElifas}
+              alt="Instituto Elifas Andreato"
+              className="col-start-2 row-start-2 h-10 w-auto object-contain"
+            />
           </div>
 
           {/* Patrocínio */}
-          <div className="flex items-end gap-5">
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-center">
-                Patrocínio
-              </span>
-              <img
-                src={marca.seloCaixa}
-                alt="Caixa"
-                className="h-7 w-auto object-contain"
-              />
-            </div>
+          <div className="grid grid-cols-[auto_auto] items-center gap-x-5">
+            <span className="col-start-1 row-start-1 text-center text-xs font-semibold uppercase tracking-wide text-foreground/70">
+              Patrocínio
+            </span>
+            <img
+              src={marca.seloCaixa}
+              alt="Caixa"
+              className="col-start-1 row-start-2 h-7 w-auto object-contain"
+            />
             <img
               src={marca.seloGovernoBrasil}
               alt="Governo do Brasil"
-              className="h-12 w-auto object-contain"
+              className="col-start-2 row-start-2 h-12 w-auto object-contain"
             />
           </div>
         </div>
