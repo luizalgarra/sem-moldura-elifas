@@ -1,42 +1,71 @@
-## Objetivo
+# Página de administração de textos e áudios
 
-Ampliar a áudio-descrição da **Obra 2 – Arca de Noé** com um segundo bloco: a **análise interpretativa** enviada. Esse bloco será narrado por uma **voz feminina (Matilda, calorosa)** e **emendado em sequência direta** ao áudio masculino (Daniel) já gerado, formando um único MP3 contínuo. O texto da análise também será acrescentado ao texto escrito da página.
+Criar uma página avulsa em `/admin` que lista todas as 85 obras, permite editar o texto (descrição) e regenerar o áudio com a mesma voz original de cada obra. As mudanças ficam salvas no backend (Lovable Cloud) e passam a aparecer para os visitantes.
+
+## Decisões confirmadas
+- **Persistência**: Lovable Cloud (banco + storage). Edições e novos áudios ficam salvos.
+- **Acesso**: aberto por link secreto em `/admin` (sem login).
+- **Voz**: cada obra regenera com sua voz original (registrada por obra; padrão Sarah, suave).
+- **Obra 2**: preservada como está (áudio de duas vozes unidas). Botão de regenerar fica desativado para ela, evitando perder o áudio especial.
+
+## Como vai funcionar
+
+```text
+/admin
+ ├── lista das 85 obras (número, título, voz, status)
+ ├── editar texto (descrição) ──► salvar ──► grava no banco
+ └── regenerar áudio ──► server fn chama ElevenLabs ──► salva no Storage
+                                                       └► grava URL no banco
+
+/obras/$num (página pública)
+ └── usa o texto/áudio salvos no banco quando existirem;
+     senão, cai no texto/áudio estáticos atuais (fallback).
+```
 
 ## Etapas
 
-### 1. Recuperar o áudio masculino atual (Parte 1)
-- Baixar o MP3 atualmente referenciado em `src/assets/audio/obra-2.mp3.asset.json` (descrição, voz Daniel) para o sandbox, para reaproveitá-lo como primeira parte — sem regerar a descrição.
+### 1. Habilitar Lovable Cloud
+Ativar o backend para ter banco, storage e secrets.
 
-### 2. Gerar o áudio da análise (Parte 2, voz feminina)
-- Preparar o texto da análise interpretativa para narração: remover títulos/marcações que não devem ser lidos como rótulo, normalizar números (ex.: "1980", "1981" → por extenso) e ajustar pontuação para pausas naturais.
-- Chamar a API Text-to-Speech da ElevenLabs com:
-  - Voz **Matilda** (`XrExE9yKIg1WjnnlVkGX`)
-  - Modelo `eleven_multilingual_v2`, saída `mp3_44100_128`
-  - Ajustes para audiodescrição: `stability ~0.6`, `similarity_boost 0.75`, `style ~0.2`, `use_speaker_boost true`, ritmo levemente reduzido (`speed 0.95`)
-- Conferir idioma, pausas e qualidade.
+### 2. Banco de dados
+Criar a tabela `obra_overrides`:
+- `num` (int, único) — número da obra
+- `descricao` (text, nulável) — texto editado
+- `audio_url` (text, nulável) — URL do áudio regenerado
+- `voz_id` (text) — voz ElevenLabs da obra (padrão Sarah `EXAVITQu4vr4xnSDxMaL`)
+- `updated_at` (timestamp)
 
-### 3. Unir os dois áudios sem cortes
-- Concatenar Parte 1 (Daniel) + Parte 2 (Matilda) em um único MP3 contínuo, **emendado direto** (sem pausa nem separação), usando `ffmpeg` (concat reencodando para um stream homogêneo).
-- Conferir o arquivo final (duração = soma das partes, transição limpa).
+Como a página é aberta por link secreto, o acesso será feito por server functions usando o cliente admin (sem expor service role ao navegador). A tabela terá RLS habilitada sem políticas para `anon`/`authenticated` — toda leitura/escrita passa pelas server functions.
 
-### 4. Substituir o asset da Obra 2
-- Fazer upload do MP3 unificado via `lovable-assets`, regenerando `src/assets/audio/obra-2.mp3.asset.json` (a URL/asset_id muda; o mapeamento por glob em `obras.ts` continua funcionando sem mudança de código).
+### 3. Storage
+Bucket público `audios-obras` para guardar os MP3 regenerados.
 
-### 5. Atualizar a descrição da Obra 2 na página
-- Em `src/data/obras.ts`, no campo `descricao` da Obra 2, acrescentar a **análise interpretativa** após a descrição visual existente, separada por quebra de parágrafo, em texto corrido e limpo (sem marcações).
+### 4. Segredo
+A `ELEVENLABS_API_KEY` já existe no projeto e será usada nas server functions de TTS.
 
-### 6. Verificação
-- Abrir `/obras/2` no preview e validar:
-  - O player toca um único áudio que começa na voz masculina (descrição) e segue, sem corte, na voz feminina (análise).
-  - O texto da página mostra a descrição visual seguida da análise interpretativa.
+### 5. Server functions (`src/lib/admin-obras.functions.ts`)
+- `listarOverrides` — retorna os overrides salvos (texto/áudio/voz por obra).
+- `salvarTexto` — valida e grava `descricao` da obra.
+- `regenerarAudio` — recebe `num`; lê o texto atual (override ou estático), chama ElevenLabs com a voz da obra, faz upload no Storage e grava a `audio_url`. Bloqueia a obra 2.
+
+Validação de entrada com Zod (número 1–85, texto com limite de tamanho).
+
+### 6. Página `/admin` (`src/routes/admin.tsx`)
+- Lista com busca por número/título.
+- Por obra: `textarea` para editar o texto, botão **Salvar texto**, player do áudio atual e botão **Regenerar áudio** (com estado de carregando). Obra 2 mostra aviso "áudio especial preservado".
+- `head()` com `noindex` para não ser indexada por buscadores.
+
+### 7. Integrar overrides na página pública
+Ajustar `src/routes/obras.$num.tsx` para, via server fn, buscar o override da obra e usar `descricao`/`audio` salvos quando existirem, mantendo o conteúdo estático de `obras.ts` como fallback.
 
 ## Detalhes técnicos
-- Geração e concatenação rodam no sandbox via `code--exec`, usando o secret `ELEVENLABS_API_KEY` — sem expor chave no front-end e sem custo por visita.
-- `ffmpeg` já está disponível no ambiente.
-- Apenas a Obra 2 é afetada; as outras 84 obras permanecem como estão.
-- `AudioDescricao.tsx` e `obras.$num.tsx` não precisam mudar — já consomem `obra.audio` e `obra.descricao`.
+- Voz original por obra: as demais obras usaram Sarah (suave); fica como padrão em `voz_id`, editável no banco se necessário. A obra 2 não é regenerada.
+- TTS: modelo `eleven_multilingual_v2`, `output_format=mp3_44100_128`, settings de narração (stability ~0.6, similarity_boost 0.75).
+- Upload do MP3 no bucket `audios-obras` com nome `obra-{num}-{timestamp}.mp3` para evitar cache antigo.
+- Server functions usam `supabaseAdmin` apenas dentro do `.handler()` (sem vazar para o cliente).
+- A página `/admin` não recebe link na navegação do site; só acessível por quem souber o endereço.
 
-## Fora de escopo
-- Regerar a descrição (Parte 1) — será reaproveitada como está.
-- Trocar a voz das outras obras.
-- Mudanças visuais/layout da página.
+## Fora do escopo
+- Edição dos demais campos (título, ano, técnica) — apenas texto e áudio.
+- Login/autenticação (acesso por link secreto, conforme escolhido).
+- Regeneração da obra 2.
