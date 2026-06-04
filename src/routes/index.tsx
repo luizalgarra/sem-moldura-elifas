@@ -2,15 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, QrCode as QrIcon, Headphones } from "lucide-react";
 import { obras } from "@/data/obras";
 import { Button } from "@/components/ui/button";
+import { marca } from "@/assets/marca";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Elifas Andreato: Sem Moldura — Catálogo Virtual" },
+      { title: "Elifas Andreato — Além da Moldura · Catálogo Virtual" },
       {
         name: "description",
         content:
-          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura. 116 obras com áudio-descrição e acesso por QR Code.",
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Além da Moldura. Obras com áudio-descrição e acesso por QR Code.",
       },
     ],
   }),
