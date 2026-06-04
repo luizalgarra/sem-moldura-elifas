@@ -14,6 +14,7 @@ import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
+import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
 const QrcodesRoute = QrcodesRouteImport.update({
   id: '/qrcodes',
@@ -40,6 +41,11 @@ const ObrasNumRoute = ObrasNumRouteImport.update({
   path: '/obras/$num',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicObraAudioNumRoute = ApiPublicObraAudioNumRouteImport.update({
+  id: '/api/public/obra-audio/$num',
+  path: '/api/public/obra-audio/$num',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/qrcodes': typeof QrcodesRoute
   '/obras/$num': typeof ObrasNumRoute
   '/obras/': typeof ObrasIndexRoute
+  '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/qrcodes': typeof QrcodesRoute
   '/obras/$num': typeof ObrasNumRoute
   '/obras': typeof ObrasIndexRoute
+  '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/qrcodes': typeof QrcodesRoute
   '/obras/$num': typeof ObrasNumRoute
   '/obras/': typeof ObrasIndexRoute
+  '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/como-usar' | '/qrcodes' | '/obras/$num' | '/obras/'
+  fullPaths:
+    | '/'
+    | '/como-usar'
+    | '/qrcodes'
+    | '/obras/$num'
+    | '/obras/'
+    | '/api/public/obra-audio/$num'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/como-usar' | '/qrcodes' | '/obras/$num' | '/obras'
-  id: '__root__' | '/' | '/como-usar' | '/qrcodes' | '/obras/$num' | '/obras/'
+  to:
+    | '/'
+    | '/como-usar'
+    | '/qrcodes'
+    | '/obras/$num'
+    | '/obras'
+    | '/api/public/obra-audio/$num'
+  id:
+    | '__root__'
+    | '/'
+    | '/como-usar'
+    | '/qrcodes'
+    | '/obras/$num'
+    | '/obras/'
+    | '/api/public/obra-audio/$num'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +105,7 @@ export interface RootRouteChildren {
   QrcodesRoute: typeof QrcodesRoute
   ObrasNumRoute: typeof ObrasNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
+  ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrasNumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/obra-audio/$num': {
+      id: '/api/public/obra-audio/$num'
+      path: '/api/public/obra-audio/$num'
+      fullPath: '/api/public/obra-audio/$num'
+      preLoaderRoute: typeof ApiPublicObraAudioNumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,7 +161,18 @@ const rootRouteChildren: RootRouteChildren = {
   QrcodesRoute: QrcodesRoute,
   ObrasNumRoute: ObrasNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
+  ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
