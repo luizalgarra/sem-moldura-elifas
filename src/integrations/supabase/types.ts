@@ -16,23 +16,44 @@ export type Database = {
     Tables: {
       obra_overrides: {
         Row: {
+          ano: string | null
           audio_url: string | null
+          autor: string | null
           descricao: string | null
+          dimensao: string | null
+          imagem_path: string | null
           num: number
+          parede: string | null
+          tecnica: string | null
+          titulo: string | null
           updated_at: string
           voz_id: string
         }
         Insert: {
+          ano?: string | null
           audio_url?: string | null
+          autor?: string | null
           descricao?: string | null
+          dimensao?: string | null
+          imagem_path?: string | null
           num: number
+          parede?: string | null
+          tecnica?: string | null
+          titulo?: string | null
           updated_at?: string
           voz_id?: string
         }
         Update: {
+          ano?: string | null
           audio_url?: string | null
+          autor?: string | null
           descricao?: string | null
+          dimensao?: string | null
+          imagem_path?: string | null
           num?: number
+          parede?: string | null
+          tecnica?: string | null
+          titulo?: string | null
           updated_at?: string
           voz_id?: string
         }

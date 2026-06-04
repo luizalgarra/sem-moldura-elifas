@@ -10,17 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QrcodesRouteImport } from './routes/qrcodes'
+import { Route as EditarRouteImport } from './routes/editar'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
+import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
 const QrcodesRoute = QrcodesRouteImport.update({
   id: '/qrcodes',
   path: '/qrcodes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditarRoute = EditarRouteImport.update({
+  id: '/editar',
+  path: '/editar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoUsarRoute = ComoUsarRouteImport.update({
@@ -53,6 +60,11 @@ const ObrasNumRoute = ObrasNumRouteImport.update({
   path: '/obras/$num',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicObraImagemNumRoute = ApiPublicObraImagemNumRouteImport.update({
+  id: '/api/public/obra-imagem/$num',
+  path: '/api/public/obra-imagem/$num',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicObraAudioNumRoute = ApiPublicObraAudioNumRouteImport.update({
   id: '/api/public/obra-audio/$num',
   path: '/api/public/obra-audio/$num',
@@ -63,32 +75,38 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
+  '/editar': typeof EditarRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
+  '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
+  '/editar': typeof EditarRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
+  '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
+  '/editar': typeof EditarRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
+  '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,41 +114,49 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/como-usar'
+    | '/editar'
     | '/qrcodes'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras/'
     | '/api/public/obra-audio/$num'
+    | '/api/public/obra-imagem/$num'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/como-usar'
+    | '/editar'
     | '/qrcodes'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras'
     | '/api/public/obra-audio/$num'
+    | '/api/public/obra-imagem/$num'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/como-usar'
+    | '/editar'
     | '/qrcodes'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras/'
     | '/api/public/obra-audio/$num'
+    | '/api/public/obra-imagem/$num'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   ComoUsarRoute: typeof ComoUsarRoute
+  EditarRoute: typeof EditarRoute
   QrcodesRoute: typeof QrcodesRouteWithChildren
   ObrasNumRoute: typeof ObrasNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
   ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
+  ApiPublicObraImagemNumRoute: typeof ApiPublicObraImagemNumRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -140,6 +166,13 @@ declare module '@tanstack/react-router' {
       path: '/qrcodes'
       fullPath: '/qrcodes'
       preLoaderRoute: typeof QrcodesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editar': {
+      id: '/editar'
+      path: '/editar'
+      fullPath: '/editar'
+      preLoaderRoute: typeof EditarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-usar': {
@@ -184,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrasNumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/obra-imagem/$num': {
+      id: '/api/public/obra-imagem/$num'
+      path: '/api/public/obra-imagem/$num'
+      fullPath: '/api/public/obra-imagem/$num'
+      preLoaderRoute: typeof ApiPublicObraImagemNumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/obra-audio/$num': {
       id: '/api/public/obra-audio/$num'
       path: '/api/public/obra-audio/$num'
@@ -209,10 +249,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ComoUsarRoute: ComoUsarRoute,
+  EditarRoute: EditarRoute,
   QrcodesRoute: QrcodesRouteWithChildren,
   ObrasNumRoute: ObrasNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
   ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
+  ApiPublicObraImagemNumRoute: ApiPublicObraImagemNumRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

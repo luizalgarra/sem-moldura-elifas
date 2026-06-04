@@ -1,48 +1,47 @@
-# Importar as imagens das obras novas (86–116) a partir da planilha
+# Página de edição de obras
 
-As imagens **estão embutidas** na planilha `LISTA DE OBRAS - ELIFAS 2.xlsx` (118 imagens dentro do arquivo). O motivo de aparecer "Imagem em breve" é que os arquivos `obra-86.jpg` … `obra-116.jpg` ainda não existem em `src/assets/obras/`.
+Criar uma página separada em `/editar` (link aberto, sem login, como a `/admin` atual) que permite editar **todos os dados** de cada obra: título, ano, autor, técnica, dimensão, parede, descrição, **imagem** e **áudio**. As alterações ficam salvas no banco e aparecem para os visitantes nas páginas das obras.
 
-Ponto importante descoberto: **a ordem da planilha NÃO é a mesma da numeração do site**. Ex.: obra 1 do site é "Secos e Molhados, Opinião", mas a linha 1 da planilha é "7 Dias de Agonia". Por isso o casamento será feito **por título**, garantindo que cada obra receba a imagem correta.
+## Situação atual
+
+- Os dados das 116 obras vivem estáticos em `src/data/obras.ts`.
+- Já existe a tabela `obra_overrides` que guarda apenas `descricao`, `audio_url` e `voz_id`.
+- A `/admin` edita só descrição e regenera áudio. A página pública (`/obras/$num`) já mescla a descrição/áudio editados sobre o estático.
+- Hoje vários pontos limitam o número da obra a 1–85; existem obras até 116.
 
 ## O que será feito
 
-1. Extrair as 31 imagens embutidas correspondentes às obras 86–116 (casadas por título com as linhas da planilha).
-2. Converter cada PNG para JPG (mesmo padrão das obras 1–85).
-3. Subir cada imagem como Lovable Asset com o nome `obra-{num}.jpg`, gerando os arquivos `src/assets/obras/obra-86.jpg.asset.json` … `obra-116.jpg.asset.json`.
+### 1. Banco de dados
+Ampliar a tabela `obra_overrides` para guardar todos os campos editáveis:
+- Novas colunas: `titulo`, `ano`, `autor`, `tecnica`, `dimensao`, `parede`, `imagem_path` (todas opcionais — quando vazias, vale o valor estático).
+- Criar um bucket de armazenamento para as imagens enviadas das obras.
 
-Nenhuma alteração de código é necessária — `imagemDaObra(num)` passa a encontrar o arquivo automaticamente e a imagem aparece.
+### 2. Página `/editar` (nova rota)
+- Lista todas as 116 obras com busca por número/título (mesmo padrão visual da `/admin`).
+- Para cada obra, um formulário com:
+  - Campos de texto: título, ano, autor, técnica, dimensão, parede.
+  - Área de texto da descrição.
+  - Envio de **nova imagem** (com pré-visualização da imagem atual).
+  - Áudio: regenerar (como hoje) — a obra 2 continua protegida.
+- Botão "Salvar" por obra; indica quando um campo foi editado.
+- Marcada como `noindex` (não aparece em buscadores).
 
-## Mapeamento obra → imagem da planilha (casado por título)
+### 3. Lógica de servidor
+- Nova função para salvar os campos de dados da obra.
+- Nova função para receber e guardar a imagem enviada no bucket e registrar o caminho.
+- Reaproveitar as funções existentes de salvar texto e regenerar áudio (ampliando o limite de obra de 85 para 116).
 
-```text
-86 Arca de Noé 2                  → image8       101 Pixinguinha               → image84
-87 Brasil História                → image17      102 Video1, Almanaque         → image99
-88 Calunga                        → image20      103 Video 2, Arca de Noé      → image100
-89 Legiao Estrangeira             → image25      104 Video 3, Bandalhismo       → image101
-90 Movimento                      → image26      105 Video 4, Bebadosamba       → image102
-91 Encarte disco Paulinho da Viola→ image27      106 Video 5, Cavaquinho        → image103
-92 Samba de Dandara               → image42      107 Video 6, Clara Nunes       → image104
-93 Fatima Guedes, Caderno         → image47      108 Video 7, Clementina        → image105
-94 Fatima Guedes, Lapis de Cor    → image48      109 Video 8, Zeca Pagodinho    → image106
-95 Mao, Movimento                 → image66      110 Video 9, Opera do Malandro → image107
-96 Muro de Arrimo                 → image68      111 Video 10, João Nogueira    → image108
-97 Dom Paulo, Opinião             → image73      112 Video 11, Tendinha         → image109
-98 O Processo                     → image74      113 Video 12, Terreiro...      → image110
-99 Papai Noel                     → image76      114 Video 13, Traço de União   → image111
-100 Nervos de Aço                 → image78      115 Gabriela                   → image112
-                                                 116 Shapes 5 unidades          → image117
-```
-
-As 31 obras têm imagem correspondente — inclusive os "vídeos", que na planilha são capas/imagens estáticas, então funcionam como imagem normal do card.
+### 4. Refletir nas páginas públicas
+- No carregamento da página da obra (`/obras/$num`), mesclar os campos editados (título, ano, técnica, dimensão, parede, descrição, imagem, áudio) sobre os dados estáticos.
+- Servir a imagem editada por uma rota pública (igual ao áudio), com fallback para a imagem estática.
 
 ## Detalhes técnicos
 
-- Extração via `unzip`/Python a partir de `xl/media/` + `xl/drawings/drawing1.xml` (âncoras das imagens nas linhas).
-- Conversão PNG→JPG com ImageMagick (`nix run nixpkgs#imagemagick`).
-- Upload com `lovable-assets create --file <jpg> --filename obra-{num}.jpg`, salvando a saída em `src/assets/obras/obra-{num}.jpg.asset.json`.
-- Sem mudança em `src/data/obras.ts` nem em componentes.
+- Migração `obra_overrides`: `ADD COLUMN` para os campos novos; bucket de imagens via storage; manter GRANTs e RLS existentes.
+- Funções em `src/lib/admin-obras.functions.ts`: `salvarDados`, `salvarImagem` (upload), e elevar o `max` de validação de `85` para `116` nas funções e na rota `api/public/obra-audio.$num.ts`.
+- Nova rota pública `src/routes/api/public/obra-imagem.$num.ts` para servir a imagem do bucket.
+- Nova rota `src/routes/editar.tsx` reutilizando `Input`, `Textarea`, `Button`.
+- Ajustar o loader de `src/routes/obras.$num.tsx` para aplicar os overrides de todos os campos.
 
-## Observações
-
-- Áudios das obras novas continuam sem arquivo (a planilha só traz imagens); os cards seguem sem áudio até serem fornecidos.
-- Caso queira, posso depois revisar também se alguma das imagens 1–85 está trocada, mas isso está fora do escopo deste pedido.
+## Observação
+A página fica acessível por link sem senha, exatamente como a `/admin` atual. Se mais tarde quiser proteger ambas com login, dá para adicionar autenticação depois.

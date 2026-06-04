@@ -13,7 +13,17 @@ export const Route = createFileRoute("/obras/$num")({
     const obra = getObra(num);
     if (!obra) throw notFound();
 
-    let override = { descricao: null as string | null, audioVersao: null as string | null };
+    let override = {
+      titulo: null as string | null,
+      ano: null as string | null,
+      autor: null as string | null,
+      tecnica: null as string | null,
+      dimensao: null as string | null,
+      parede: null as string | null,
+      descricao: null as string | null,
+      imagemVersao: null as string | null,
+      audioVersao: null as string | null,
+    };
     try {
       override = await getOverridePublico({ data: { num } });
     } catch {
@@ -22,12 +32,22 @@ export const Route = createFileRoute("/obras/$num")({
 
     return {
       ...obra,
+      titulo: override.titulo ?? obra.titulo,
+      ano: override.ano ?? obra.ano,
+      autor: override.autor ?? obra.autor,
+      tecnica: override.tecnica ?? obra.tecnica,
+      dimensao: override.dimensao ?? obra.dimensao,
+      parede: override.parede ?? obra.parede,
       descricao: override.descricao ?? obra.descricao,
+      imagem: override.imagemVersao
+        ? `/api/public/obra-imagem/${num}?v=${override.imagemVersao}`
+        : obra.imagem,
       audio: override.audioVersao
         ? `/api/public/obra-audio/${num}?v=${override.audioVersao}`
         : obra.audio,
     };
   },
+
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
