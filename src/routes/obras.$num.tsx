@@ -81,7 +81,7 @@ function ObraPagina() {
       </header>
 
       <div className="mt-6">
-        <AudioDescricao texto={obra.descricao} />
+        <AudioDescricao texto={obra.descricao} audio={obra.audio} />
       </div>
 
       <dl className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
