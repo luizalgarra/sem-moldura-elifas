@@ -108,9 +108,6 @@ function Acervo() {
                   className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   {grupo.parede}
-                  <span className="ml-1.5 text-xs text-muted-foreground">
-                    {grupo.obras.length}
-                  </span>
                 </a>
               </li>
             ))}
