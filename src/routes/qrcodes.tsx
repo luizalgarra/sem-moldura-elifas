@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { obras } from "@/data/obras";
 import { QrCode } from "@/components/QrCode";
 import { SITE_URL } from "@/lib/site";
@@ -30,6 +30,12 @@ function QrCodes() {
           página da obra (com áudio-descrição) no site publicado. Use o recurso
           de impressão do navegador.
         </p>
+        <Link
+          to="/qrcodes/imprimir"
+          className="mt-3 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline print:hidden"
+        >
+          Gerar PDF para impressão →
+        </Link>
       </header>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
