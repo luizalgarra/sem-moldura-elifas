@@ -397,6 +397,18 @@ export const salvarDados = createServerFn({ method: "POST" })
     );
 
     const tabela = ehObraFixa(data.chave) ? "obra_overrides" : "obras_extras";
+
+    // Lê a parede ATUAL antes de salvar, para detectar troca de parede.
+    const { data: atual } = await supabaseAdmin
+      .from(tabela)
+      .select("parede")
+      .eq("num", data.chave)
+      .maybeSingle();
+    let paredeAntiga = atual?.parede ?? null;
+    if (paredeAntiga == null && ehObraFixa(data.chave)) {
+      paredeAntiga = getObra(data.chave)?.parede ?? null;
+    }
+
     const { error } = await supabaseAdmin.from(tabela).upsert(
       {
         num: data.chave,
@@ -415,6 +427,41 @@ export const salvarDados = createServerFn({ method: "POST" })
       console.error("salvarDados:", error.message);
       return { ok: false as const, erro: "Não foi possível salvar os dados." };
     }
+
+    // Se a parede mudou, move a obra para o INÍCIO do grupo da nova parede.
+    if (data.parede && data.parede !== paredeAntiga) {
+      try {
+        await materializarOrdem(supabaseAdmin);
+        const acervo = await construirAcervo(supabaseAdmin);
+
+        // Primeira obra (que não seja a movida) já pertencente à nova parede.
+        const alvo = acervo.find(
+          (o) => o.chave !== data.chave && o.parede === data.parede,
+        );
+
+        // Só reposiciona se já existir outra obra na parede de destino.
+        if (alvo) {
+          const filtrada = acervo
+            .map((o) => o.chave)
+            .filter((c) => c !== data.chave);
+          const insertAt = filtrada.indexOf(alvo.chave);
+          filtrada.splice(insertAt, 0, data.chave);
+
+          const linhas = filtrada.map((c, i) => ({
+            chave: c,
+            posicao: i + 1,
+          }));
+          await supabaseAdmin.from("acervo_ordem").delete().gte("chave", 0);
+          if (linhas.length > 0) {
+            await supabaseAdmin.from("acervo_ordem").insert(linhas);
+          }
+        }
+      } catch (e) {
+        console.error("salvarDados reordenar:", e);
+        // Não falha o salvamento dos dados por causa da reordenação.
+      }
+    }
+
     return { ok: true as const };
   });
 
