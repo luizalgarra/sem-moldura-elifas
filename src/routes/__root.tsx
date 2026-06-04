@@ -80,32 +80,44 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Elifas Andreato: Sem Moldura — Catálogo Virtual" },
+      { title: "Elifas Andreato — Além da Moldura · Catálogo Virtual" },
       {
         name: "description",
         content:
-          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura. Obras com áudio-descrição e acesso por QR Code.",
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Além da Moldura. Obras com áudio-descrição e acesso por QR Code.",
       },
       { name: "author", content: "Elifas Andreato" },
-      { property: "og:title", content: "Elifas Andreato: Sem Moldura — Catálogo Virtual" },
+      { property: "og:title", content: "Elifas Andreato — Além da Moldura" },
       {
         property: "og:description",
         content:
-          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura, com áudio-descrição e acesso por QR Code.",
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Além da Moldura, com áudio-descrição e acesso por QR Code.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Elifas Andreato: Sem Moldura — Catálogo Virtual" },
-      { name: "description", content: "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura." },
-      { property: "og:description", content: "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura." },
-      { name: "twitter:description", content: "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/XIwQbZAXsjSLszZ9nIPQQDLctlc2/social-images/social-1780536824696-Img_15_SONHO_CIVICO.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/XIwQbZAXsjSLszZ9nIPQQDLctlc2/social-images/social-1780536824696-Img_15_SONHO_CIVICO.webp" },
+      { property: "og:site_name", content: "Elifas Andreato — Além da Moldura" },
+      { property: "og:image", content: `https://sem-moldura-elifas.lovable.app${marca.ogImage}` },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Elifas Andreato — Além da Moldura" },
+      {
+        name: "twitter:description",
+        content:
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Além da Moldura.",
+      },
+      { name: "twitter:image", content: `https://sem-moldura-elifas.lovable.app${marca.ogImage}` },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: marca.favicon },
+      { rel: "apple-touch-icon", href: marca.favicon },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap",
       },
     ],
   }),
