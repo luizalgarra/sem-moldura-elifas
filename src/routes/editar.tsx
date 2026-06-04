@@ -430,10 +430,10 @@ function ObraEditor({
         reader.readAsDataURL(file);
       });
       const r = await enviarImagem({
-        data: { num: obra.num, base64, contentType: file.type },
+        data: { chave: obra.chave, base64, contentType: file.type },
       });
       if (r.ok) {
-        setImagemUrl(`/api/public/obra-imagem/${obra.num}?v=${r.versao}`);
+        setImagemUrl(`/api/public/obra-imagem/${obra.chave}?v=${r.versao}`);
         setMsg("Imagem atualizada.");
         onChanged();
       } else {
