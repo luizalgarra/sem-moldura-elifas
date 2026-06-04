@@ -56,7 +56,7 @@ function AudioArquivo({ src }: { src: string }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Volume2 className="size-5 text-primary" aria-hidden="true" />
+        <Volume2 className="size-5 text-accent" aria-hidden="true" />
         <span>Áudio-descrição</span>
       </div>
 
@@ -201,7 +201,7 @@ function AudioVoz({ texto }: { texto: string }) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Volume2 className="size-5 text-primary" aria-hidden="true" />
+        <Volume2 className="size-5 text-accent" aria-hidden="true" />
         <span>Áudio-descrição</span>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
