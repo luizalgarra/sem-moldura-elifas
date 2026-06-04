@@ -91,10 +91,10 @@ function Index() {
       {destaques.length > 0 && (
         <section className="mx-auto max-w-5xl px-4 pb-16">
           <div className="flex items-end justify-between gap-4">
-            <h2 className="font-serif text-2xl font-semibold text-foreground">
+            <h2 className="text-2xl font-semibold text-foreground">
               Algumas obras
             </h2>
-            <Link to="/obras" className="text-sm font-medium text-primary hover:underline">
+            <Link to="/obras" className="text-sm font-medium text-accent hover:underline">
               Ver todas
             </Link>
           </div>
