@@ -1,53 +1,43 @@
-# Incluir obra renumerando a sequência
+## Objetivo
 
-Hoje cada obra tem um número fixo que serve para tudo: ordem de exibição, nome do arquivo de imagem/áudio e link/QR. Por isso, simplesmente "empurrar" os números quebra a ligação com as imagens e áudios originais.
+Adicionar 5 novas obras ao final do acervo, reutilizando os dados da obra "Shapes 5 unidades" (#117) e usando o nome de cada arquivo como título.
 
-Para você poder incluir uma obra em qualquer posição e fazer todas as seguintes subirem um número, vou separar dois conceitos:
+## As 5 obras
 
-- **Identidade interna (fixa)**: um código que nunca muda, usado só para achar a imagem e o áudio certos de cada obra. Você nunca vê isso.
-- **Número exibido (posição)**: o número que aparece no site, no QR e nos links. É esse que entra em sequência e se reorganiza quando você inclui ou remove uma obra.
+Títulos (nome do arquivo, sem extensão):
 
-## Como vai funcionar para você
+1. Shape 1 Batuqueiro
+2. Shape 2 Cantora
+3. Shape 3 Guitarrista
+4. Shape 4 Conjunto
+5. Shape 5 Listas
 
-- Ao incluir uma obra, em vez de digitar um número livre, você escolhe **em qual posição** ela entra (ex.: "entrar como nº 5").
-- Todas as obras da posição 5 em diante sobem +1 automaticamente (5→6, 6→7, ...), incluindo as 116 originais.
-- Ao remover uma obra, a sequência se fecha: as seguintes descem -1, sem deixar buracos.
-- A numeração fica sempre contínua (1, 2, 3, ... sem falhas).
-- Como combinado: QR codes e links já impressos podem passar a apontar para outra obra após reorganizar — isso é esperado.
+## Dados aplicados a todas (copiados de "Shapes 5 unidades")
 
-## O que muda na prática
+- **Ano:** 2024
+- **Autor:** Elifas Andreato
+- **Técnica:** Pintura sob madeira
+- **Dimensão:** 80cm x 40cm
+- **Parede:** Obras adicionais
+- **Descrição:** gerada no mesmo padrão, por exemplo: "Obra: Shape 1 Batuqueiro. Elifas Andreato, 2024. Técnica: Pintura sob madeira. Dimensão do original: 80cm x 40cm."
 
-- A inclusão deixa de pedir "número da obra" e passa a pedir "posição na sequência".
-- A imagem e o áudio de cada obra continuam corretos mesmo depois de várias inclusões/remoções, porque eles seguem a identidade interna, não a posição.
+Cada obra recebe a imagem correspondente enviada.
 
-## Detalhes técnicos
+## Como será feito
 
-### Banco de dados (migração)
+As 5 obras entram como "obras extras" (mesmo mecanismo do botão "Incluir nova obra" da página /editar), posicionadas em sequência ao final do acervo atual. Numeração das demais obras não muda.
 
-- Nova tabela `acervo_ordem`:
-  - `chave` (int, PK) = identidade interna da obra (para as 116 originais é o número original 1–116; para obras novas, um id ≥ 1000 gerado automaticamente).
-  - `posicao` (int, único) = número exibido.
-  - GRANT para `service_role`, RLS habilitada (acesso só via servidor, como hoje).
-- `obras_extras`: a coluna `num` passa a guardar a **identidade interna** (≥ 1000), não mais o número escolhido pelo usuário. Imagens/áudios no storage continuam nomeados por essa identidade.
-- `obra_overrides` e `obras_ocultas` permanecem chaveadas pela identidade (número original das fixas) — sem mudança estrutural.
+### Passos técnicos
 
-### Servidor (`src/lib/admin-obras.functions.ts`)
+1. Reunir as 5 imagens enviadas (`Shape 1 Batuqueiro.png` … `Shape 5 Listas.png`).
+2. Para cada obra, atribuir uma identidade interna livre (chave ≥ 1000) e:
+   - Enviar a imagem ao armazenamento (bucket `imagens-obras`).
+   - Inserir o registro em `obras_extras` com os dados acima e o caminho da imagem.
+   - Acrescentar a chave ao final de `acervo_ordem` (posição = total atual + 1, em sequência).
+3. Executar tudo via um script único usando o cliente administrativo (service role), garantindo que a ordem fique contígua.
 
-- Helper `materializarOrdem()`: se `acervo_ordem` estiver vazia, popula com a ordem atual (fixas 1–116 menos ocultas, na ordem original; depois extras existentes). A partir daí toda inclusão/remoção opera sobre essa tabela.
-- `listarAcervo`: passa a montar a lista pela `acervo_ordem` (ordenada por `posicao`), resolvendo cada `chave` para os dados (fixa+override ou extra) e definindo o **número exibido = posicao**. URLs de imagem/áudio passam a usar a identidade interna (chave), não a posição.
-- `criarObra({ posicao, ...dados })`:
-  1. gera identidade ≥ 1000, grava em `obras_extras`;
-  2. `UPDATE acervo_ordem SET posicao = posicao + 1 WHERE posicao >= :posicao`;
-  3. insere a nova `chave` na `posicao` escolhida.
-- `removerObra({ posicao })`: resolve a `chave`; se fixa → registra em `obras_ocultas`, se extra → apaga registro + arquivos; remove a linha da ordem e compacta (`posicao = posicao - 1 WHERE posicao > removida`).
-- `salvarDados`, `salvarImagem`, `salvarTexto`, `regenerarAudio`, `getObraPublica`: passam a receber/usar a **identidade interna** (resolvida a partir da posição quando vierem da URL pública), em vez do número exibido.
+### Observações
 
-### Páginas e rotas
-
-- `/editar`: formulário "Nova obra" troca o campo "número" por "posição na sequência"; cada cartão usa a identidade para salvar e a posição para exibir; botão "Remover" opera por posição.
-- `/obras` e `/obras/$num`: continuam usando o número exibido na URL; o loader converte posição → identidade via `acervo_ordem`.
-- `/api/public/obra-imagem/$num` e `/api/public/obra-audio/$num`: o parâmetro passa a ser a **identidade interna** (a URL é montada pelo servidor), mantendo a mídia correta após renumeração.
-
-## Observação
-
-Por reorganizar todo o acervo, recomendo conferir o acervo após a primeira inclusão para validar a sequência. As obras novas continuam começando sem áudio e podem gerar a narração pelo botão existente.
+- As novas obras começam sem áudio; a narração pode ser gerada depois pelo botão "Regenerar áudio" em /editar.
+- A imagem fica registrada como `.png` e é servida pela rota `/api/public/obra-imagem/{chave}` já existente.
+- Nada nas 117 obras anteriores é alterado; os 5 shapes apenas aparecem no fim da sequência (posições 118 a 122).
