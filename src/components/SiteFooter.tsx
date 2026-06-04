@@ -1,13 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { marca } from "@/assets/marca";
 
-const SELOS = [
-  { src: marca.seloCaixaCultural, alt: "Caixa Cultural" },
-  { src: marca.seloCaixa, alt: "Caixa" },
-  { src: marca.seloGovernoBrasil, alt: "Governo do Brasil" },
-  { src: marca.seloSecom, alt: "Secom — Secretaria de Comunicação Social" },
-];
-
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-border bg-secondary/40">
