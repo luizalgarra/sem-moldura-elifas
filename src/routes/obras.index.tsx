@@ -105,7 +105,7 @@ function Acervo() {
             <section key={grupo.parede} aria-labelledby={`parede-${grupo.parede}`}>
               <h2
                 id={`parede-${grupo.parede}`}
-                className="mb-4 border-b border-border pb-2 font-serif text-2xl font-semibold text-foreground"
+                className="mb-4 scroll-mt-24 border-b border-border pb-2 font-serif text-2xl font-semibold text-foreground"
               >
                 {grupo.parede}
                 <span className="ml-2 text-base font-normal text-muted-foreground">
