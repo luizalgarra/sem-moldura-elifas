@@ -651,14 +651,14 @@ export const obras: Obra[] = [
   {
     num: 52,
     titulo: "Aqualouco",
-    ano: "1987",
+    ano: "1981",
     autor: "Elifas Andreato",
-    tecnica: "Caneta, nanquim e colagens",
+    tecnica: "Acrilica e lapis sob tela",
     dimensao: "30cm x 30cm",
     parede: "Parede 3",
     imagem: imagemDaObra(52),
     audio: audioDaObra(52),
-    descricao: "Obra número 52: Aqualouco. Elifas Andreato, 1987. Técnica: Caneta, nanquim e colagens. Dimensão do original: 30 centímetros por 30 centímetros.",
+    descricao: "Obra número 52: Aqualouco. Elifas Andreato, 1981. Técnica: Acrilica e lapis sob tela. Dimensão do original: 30 centímetros por 30 centímetros.",
   },
   {
     num: 53,
