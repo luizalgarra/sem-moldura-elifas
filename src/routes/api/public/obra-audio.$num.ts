@@ -5,7 +5,7 @@ export const Route = createFileRoute("/api/public/obra-audio/$num")({
     handlers: {
       GET: async ({ params }) => {
         const num = Number(params.num);
-        if (!Number.isInteger(num) || num < 1 || num > 85) {
+        if (!Number.isInteger(num) || num < 1 || num > 116) {
           return new Response("Not found", { status: 404 });
         }
 
