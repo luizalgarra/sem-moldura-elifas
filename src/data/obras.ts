@@ -1435,7 +1435,8 @@ export const paredesOrdem: string[] = [
   "Parede 2",
   "Parede 3",
   "Trainel Martinho",
-  "Obras adicionais",
+  "Parede 4",
+  "Vídeos",
 ];
 
 export function obrasPorParede(): { parede: string; obras: Obra[] }[] {
