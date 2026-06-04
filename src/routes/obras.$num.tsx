@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ImageOff, ZoomIn, X } from "lucide-react";
 import { obras } from "@/data/obras";
-import { getObraPublica } from "@/lib/admin-obras.functions";
+import { listarAcervo } from "@/lib/admin-obras.functions";
 import { AudioDescricao } from "@/components/AudioDescricao";
 import { NavegacaoSequencial } from "@/components/NavegacaoSequencial";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,13 @@ export const Route = createFileRoute("/obras/$num")({
     const num = Number(params.num);
     if (!Number.isInteger(num) || num < 1) throw notFound();
 
-    const obra = await getObraPublica({ data: { num } });
+    const acervo = await listarAcervo();
+    const obra = acervo.find((o) => o.num === num);
     if (!obra) throw notFound();
 
-    return obra;
+    return { obra, total: acervo.length };
   },
+
 
   head: ({ loaderData }) => ({
     meta: loaderData
