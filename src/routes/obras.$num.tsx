@@ -21,20 +21,21 @@ export const Route = createFileRoute("/obras/$num")({
 
 
   head: ({ loaderData }) => ({
-    meta: loaderData
+    meta: loaderData?.obra
       ? [
-          { title: `${loaderData.titulo} — Elifas Andreato: Sem Moldura` },
+          { title: `${loaderData.obra.titulo} — Elifas Andreato: Sem Moldura` },
           {
             name: "description",
-            content: `${loaderData.titulo} (${loaderData.ano}), de Elifas Andreato. ${loaderData.tecnica}.`,
+            content: `${loaderData.obra.titulo} (${loaderData.obra.ano}), de Elifas Andreato. ${loaderData.obra.tecnica}.`,
           },
-          { property: "og:title", content: `${loaderData.titulo} — Elifas Andreato` },
-          ...(loaderData.imagem
-            ? [{ property: "og:image", content: loaderData.imagem }]
+          { property: "og:title", content: `${loaderData.obra.titulo} — Elifas Andreato` },
+          ...(loaderData.obra.imagem
+            ? [{ property: "og:image", content: loaderData.obra.imagem }]
             : []),
         ]
       : [],
   }),
+
   component: ObraPagina,
   errorComponent: ObraErro,
   notFoundComponent: ObraNaoEncontrada,
