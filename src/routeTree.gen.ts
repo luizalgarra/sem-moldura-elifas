@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
+import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
 const QrcodesRoute = QrcodesRouteImport.update({
@@ -53,6 +54,11 @@ const ObrasNumRoute = ObrasNumRouteImport.update({
   path: '/obras/$num',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicObraImagemNumRoute = ApiPublicObraImagemNumRouteImport.update({
+  id: '/api/public/obra-imagem/$num',
+  path: '/api/public/obra-imagem/$num',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicObraAudioNumRoute = ApiPublicObraAudioNumRouteImport.update({
   id: '/api/public/obra-audio/$num',
   path: '/api/public/obra-audio/$num',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
+  '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
+  '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
+  '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/qrcodes/imprimir'
     | '/obras/'
     | '/api/public/obra-audio/$num'
+    | '/api/public/obra-imagem/$num'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/qrcodes/imprimir'
     | '/obras'
     | '/api/public/obra-audio/$num'
+    | '/api/public/obra-imagem/$num'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/qrcodes/imprimir'
     | '/obras/'
     | '/api/public/obra-audio/$num'
+    | '/api/public/obra-imagem/$num'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   ObrasNumRoute: typeof ObrasNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
   ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
+  ApiPublicObraImagemNumRoute: typeof ApiPublicObraImagemNumRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrasNumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/obra-imagem/$num': {
+      id: '/api/public/obra-imagem/$num'
+      path: '/api/public/obra-imagem/$num'
+      fullPath: '/api/public/obra-imagem/$num'
+      preLoaderRoute: typeof ApiPublicObraImagemNumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/obra-audio/$num': {
       id: '/api/public/obra-audio/$num'
       path: '/api/public/obra-audio/$num'
@@ -213,7 +233,18 @@ const rootRouteChildren: RootRouteChildren = {
   ObrasNumRoute: ObrasNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
   ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
+  ApiPublicObraImagemNumRoute: ApiPublicObraImagemNumRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
