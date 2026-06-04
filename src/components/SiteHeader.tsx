@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ControlesAcessibilidade } from "@/components/ControlesAcessibilidade";
+import { marca } from "@/assets/marca";
 
 export function SiteHeader() {
   return (
@@ -7,26 +8,30 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link
           to="/"
-          className="flex flex-col leading-tight focus-visible:outline-none"
-          aria-label="Página inicial do catálogo"
+          className="flex items-center gap-3 focus-visible:outline-none"
+          aria-label="Página inicial · Elifas Andreato — Além da Moldura"
         >
-          <span className="font-serif text-lg font-bold text-foreground">
-            Elifas Andreato
-          </span>
-          <span className="text-xs uppercase tracking-widest text-primary">
-            Sem Moldura · 80 anos
+          <img
+            src={marca.logoFirmaBranco}
+            alt="Elifas Andreato — Além da Moldura"
+            className="h-9 w-auto sm:h-11"
+            width={160}
+            height={44}
+          />
+          <span className="hidden text-xs uppercase tracking-widest text-brand-yellow sm:block">
+            Além da Moldura · 80 anos
           </span>
         </Link>
         <div className="flex items-center gap-3">
           <nav aria-label="Navegação principal" className="hidden sm:block">
-            <ul className="flex items-center gap-4 text-sm font-medium">
+            <ul className="flex items-center gap-4 text-sm font-medium text-foreground">
               <li>
-                <Link to="/obras" className="hover:text-primary" activeProps={{ className: "text-primary" }}>
+                <Link to="/obras" className="hover:text-accent" activeProps={{ className: "text-accent" }}>
                   Acervo
                 </Link>
               </li>
               <li>
-                <Link to="/como-usar" className="hover:text-primary" activeProps={{ className: "text-primary" }}>
+                <Link to="/como-usar" className="hover:text-accent" activeProps={{ className: "text-accent" }}>
                   Como usar
                 </Link>
               </li>
