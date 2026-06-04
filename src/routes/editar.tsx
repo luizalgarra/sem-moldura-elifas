@@ -450,9 +450,9 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { num: obra.num } });
+      const r = await regenerar({ data: { chave: obra.chave } });
       if (r.ok) {
-        setAudioUrl(`/api/public/obra-audio/${obra.num}?v=${r.versao}`);
+        setAudioUrl(`/api/public/obra-audio/${obra.chave}?v=${r.versao}`);
         setMsg("Áudio regenerado.");
         onChanged();
       } else {
