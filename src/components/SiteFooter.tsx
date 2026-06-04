@@ -40,45 +40,66 @@ export function SiteFooter() {
         {/* Informações da exposição */}
         <div className="mt-8 border-t border-border pt-6 text-foreground/80">
           <p className="font-semibold text-foreground">
-            Realização Instituto Elifas Andreato · Patrocínio Caixa / Governo do
-            Brasil
+            Caixa Cultural São Paulo · Praça da Sé, 111 — Centro
           </p>
           <p className="mt-2 leading-relaxed">
-            Caixa Cultural São Paulo · Praça da Sé, 111 — Centro · 27/06 a
-            20/09/2026 · ter–dom 9h–18h · Entrada franca.
+            27/06 a 20/09/2026 · ter–dom 9h–18h · Entrada franca.
           </p>
+          <div className="mt-4 flex items-center gap-3" aria-hidden="false">
+            <img
+              src={marca.iconeAcessibilidade}
+              alt="Recursos de acessibilidade disponíveis (áudio-descrição)"
+              className="h-8 w-auto object-contain"
+            />
+            <img
+              src={marca.iconeClassificacao}
+              alt="Classificação indicativa: 12 anos"
+              className="h-8 w-auto object-contain"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Faixa clara de selos institucionais */}
-      <div className="bg-foreground py-6">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-6 px-4">
-          {SELOS.map((selo) => (
-            <img
-              key={selo.alt}
-              src={selo.src}
-              alt={selo.alt}
-              className="h-10 w-auto object-contain"
-            />
-          ))}
-          {/* Selo do Instituto é branco → chip escuro */}
-          <span className="inline-flex items-center rounded-md bg-background px-3 py-2">
-            <img
-              src={marca.seloInstitutoElifas}
-              alt="Instituto Elifas Andreato"
-              className="h-9 w-auto object-contain"
-            />
-          </span>
-          <img
-            src={marca.iconeClassificacao}
-            alt="Classificação indicativa: livre"
-            className="h-10 w-auto object-contain"
-          />
-          <img
-            src={marca.iconeAcessibilidade}
-            alt="Recursos de acessibilidade disponíveis"
-            className="h-10 w-auto object-contain"
-          />
+      {/* Assinatura institucional — fiel ao cartaz (fundo escuro, dois grupos) */}
+      <div className="border-t border-border bg-background py-8">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-10 px-4 sm:flex-row sm:items-end sm:justify-between">
+          {/* Realização */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+              Realização
+            </span>
+            <div className="flex items-center gap-4">
+              <img
+                src={marca.seloSecom}
+                alt="Tem patrocínio, tem Governo do Brasil"
+                className="h-12 w-auto object-contain"
+              />
+              <img
+                src={marca.seloInstitutoElifas}
+                alt="Instituto Elifas Andreato"
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+          </div>
+
+          {/* Patrocínio */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+              Patrocínio
+            </span>
+            <div className="flex items-center gap-5">
+              <img
+                src={marca.seloCaixa}
+                alt="Caixa"
+                className="h-7 w-auto object-contain"
+              />
+              <img
+                src={marca.seloGovernoBrasil}
+                alt="Governo do Brasil"
+                className="h-12 w-auto object-contain"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </footer>
