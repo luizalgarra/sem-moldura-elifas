@@ -64,16 +64,16 @@ export function SiteFooter() {
       <div className="border-t border-border bg-background py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-10 px-4 sm:flex-row sm:items-end sm:justify-between">
           {/* Realização */}
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-right">
-              Realização
-            </span>
-            <div className="flex items-center gap-4">
-              <img
-                src={marca.seloSecom}
-                alt="Tem patrocínio, tem Governo do Brasil"
-                className="h-12 w-auto object-contain"
-              />
+          <div className="flex items-end gap-4">
+            <img
+              src={marca.seloSecom}
+              alt="Tem patrocínio, tem Governo do Brasil"
+              className="h-12 w-auto object-contain"
+            />
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-foreground/70 text-center">
+                Realização
+              </span>
               <img
                 src={marca.seloInstitutoElifas}
                 alt="Instituto Elifas Andreato"
