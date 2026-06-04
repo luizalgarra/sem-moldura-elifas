@@ -142,9 +142,9 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
     });
 
   const handleCriar = async () => {
-    const n = Number(num);
-    if (!Number.isInteger(n) || n < 1) {
-      setMsg("Informe um número válido para a obra.");
+    const p = Number(posicao);
+    if (!Number.isInteger(p) || p < 1) {
+      setMsg("Informe a posição (número de exibição) da obra.");
       return;
     }
     if (!titulo.trim()) {
@@ -165,7 +165,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
     try {
       const r = await criar({
         data: {
-          num: n,
+          posicao: p,
           titulo,
           ano,
           autor,
@@ -182,7 +182,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
       if (arquivo) {
         const base64 = await lerBase64(arquivo);
         await enviarImagem({
-          data: { num: n, base64, contentType: arquivo.type },
+          data: { chave: r.chave, base64, contentType: arquivo.type },
         });
       }
       setMsg("Obra criada.");
@@ -195,6 +195,7 @@ function NovaObra({ onCriada }: { onCriada: () => void }) {
       setSalvando(false);
     }
   };
+
 
   if (!aberto) {
     return (
