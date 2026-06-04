@@ -39,6 +39,36 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
   },
 );
 
+/** Busca o override de uma única obra (usado na página pública). */
+export const getOverridePublico = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z.object({ num: z.number().int().min(1).max(85) }).parse(input),
+  )
+  .handler(
+    async ({
+      data,
+    }): Promise<{ descricao: string | null; audioVersao: string | null }> => {
+      const { supabaseAdmin } = await import(
+        "@/integrations/supabase/client.server"
+      );
+      const { data: row, error } = await supabaseAdmin
+        .from("obra_overrides")
+        .select("descricao, audio_url, updated_at")
+        .eq("num", data.num)
+        .maybeSingle();
+
+      if (error || !row) {
+        return { descricao: null, audioVersao: null };
+      }
+      return {
+        descricao: row.descricao,
+        audioVersao: row.audio_url
+          ? new Date(row.updated_at).getTime().toString()
+          : null,
+      };
+    },
+  );
+
 /** Salva o texto (descrição) editado de uma obra. */
 export const salvarTexto = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
