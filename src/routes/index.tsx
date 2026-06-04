@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura. 85 obras com áudio-descrição e acesso por QR Code.",
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Sem Moldura. 116 obras com áudio-descrição e acesso por QR Code.",
       },
     ],
   }),
