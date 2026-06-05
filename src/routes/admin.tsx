@@ -179,6 +179,30 @@ function ObraEditor({
     }
   };
 
+  const handleAmostra = async () => {
+    setTocandoAmostra(true);
+    setMsg(null);
+    try {
+      let url = cacheAmostras.get(vozId);
+      if (!url) {
+        const r = await buscarAmostra({ data: { vozId } });
+        if (!r.ok || !r.url) {
+          setMsg(r.ok ? "Esta voz não tem amostra." : (r.erro ?? "Erro na amostra."));
+          return;
+        }
+        url = r.url;
+        cacheAmostras.set(vozId, url);
+      }
+      await new Audio(url).play();
+    } catch {
+      setMsg("Não foi possível tocar a amostra.");
+    } finally {
+      setTocandoAmostra(false);
+    }
+  };
+
+
+
   const audioSrc = temAudioRegen
     ? `/api/public/obra-audio/${num}?v=${versaoAudio}`
     : null;
