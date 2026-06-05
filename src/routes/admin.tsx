@@ -351,7 +351,7 @@ function ObraEditor({
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Regenerar áudio</span>
+            <span>Gerar áudios (Carla + Danilo)</span>
           </Button>
         )}
 
@@ -371,10 +371,29 @@ function ObraEditor({
         )}
       </div>
 
-      {audioSrc && (
+      {protegida && audioSrc && (
         <audio controls preload="none" src={audioSrc} className="mt-3 w-full">
           Seu navegador não suporta áudio.
         </audio>
+      )}
+
+      {!protegida && temAudioRegen && (
+        <div className="mt-3 space-y-2">
+          <div>
+            <p className="text-xs text-muted-foreground">Voz feminina (Carla)</p>
+            <audio controls preload="none" src={audioFemSrc!} className="mt-1 w-full">
+              Seu navegador não suporta áudio.
+            </audio>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Voz masculina (Danilo Tenfen)
+            </p>
+            <audio controls preload="none" src={audioMascSrc!} className="mt-1 w-full">
+              Seu navegador não suporta áudio.
+            </audio>
+          </div>
+        </div>
       )}
     </li>
   );
