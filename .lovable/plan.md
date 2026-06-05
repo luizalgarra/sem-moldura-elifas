@@ -1,32 +1,30 @@
 ## Objetivo
+Permitir escolher a voz (incluindo vozes masculinas) ao regenerar o áudio de cada obra no painel `/admin`, sem precisar saber o ID da voz.
 
-Incluir a marca **CAIXA CULTURAL** à esquerda da marca Elifas Andreato no cabeçalho do site.
+## O que muda
 
-## Contexto
+### 1. Lista de vozes nomeadas
+Criar uma pequena lista de vozes disponíveis (nome amigável → ID do ElevenLabs), com opções femininas e masculinas:
+- Sarah (feminina, suave) — `EXAVITQu4vr4xnSDxMaL` (padrão atual)
+- Alice (feminina) — `Xb7hH8MSUJpSbSDYk0k2`
+- George (masculina, madura) — `JBFqnCBsd6RMkjVDRZzb`
+- Brian (masculina, grave) — `nPczCjzI2devNBz1zQrb`
+- Daniel (masculina, locução) — `onwK4e9ZLuTAKqWW03F9`
 
-O cabeçalho (`src/components/SiteHeader.tsx`) atualmente exibe apenas o logo Elifas (`marca.logoFirmaBranco`) dentro de um `<Link>` para a página inicial. O selo `marca.seloCaixaCultural` já existe nos assets do projeto e está pronto para uso.
+### 2. Seletor de voz no painel admin
+Em cada obra (componente `ObraEditor` em `src/routes/admin.tsx`), adicionar um menu suspenso "Voz" ao lado do botão "Regenerar áudio". Ele já vem pré-selecionado com a voz atual da obra (campo `voz_id`) ou a Sarah por padrão.
 
-## Mudança
+### 3. Passar a voz escolhida para a geração
+Ajustar a função `regenerarAudio` (`src/lib/admin-obras.functions.ts`) para aceitar um `vozId` opcional vindo do painel. Hoje ela só lê o `voz_id` já salvo no banco; passará a usar a voz escolhida na tela, validando que o ID pertence à lista de vozes permitidas (segurança). A voz escolhida é salva no campo `voz_id` da obra, então fica memorizada para a próxima vez.
 
-No `src/components/SiteHeader.tsx`, adicionar a imagem do selo CAIXA CULTURAL imediatamente à esquerda da marca Elifas, dentro do mesmo bloco do cabeçalho:
+### 4. Obra protegida
+A obra nº 2 (Arca de Noé, áudio especial com duas vozes) continua bloqueada — sem seletor nem regeneração, como já é hoje.
 
-```text
-[ CAIXA CULTURAL ] | [ Logo Elifas ]   Além da Moldura · 80 anos
-```
+## Detalhes técnicos
+- `regenerarAudio` recebe `{ chave, vozId? }`; valida `vozId` contra a lista permitida; faz fallback para o `voz_id` salvo ou Sarah.
+- O `upsert` em `obra_overrides` já grava `voz_id`, então a escolha persiste.
+- Nenhuma mudança de banco é necessária (coluna `voz_id` já existe).
+- Sem necessidade de nova chave de API — usa a `ELEVENLABS_API_KEY` já configurada.
 
-Detalhes:
-
-- Inserir `<img src={marca.seloCaixaCultural} alt="Caixa Cultural" />` à esquerda do logo Elifas.
-- Dimensionar com altura compatível (`h-9 sm:h-11`, igual à marca Elifas) e `w-auto`.
-- Adicionar um separador visual sutil (ex.: borda à direita do selo CAIXA com leve padding/margin) para distinguir as duas marcas — opcional, a confirmar visualmente.
-- Manter o `<Link to="/">` envolvendo apenas a marca Elifas, deixando o selo CAIXA como elemento estático ao lado (já que é uma marca de patrocinador, não um link de navegação).
-
-## Verificação
-
-Conferir no preview que ambas as marcas aparecem alinhadas verticalmente, com tamanho equilibrado, e que o layout permanece responsivo em telas pequenas.   
-  
-  
-INclua a palavra APRESENTA logo em seguida, antes do logo Elifas  
-
-
-&nbsp;
+## Resultado
+No painel, você seleciona "George" (ou outra voz masculina) na obra desejada, clica em "Regenerar áudio", ouve o resultado no player, e a voz fica salva para aquela obra.

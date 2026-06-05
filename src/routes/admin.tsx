@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Save, RefreshCw, Search, Lock } from "lucide-react";
 import { obras } from "@/data/obras";
+import { VOZES, VOZ_PADRAO_ID } from "@/data/vozes";
 import {
   listarOverrides,
   salvarTexto,
@@ -13,6 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const OBRA_PROTEGIDA = 2;
 
@@ -117,6 +125,9 @@ function ObraEditor({
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
     override?.audioPath ? Date.now().toString() : null,
   );
+  const [vozId, setVozId] = useState<string>(
+    override?.vozId ?? VOZ_PADRAO_ID,
+  );
 
   const protegida = num === OBRA_PROTEGIDA;
   const temAudioRegen = versaoAudio !== null;
@@ -139,7 +150,7 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { chave: num } });
+      const r = await regenerar({ data: { chave: num, vozId } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
         setMsg("Áudio regenerado.");
@@ -193,20 +204,38 @@ function ObraEditor({
             Áudio especial preservado
           </span>
         ) : (
-          <Button
-            variant="outline"
-            onClick={handleRegenerar}
-            disabled={gerando}
-            className="min-h-11"
-          >
-            {gerando ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <RefreshCw aria-hidden="true" />
-            )}
-            <span>Regenerar áudio</span>
-          </Button>
+          <>
+            <Select value={vozId} onValueChange={setVozId}>
+              <SelectTrigger
+                className="min-h-11 w-44"
+                aria-label={`Voz da obra ${num}`}
+              >
+                <SelectValue placeholder="Voz" />
+              </SelectTrigger>
+              <SelectContent>
+                {VOZES.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.nome} ({v.descricao})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={handleRegenerar}
+              disabled={gerando}
+              className="min-h-11"
+            >
+              {gerando ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <RefreshCw aria-hidden="true" />
+              )}
+              <span>Regenerar áudio</span>
+            </Button>
+          </>
         )}
+
 
         {msg && (
           <span className="text-sm text-muted-foreground" role="status">
