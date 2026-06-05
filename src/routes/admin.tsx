@@ -182,7 +182,7 @@ function AdminPagina() {
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Gerar áudios de todas as obras (Carla + Danilo)</span>
+            <span>Gerar locução alternada de todas as obras</span>
           </Button>
           {loteRodando && (
             <span className="text-sm text-muted-foreground" role="status">
