@@ -93,6 +93,7 @@ function AdminPagina() {
             num={obra.num}
             titulo={obra.titulo}
             textoEstatico={obra.descricao}
+            audioEstatico={obra.audio}
             override={mapa.get(obra.num)}
             onChanged={() => refetch()}
           />
