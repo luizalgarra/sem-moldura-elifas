@@ -18,6 +18,8 @@ export interface OverrideObra {
   descricao: string | null;
   imagemPath: string | null;
   audioPath: string | null;
+  audioFemPath: string | null;
+  audioMascPath: string | null;
   vozId: string;
   updatedAt: string | null;
 }
