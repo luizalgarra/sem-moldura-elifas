@@ -297,10 +297,11 @@ function ObraEditor({
   };
 
   // Áudio protegido (#2): mantém o arquivo único legado para conferência.
-  const audioProtegidoSrc =
-    protegida && (override?.audioPath || audioEstatico)
+  const audioProtegidoSrc = !protegida
+    ? null
+    : override?.audioPath
       ? `/api/public/obra-audio/${num}?v=${versaoAudio ?? Date.now()}`
-      : null;
+      : audioEstatico;
 
   const downloadSrc =
     (temAudioRegen ? `/api/public/obra-audio/${num}?trecho=0&v=${versaoAudio}` : null) ??
