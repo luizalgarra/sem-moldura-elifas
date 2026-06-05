@@ -172,6 +172,8 @@ function ObraEditor({
     ? `/api/public/obra-audio/${num}?v=${versaoAudio}`
     : null;
 
+  const downloadSrc = audioSrc ?? audioEstatico;
+
   return (
     <li className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-baseline justify-between gap-2">
