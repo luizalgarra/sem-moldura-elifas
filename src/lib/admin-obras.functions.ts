@@ -20,6 +20,7 @@ export interface OverrideObra {
   audioPath: string | null;
   audioFemPath: string | null;
   audioMascPath: string | null;
+  audioTrechos: Trecho[] | null;
   vozId: string;
   updatedAt: string | null;
 }
