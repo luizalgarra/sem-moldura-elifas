@@ -120,41 +120,44 @@ function AdminPagina() {
       <div className="mt-6 rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-medium text-foreground">Voz padrão</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Escolha a voz usada ao regenerar o áudio de todas as obras.
+          Selecione a voz usada ao regenerar o áudio de todas as obras.
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <Select value={vozGlobal} onValueChange={setVozGlobal}>
-            <SelectTrigger className="min-h-11 w-60" aria-label="Voz padrão">
-              <SelectValue placeholder="Voz" />
-            </SelectTrigger>
-            <SelectContent>
-              {VOZES_PADRAO.map((v) => (
-                <SelectItem key={v.id} value={v.id}>
-                  {v.rotulo}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            onClick={handleAmostra}
-            disabled={tocandoAmostra}
-            className="min-h-11"
-            aria-label="Ouvir amostra da voz padrão"
-          >
-            {tocandoAmostra ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <Volume2 aria-hidden="true" />
-            )}
-            <span>Ouvir amostra</span>
-          </Button>
-          {amostraMsg && (
-            <span className="text-sm text-muted-foreground" role="status">
-              {amostraMsg}
-            </span>
-          )}
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {VOZES_PADRAO.map((v) => {
+            const ativa = v.id === vozGlobal;
+            return (
+              <div key={v.id} className="flex items-center gap-2">
+                <Button
+                  variant={ativa ? "default" : "outline"}
+                  onClick={() => setVozGlobal(v.id)}
+                  className="min-h-11 flex-1 justify-start"
+                  aria-pressed={ativa}
+                >
+                  <span>{v.rotulo}</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleAmostra(v.id)}
+                  disabled={amostraCarregando === v.id}
+                  className="min-h-11 min-w-11"
+                  aria-label={`Ouvir amostra de ${v.rotulo}`}
+                >
+                  {amostraCarregando === v.id ? (
+                    <Loader2 className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Volume2 aria-hidden="true" />
+                  )}
+                </Button>
+              </div>
+            );
+          })}
         </div>
+        {amostraMsg && (
+          <p className="mt-2 text-sm text-muted-foreground" role="status">
+            {amostraMsg}
+          </p>
+        )}
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
