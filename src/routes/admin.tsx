@@ -241,8 +241,16 @@ function ObraEditor({
           </>
         )}
 
+        {downloadSrc && (
+          <Button asChild variant="outline" className="min-h-11">
+            <a href={downloadSrc} download={`obra-${num}.mp3`}>
+              <Download aria-hidden="true" />
+              <span>Baixar áudio</span>
+            </a>
+          </Button>
+        )}
 
-        {msg && (
+
           <span className="text-sm text-muted-foreground" role="status">
             {msg}
           </span>
