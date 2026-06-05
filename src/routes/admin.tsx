@@ -2,13 +2,22 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Save, RefreshCw, Search, Lock, Download } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  RefreshCw,
+  Search,
+  Lock,
+  Download,
+  Volume2,
+} from "lucide-react";
 import { obras } from "@/data/obras";
 import { VOZES, VOZ_PADRAO_ID } from "@/data/vozes";
 import {
   listarOverrides,
   salvarTexto,
   regenerarAudio,
+  amostraVoz,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
