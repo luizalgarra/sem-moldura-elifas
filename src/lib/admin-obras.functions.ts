@@ -676,3 +676,41 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       versao: versaoDe(salvo?.updated_at),
     };
   });
+
+/** Retorna a URL de prévia (amostra) de uma voz da ElevenLabs. */
+export const amostraVoz = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z.object({ vozId: z.string().min(1).max(100) }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    if (!vozValida(data.vozId)) {
+      return { ok: false as const, erro: "Voz inválida." };
+    }
+
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) {
+      return { ok: false as const, erro: "Chave de voz não configurada." };
+    }
+
+    try {
+      const resp = await fetch(
+        `https://api.elevenlabs.io/v1/voices/${data.vozId}`,
+        { headers: { "xi-api-key": apiKey } },
+      );
+
+      if (!resp.ok) {
+        console.error("amostraVoz:", resp.status, await resp.text());
+        return { ok: false as const, erro: "Não foi possível obter a amostra." };
+      }
+
+      const voz = (await resp.json()) as { preview_url?: string };
+      if (!voz.preview_url) {
+        return { ok: false as const, erro: "Esta voz não tem amostra." };
+      }
+
+      return { ok: true as const, url: voz.preview_url };
+    } catch (e) {
+      console.error("amostraVoz fetch:", e);
+      return { ok: false as const, erro: "Serviço de voz indisponível." };
+    }
+  });
