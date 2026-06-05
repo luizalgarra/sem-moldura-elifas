@@ -283,7 +283,7 @@ function ObraEditor({
       const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
-        setMsg("Áudios gerados (feminina e masculina).");
+        setMsg(`Locução alternada gerada (${r.trechos} trechos).`);
         onChanged();
       } else {
         setMsg(r.erro ?? "Erro ao gerar.");
@@ -295,16 +295,16 @@ function ObraEditor({
     }
   };
 
-  const audioFemSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
-    : null;
-  const audioMascSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=masc&v=${versaoAudio}`
-    : null;
-  const audioSrc = audioFemSrc;
+  // Áudio protegido (#2): mantém o arquivo único legado para conferência.
+  const audioProtegidoSrc =
+    protegida && (override?.audioPath || audioEstatico)
+      ? `/api/public/obra-audio/${num}?v=${versaoAudio ?? Date.now()}`
+      : null;
 
-
-  const downloadSrc = audioSrc ?? audioEstatico;
+  const downloadSrc =
+    (temAudioRegen ? `/api/public/obra-audio/${num}?trecho=0&v=${versaoAudio}` : null) ??
+    audioProtegidoSrc ??
+    audioEstatico;
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
