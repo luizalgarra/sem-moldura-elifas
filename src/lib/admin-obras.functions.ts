@@ -327,6 +327,7 @@ async function construirAcervo(
       audio: audioFem,
       audioFem,
       audioMasc,
+      audioTrechos: trechosPublicos(ex.audio_trechos, ex.num, v),
       extra: true,
     });
   }
