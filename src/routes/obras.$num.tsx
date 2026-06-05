@@ -95,6 +95,7 @@ function ObraPagina() {
           audio={obra.audio}
           audioFem={obra.audioFem}
           audioMasc={obra.audioMasc}
+          audioTrechos={obra.audioTrechos}
         />
       </div>
 
