@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Save, RefreshCw, Search, Lock } from "lucide-react";
+import { Loader2, Save, RefreshCw, Search, Lock, Download } from "lucide-react";
 import { obras } from "@/data/obras";
 import { VOZES, VOZ_PADRAO_ID } from "@/data/vozes";
 import {
@@ -93,6 +93,7 @@ function AdminPagina() {
             num={obra.num}
             titulo={obra.titulo}
             textoEstatico={obra.descricao}
+            audioEstatico={obra.audio}
             override={mapa.get(obra.num)}
             onChanged={() => refetch()}
           />
@@ -106,12 +107,14 @@ function ObraEditor({
   num,
   titulo,
   textoEstatico,
+  audioEstatico,
   override,
   onChanged,
 }: {
   num: number;
   titulo: string;
   textoEstatico: string;
+  audioEstatico: string | null;
   override: OverrideObra | undefined;
   onChanged: () => void;
 }) {
@@ -168,6 +171,8 @@ function ObraEditor({
   const audioSrc = temAudioRegen
     ? `/api/public/obra-audio/${num}?v=${versaoAudio}`
     : null;
+
+  const downloadSrc = audioSrc ?? audioEstatico;
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
@@ -236,6 +241,14 @@ function ObraEditor({
           </>
         )}
 
+        {downloadSrc && (
+          <Button asChild variant="outline" className="min-h-11">
+            <a href={downloadSrc} download={`obra-${num}.mp3`}>
+              <Download aria-hidden="true" />
+              <span>Baixar áudio</span>
+            </a>
+          </Button>
+        )}
 
         {msg && (
           <span className="text-sm text-muted-foreground" role="status">
