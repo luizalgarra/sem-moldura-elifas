@@ -33,6 +33,9 @@ import {
 
 const OBRA_PROTEGIDA = 2;
 
+// Cache de URLs de amostra por voz, compartilhado entre os itens.
+const cacheAmostras = new Map<string, string>();
+
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
