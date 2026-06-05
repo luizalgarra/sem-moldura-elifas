@@ -561,11 +561,17 @@ export const salvarTexto = createServerFn({ method: "POST" })
 /** Regenera o áudio de uma obra via ElevenLabs e salva no storage. */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
+    z
+      .object({
+        chave: z.number().int().min(1).max(MAX_CHAVE),
+        vozId: z.string().min(1).max(100).optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data }) => {
     const { chave } = data;
     const fixa = ehObraFixa(chave);
+    const vozEscolhida = vozValida(data.vozId) ? data.vozId! : null;
 
     if (chave === OBRA_PROTEGIDA) {
       return {
