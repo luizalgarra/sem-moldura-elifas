@@ -1,49 +1,197 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { TrechoPublico } from "@/lib/admin-obras.functions";
 
 interface AudioDescricaoProps {
   texto: string;
   audio?: string | null;
   audioFem?: string | null;
   audioMasc?: string | null;
+  audioTrechos?: TrechoPublico[] | null;
 }
 
 const VELOCIDADES = [0.75, 1, 1.25] as const;
+
+const ROTULO_VOZ: Record<string, string> = {
+  fem: "voz feminina",
+  masc: "voz masculina",
+};
 
 export function AudioDescricao({
   texto,
   audio,
   audioFem,
   audioMasc,
+  audioTrechos,
 }: AudioDescricaoProps) {
-  const fem = audioFem ?? audio ?? null;
-  const masc = audioMasc ?? null;
-  if (fem || masc) {
-    return <AudioArquivo fem={fem} masc={masc} />;
+  // Preferência: locução alternada por seção.
+  if (audioTrechos && audioTrechos.length > 0) {
+    return <AudioSequencia trechos={audioTrechos} />;
+  }
+  // Fallback: áudio único (obra especial ou registros antigos).
+  const unico = audioFem ?? audio ?? audioMasc ?? null;
+  if (unico) {
+    return <AudioArquivo src={unico} />;
   }
   return <AudioVoz texto={texto} />;
 }
 
-// ---- Reprodução do MP3 pré-gerado (ElevenLabs) ----
-function AudioArquivo({
-  fem,
-  masc,
-}: {
-  fem: string | null;
-  masc: string | null;
-}) {
-  // Voz inicial: feminina quando existir, senão masculina.
-  const [voz, setVoz] = useState<"fem" | "masc">(fem ? "fem" : "masc");
-  const src = (voz === "masc" ? masc : fem) ?? fem ?? masc ?? "";
-  const temAmbas = !!fem && !!masc;
-
+// ---- Locução alternada: reproduz os trechos em sequência ----
+function AudioSequencia({ trechos }: { trechos: TrechoPublico[] }) {
+  const [idx, setIdx] = useState(0);
   const [tocando, setTocando] = useState(false);
   const [pausado, setPausado] = useState(false);
   const [velocidade, setVelocidade] = useState<number>(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Reinicia o estado ao trocar de obra ou de voz
+  // Reinicia ao trocar de obra.
+  useEffect(() => {
+    setIdx(0);
+    setTocando(false);
+    setPausado(false);
+  }, [trechos]);
+
+  // Ao avançar de trecho, toca o próximo automaticamente.
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (tocando && !pausado) {
+      el.playbackRate = velocidade;
+      void el.play();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx]);
+
+  const alternar = useCallback(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (!tocando) {
+      el.playbackRate = velocidade;
+      void el.play();
+      setTocando(true);
+      setPausado(false);
+    } else if (pausado) {
+      el.playbackRate = velocidade;
+      void el.play();
+      setPausado(false);
+    } else {
+      el.pause();
+      setPausado(true);
+    }
+  }, [tocando, pausado, velocidade]);
+
+  const parar = useCallback(() => {
+    const el = audioRef.current;
+    if (el) {
+      el.pause();
+      el.currentTime = 0;
+    }
+    setTocando(false);
+    setPausado(false);
+    setIdx(0);
+  }, []);
+
+  const aoTerminar = useCallback(() => {
+    setIdx((i) => {
+      if (i < trechos.length - 1) return i + 1;
+      // Fim da sequência.
+      setTocando(false);
+      setPausado(false);
+      return 0;
+    });
+  }, [trechos.length]);
+
+  const atual = trechos[idx];
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <Volume2 className="size-5 text-accent" aria-hidden="true" />
+        <span>Áudio-descrição</span>
+      </div>
+
+      <p className="mt-2 text-xs text-muted-foreground" role="status">
+        {tocando ? (
+          <>
+            Tocando {idx + 1}/{trechos.length}: {atual?.rotulo} ·{" "}
+            {ROTULO_VOZ[atual?.voz] ?? atual?.voz}
+          </>
+        ) : (
+          <>Locução alternada · {trechos.length} trechos (vozes se revezam)</>
+        )}
+      </p>
+
+      <audio
+        ref={audioRef}
+        src={atual?.url}
+        preload="none"
+        onEnded={aoTerminar}
+      />
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button
+          onClick={alternar}
+          className="min-h-11"
+          aria-label={
+            !tocando
+              ? "Ouvir a áudio-descrição"
+              : pausado
+                ? "Continuar a áudio-descrição"
+                : "Pausar a áudio-descrição"
+          }
+        >
+          {!tocando || pausado ? (
+            <Play aria-hidden="true" />
+          ) : (
+            <Pause aria-hidden="true" />
+          )}
+          <span>{!tocando ? "Ouvir" : pausado ? "Continuar" : "Pausar"}</span>
+        </Button>
+        <Button
+          variant="outline"
+          onClick={parar}
+          disabled={!tocando}
+          className="min-h-11"
+          aria-label="Reiniciar a áudio-descrição"
+        >
+          <RotateCcw aria-hidden="true" />
+          <span>Parar</span>
+        </Button>
+
+        <div
+          className="ml-auto flex items-center gap-1"
+          role="group"
+          aria-label="Velocidade da leitura"
+        >
+          {VELOCIDADES.map((v) => (
+            <Button
+              key={v}
+              size="sm"
+              variant={velocidade === v ? "default" : "outline"}
+              className="min-h-11 min-w-11"
+              aria-pressed={velocidade === v}
+              onClick={() => {
+                setVelocidade(v);
+                if (audioRef.current) audioRef.current.playbackRate = v;
+              }}
+            >
+              {v}×
+            </Button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- Reprodução de um MP3 único (fallback: obra especial / legado) ----
+function AudioArquivo({ src }: { src: string }) {
+  const [tocando, setTocando] = useState(false);
+  const [pausado, setPausado] = useState(false);
+  const [velocidade, setVelocidade] = useState<number>(1);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     setTocando(false);
     setPausado(false);
@@ -72,46 +220,12 @@ function AudioArquivo({
     setPausado(false);
   }, []);
 
-
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
         <Volume2 className="size-5 text-accent" aria-hidden="true" />
         <span>Áudio-descrição</span>
       </div>
-
-      {temAmbas && (
-        <div
-          className="mt-3 flex items-center gap-1"
-          role="group"
-          aria-label="Voz da áudio-descrição"
-        >
-          <Button
-            size="sm"
-            variant={voz === "fem" ? "default" : "outline"}
-            className="min-h-11"
-            aria-pressed={voz === "fem"}
-            onClick={() => {
-              parar();
-              setVoz("fem");
-            }}
-          >
-            Voz feminina
-          </Button>
-          <Button
-            size="sm"
-            variant={voz === "masc" ? "default" : "outline"}
-            className="min-h-11"
-            aria-pressed={voz === "masc"}
-            onClick={() => {
-              parar();
-              setVoz("masc");
-            }}
-          >
-            Voz masculina
-          </Button>
-        </div>
-      )}
 
       <audio
         ref={audioRef}
@@ -122,7 +236,6 @@ function AudioArquivo({
           setPausado(false);
         }}
       />
-
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button
