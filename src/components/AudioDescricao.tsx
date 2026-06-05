@@ -80,6 +80,39 @@ function AudioArquivo({
         <span>Áudio-descrição</span>
       </div>
 
+      {temAmbas && (
+        <div
+          className="mt-3 flex items-center gap-1"
+          role="group"
+          aria-label="Voz da áudio-descrição"
+        >
+          <Button
+            size="sm"
+            variant={voz === "fem" ? "default" : "outline"}
+            className="min-h-11"
+            aria-pressed={voz === "fem"}
+            onClick={() => {
+              parar();
+              setVoz("fem");
+            }}
+          >
+            Voz feminina
+          </Button>
+          <Button
+            size="sm"
+            variant={voz === "masc" ? "default" : "outline"}
+            className="min-h-11"
+            aria-pressed={voz === "masc"}
+            onClick={() => {
+              parar();
+              setVoz("masc");
+            }}
+          >
+            Voz masculina
+          </Button>
+        </div>
+      )}
+
       <audio
         ref={audioRef}
         src={src}
@@ -89,6 +122,7 @@ function AudioArquivo({
           setPausado(false);
         }}
       />
+
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button
