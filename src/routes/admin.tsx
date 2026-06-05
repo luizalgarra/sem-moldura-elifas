@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Save, RefreshCw, Search, Lock } from "lucide-react";
 import { obras } from "@/data/obras";
+import { VOZES, VOZ_PADRAO_ID } from "@/data/vozes";
 import {
   listarOverrides,
   salvarTexto,
@@ -13,6 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const OBRA_PROTEGIDA = 2;
 
