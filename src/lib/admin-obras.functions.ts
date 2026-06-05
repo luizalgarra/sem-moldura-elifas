@@ -922,7 +922,7 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       .upsert(
         {
           num: chave,
-          audio_trechos: trechos as unknown as Record<string, unknown>[],
+          audio_trechos: trechos as unknown as import("@/integrations/supabase/types").Json,
           audio_url: null,
           audio_fem_path: null,
           audio_masc_path: null,
