@@ -1,29 +1,36 @@
 ## Objetivo
 
-Permitir baixar o arquivo de áudio (.mp3) de cada obra listada no painel `/admin`, com um botão de download em cada item.
+Ampliar a lista de vozes disponíveis no seletor do painel `/admin`, mantendo Sarah e George e adicionando várias outras vozes da ElevenLabs (modelo multilingual) para escolha.
 
-## Como funciona hoje
+## Mudança (apenas `src/data/vozes.ts`)
 
-- O painel lista cada obra fixa (`src/routes/admin.tsx`).
-- O player de áudio só aparece quando existe um áudio **regenerado** (`audioSrc` via `/api/public/obra-audio/:num`).
-- Cada obra fixa também tem um áudio **estático** original (`obra.audio`), que hoje não é exposto no admin.
+Expandir o array `VOZES` para incluir, além de Sarah e George, as principais vozes da biblioteca ElevenLabs com seus IDs oficiais, nome amigável, descrição e gênero. Vozes a incluir:
 
-## Mudanças (apenas `src/routes/admin.tsx`)
+Femininas:
+- Sarah (`EXAVITQu4vr4xnSDxMaL`) — suave *(já existe)*
+- Laura (`FGY2WhTYpPnrIDTdsKH5`) — jovem, animada
+- Alice (`Xb7hH8MSUJpSbSDYk0k2`) — clara, britânica
+- Matilda (`XrExE9yKIg1WjnnlVkGX`) — calorosa
+- Jessica (`cgSgspJ2msm6clMCkdW9`) — expressiva
+- Lily (`pFZP5JQG7iQjIQuC4Bku`) — suave, britânica
 
-1. Passar o áudio estático para o editor: na lista, adicionar `audioEstatico={obra.audio}` ao componente `ObraEditor` e receber essa prop.
+Masculinas:
+- George (`JBFqnCBsd6RMkjVDRZzb`) — madura *(já existe)*
+- Roger (`CwhRBWXzGAHq8TQ4Fs17`) — natural
+- Charlie (`IKne3meq5aSn9XLyUdCD`) — confiante, australiana
+- Callum (`N2lVS1w4EtoT3dr4eOWO`) — intensa
+- Liam (`TX3LPaxmHKxFdv7VOQHJ`) — articulada
+- Will (`bIHbv24MWmeRgasZH58o`) — amigável
+- Eric (`cjVigY5qzO86Huf0OWal`) — clássica
+- Chris (`iP95p4xoKVk53GoZ742B`) — casual
+- Brian (`nPczCjzI2devNBz1zQrb`) — profunda
+- Daniel (`onwK4e9ZLuTAKqWW03F9`) — locução
+- Bill (`pqHfZKP75CvOlQylNhV4`) — narração
 
-2. Calcular a fonte de download para cada obra:
-   - Se houver áudio regenerado → usar `/api/public/obra-audio/:num?v=…`.
-   - Senão, se houver áudio estático → usar `obra.audio`.
-   - Se não houver nenhum dos dois → não mostrar o botão de download.
+`VOZ_PADRAO_ID` continua sendo Sarah. `vozValida()` passa a aceitar todos os IDs da lista automaticamente.
 
-3. Adicionar um botão de **Baixar áudio** na barra de ações de cada obra, ao lado de "Salvar texto"/"Regenerar áudio":
-   - Renderizado como um link (`<a>`) com atributo `download="obra-<num>.mp3"` apontando para a fonte de download, estilizado como botão (variante `outline`, usando o ícone `Download` de `lucide-react`).
-   - Desabilitado/oculto quando não há áudio disponível.
+## Impacto
 
-## Detalhes técnicos
-
-- Importar o ícone `Download` de `lucide-react`.
-- O atributo `download` força o navegador a salvar o arquivo. Como a rota `/api/public/obra-audio/:num` é do mesmo domínio, o `download` funciona normalmente; o áudio estático também é servido do mesmo domínio (asset).
-- Sem alterações de banco de dados, server functions ou novas chaves de API.
-- A obra protegida (#2) também ganha o download do seu áudio especial estático, já que `obra.audio` existe para ela.
+- O seletor em `src/routes/admin.tsx` lê de `VOZES`, então exibirá todas as opções sem mudanças nele.
+- A validação em `regenerarAudio` (`src/lib/admin-obras.functions.ts`) já usa `vozValida()`, então qualquer uma das novas vozes é aceita.
+- Sem mudanças de banco de dados nem novas chaves de API (já usa `ELEVENLABS_API_KEY`).
