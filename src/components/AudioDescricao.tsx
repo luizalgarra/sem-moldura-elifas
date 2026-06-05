@@ -5,29 +5,48 @@ import { Button } from "@/components/ui/button";
 interface AudioDescricaoProps {
   texto: string;
   audio?: string | null;
+  audioFem?: string | null;
+  audioMasc?: string | null;
 }
 
 const VELOCIDADES = [0.75, 1, 1.25] as const;
 
-export function AudioDescricao({ texto, audio }: AudioDescricaoProps) {
-  if (audio) {
-    return <AudioArquivo src={audio} />;
+export function AudioDescricao({
+  texto,
+  audio,
+  audioFem,
+  audioMasc,
+}: AudioDescricaoProps) {
+  const fem = audioFem ?? audio ?? null;
+  const masc = audioMasc ?? null;
+  if (fem || masc) {
+    return <AudioArquivo fem={fem} masc={masc} />;
   }
   return <AudioVoz texto={texto} />;
 }
 
 // ---- Reprodução do MP3 pré-gerado (ElevenLabs) ----
-function AudioArquivo({ src }: { src: string }) {
+function AudioArquivo({
+  fem,
+  masc,
+}: {
+  fem: string | null;
+  masc: string | null;
+}) {
+  // Voz inicial: feminina quando existir, senão masculina.
+  const [voz, setVoz] = useState<"fem" | "masc">(fem ? "fem" : "masc");
+  const src = (voz === "masc" ? masc : fem) ?? fem ?? masc ?? "";
+  const temAmbas = !!fem && !!masc;
+
   const [tocando, setTocando] = useState(false);
   const [pausado, setPausado] = useState(false);
   const [velocidade, setVelocidade] = useState<number>(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Reinicia o estado ao trocar de obra
+  // Reinicia o estado ao trocar de obra ou de voz
   useEffect(() => {
     setTocando(false);
     setPausado(false);
-    setVelocidade(1);
   }, [src]);
 
   const alternar = useCallback(() => {
@@ -52,6 +71,7 @@ function AudioArquivo({ src }: { src: string }) {
     setTocando(false);
     setPausado(false);
   }, []);
+
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
