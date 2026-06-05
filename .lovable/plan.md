@@ -1,46 +1,60 @@
 ## Objetivo
 
-Cada obra passa a ter **duas locuções padrão**: feminina (**Carla**) e masculina (**Danilo Tenfen**). A geração é em lote (gera as duas de uma vez), tanto por obra quanto para todas. No site público, o visitante alterna entre voz feminina e masculina.
+Substituir o modelo atual (dois MP3s completos + botão de alternar voz) por uma **locução única alternada por seção**. O player abre direto pela audiodescrição e reveza as vozes na ordem:
 
-## Banco de dados (migração)
+```text
+1. Audiodescrição              → voz masculina (Danilo)
+2. Identificação da obra       → voz feminina (Carla)
+3. Contexto histórico/cultural → voz masculina (Danilo)
+4. Análise interpretativa      → voz feminina (Carla)
+```
 
-Adicionar duas colunas em `obra_overrides` e `obras_extras`:
-- `audio_fem_path text` — caminho do MP3 da voz feminina (Carla)
-- `audio_masc_path text` — caminho do MP3 da voz masculina (Danilo)
+A imagem mental (descrição) vem primeiro; as vozes se revezam entre "fato" e "leitura".
 
-A coluna atual `audio_url` é mantida (usada pela obra especial #2 e como fallback). `voz_id` deixa de ser usada para a escolha, mas permanece para não quebrar registros antigos.
+## Como vai funcionar
 
-## Vozes (`src/data/vozes.ts`)
+- Cada obra passa a ter **4 trechos de áudio**, cada um já gravado com a voz definida pela posição (masc, fem, masc, fem).
+- No site público, ao tocar, o player reproduz os 4 trechos **em sequência automática**, sem corte perceptível. O botão "alternar voz" sai.
+- Os controles atuais (Ouvir/Pausar, Parar, velocidade 0,75×/1×/1,25×) continuam, agora atuando sobre a sequência inteira.
+- Um pequeno indicador mostra qual seção está tocando (ex.: "Audiodescrição · voz masculina").
 
-Exportar constantes:
-- `VOZ_FEMININA_ID = "7eUAxNOneHxqfyRS77mW"` (Carla)
-- `VOZ_MASCULINA_ID = "rVRk0uJAtO8T38Gm03mf"` (Danilo Tenfen)
+## Divisão do texto em seções
 
-## Backend (`src/lib/admin-obras.functions.ts`)
+A divisão usa os títulos gerados pelo prompt: **Identificação da obra**, **Audiodescrição**, **Contexto histórico e cultural**, **Análise interpretativa**.
 
-- **`regenerarAudio`**: passa a gerar **as duas vozes** para uma obra (Carla e Danilo), salvando em `audio_fem_path` e `audio_masc_path`. Retorna `versao` e quais vozes foram geradas. A obra protegida (#2) continua bloqueada.
-- **`construirAcervo`** e `ObraAcervo`: expor `audioFem` e `audioMasc` (URLs `/api/public/obra-audio/<num>?voz=fem|masc`). Manter `audio` como fallback (feminina, ou o áudio especial da #2).
-- **`listarOverrides`**: incluir `audioFemPath` e `audioMascPath` para o admin saber o que já existe.
+- Quando os títulos existem (como na obra #53), cada seção vira um trecho, reordenados para a sequência de reprodução (descrição primeiro).
+- Quando a obra **não tem esses títulos** (a maioria hoje), o texto é dividido "como der": quebrado em 4 blocos aproximadamente iguais por parágrafos/frases, recebendo as vozes na mesma ordem alternada (masc, fem, masc, fem). Assim toda obra ganha o efeito de revezamento mesmo sem estrutura formal.
+- A obra protegida #2 (áudio especial) continua intocada.
 
-## Rota pública de áudio (`src/routes/api/public/obra-audio.$num.ts`)
+## Etapas
 
-- Ler o query param `voz` (`fem` | `masc`, padrão `fem`).
-- Servir `audio_fem_path` ou `audio_masc_path`; se faltar, cair para `audio_url`.
+### 1. Banco de dados (migração)
+Adicionar uma coluna `audio_trechos jsonb` em `obra_overrides` e `obras_extras`, guardando a lista ordenada de trechos: `[{ ordem, rotulo, voz, path }]`. As colunas antigas (`audio_url`, `audio_fem_path`, `audio_masc_path`) permanecem para não quebrar a obra #2 e registros legados.
 
-## Admin (`src/routes/admin.tsx`)
+### 2. Backend (`src/lib/admin-obras.functions.ts`)
+- Nova função utilitária que **separa o texto em seções** (com títulos ou por blocos) e devolve a lista ordenada com a voz de cada trecho.
+- `regenerarAudio`: passa a gerar **um clipe por trecho** (4 chamadas à ElevenLabs, em paralelo), faz upload de cada um e salva o array em `audio_trechos`.
+- `construirAcervo`/`ObraAcervo`: expõe `audioTrechos` — lista de `{ rotulo, voz, url }` apontando para a rota pública com índice. Mantém `audio` como fallback (obra #2 e legados).
 
-- Os dois botões de voz no topo deixam de ser "voz ativa": viram referência/amostra das duas vozes padrão.
-- Adicionar botão geral **"Gerar áudios de todas as obras (Carla + Danilo)"** que percorre as obras no cliente, chamando `regenerarAudio` por obra em sequência, com indicador de progresso.
-- Em cada obra, o botão passa a ser **"Gerar áudios (Carla + Danilo)"**, gerando as duas vozes.
-- Player de prévia por obra mostra a versão feminina e a masculina.
+### 3. Rota pública de áudio (`src/routes/api/public/obra-audio.$num.ts`)
+- Aceitar o parâmetro `trecho` (índice 0..3) e servir o arquivo correspondente lido de `audio_trechos`.
+- Manter o comportamento antigo (`voz=fem|masc` / `audio_url`) como fallback para a obra #2.
 
-## Site público (`AudioDescricao.tsx` + `obras.$num.tsx`)
+### 4. Player do site (`src/components/AudioDescricao.tsx` + `obras.$num.tsx`)
+- Trocar a lógica de "um `<audio>` com troca de `src`" por **reprodução encadeada** dos trechos: ao terminar um, inicia o próximo automaticamente.
+- Remover o seletor feminina/masculina.
+- Pausar/continuar e parar atuam sobre a sequência; a velocidade é aplicada a todos os trechos.
+- Mostrar o rótulo da seção atual e a voz.
+- Fallback: obra #2 (áudio único) e obras sem trechos gerados continuam tocando o arquivo completo atual; sem nenhum áudio, cai na leitura por voz do navegador.
 
-- `AudioDescricao` recebe `audioFem` e `audioMasc`.
-- Adicionar um seletor **Feminina / Masculina** que troca o `src` do player. Esconde o seletor quando só existe uma das vozes (ex.: obra especial #2).
-- Reproduz com os controles atuais (ouvir, parar, velocidade).
+### 5. Admin (`src/routes/admin.tsx`)
+- O botão por obra e o de lote continuam, mas agora geram os **4 trechos alternados**.
+- A prévia por obra mostra os 4 players na ordem de reprodução, cada um rotulado (ex.: "1 · Audiodescrição · masculina").
+- Atualizar os textos de ajuda para refletir o novo modelo.
 
 ## Observações técnicas
 
-- A geração em lote é feita no cliente (um pedido por obra) para evitar timeout do runtime serverless em chamadas longas à ElevenLabs.
-- Cada `regenerarAudio` faz duas chamadas à ElevenLabs (uma por voz) e dois uploads no bucket `audios-obras`.
+- A geração continua no cliente (uma chamada `regenerarAudio` por obra) para evitar timeout; dentro do servidor, os 4 trechos são gerados em paralelo.
+- Para naturalidade entre cortes, as chamadas à ElevenLabs podem usar `previous_text`/`next_text` (request stitching) com os trechos vizinhos.
+- Como o esquema de seções muda, **será preciso regenerar os áudios** (em lote) depois da implementação para todas as obras passarem a ter os 4 trechos. Antes disso, elas seguem tocando o áudio antigo via fallback.
+- A obra #53 (Adoniran Palhaço) ainda aguarda sua geração de áudio aprovada por você; com este modelo, ela será gerada já com os 4 trechos.
