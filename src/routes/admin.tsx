@@ -12,7 +12,6 @@ import {
   Volume2,
 } from "lucide-react";
 import { obras } from "@/data/obras";
-import { VOZES, VOZ_PADRAO_ID } from "@/data/vozes";
 import {
   listarOverrides,
   salvarTexto,
@@ -33,6 +32,14 @@ import {
 
 const OBRA_PROTEGIDA = 2;
 
+// Vozes padrão oferecidas no admin (uma feminina, uma masculina).
+const VOZ_FEMININA_ID = "7eUAxNOneHxqfyRS77mW"; // Carla (Conversacional)
+const VOZ_MASCULINA_ID = "rVRk0uJAtO8T38Gm03mf"; // Danilo Tenfen
+const VOZES_PADRAO = [
+  { id: VOZ_FEMININA_ID, rotulo: "Carla (feminina)" },
+  { id: VOZ_MASCULINA_ID, rotulo: "Danilo Tenfen (masculina)" },
+];
+
 // Cache de URLs de amostra por voz, compartilhado entre os itens.
 const cacheAmostras = new Map<string, string>();
 
@@ -48,6 +55,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPagina() {
   const fetchOverrides = useServerFn(listarOverrides);
+  const buscarAmostra = useServerFn(amostraVoz);
   const { data: overrides, refetch } = useQuery({
     queryKey: ["overrides"],
     queryFn: () => fetchOverrides(),
@@ -60,6 +68,9 @@ function AdminPagina() {
   }, [overrides]);
 
   const [busca, setBusca] = useState("");
+  const [vozGlobal, setVozGlobal] = useState<string>(VOZ_FEMININA_ID);
+  const [tocandoAmostra, setTocandoAmostra] = useState(false);
+  const [amostraMsg, setAmostraMsg] = useState<string | null>(null);
 
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
@@ -69,6 +80,30 @@ function AdminPagina() {
         String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
     );
   }, [busca]);
+
+  const handleAmostra = async () => {
+    setTocandoAmostra(true);
+    setAmostraMsg(null);
+    try {
+      let url = cacheAmostras.get(vozGlobal);
+      if (!url) {
+        const r = await buscarAmostra({ data: { vozId: vozGlobal } });
+        if (!r.ok || !r.url) {
+          setAmostraMsg(
+            r.ok ? "Esta voz não tem amostra." : (r.erro ?? "Erro na amostra."),
+          );
+          return;
+        }
+        url = r.url;
+        cacheAmostras.set(vozGlobal, url);
+      }
+      await new Audio(url).play();
+    } catch {
+      setAmostraMsg("Não foi possível tocar a amostra.");
+    } finally {
+      setTocandoAmostra(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -81,6 +116,46 @@ function AdminPagina() {
           salvas e aparecem para os visitantes.
         </p>
       </header>
+
+      <div className="mt-6 rounded-lg border border-border bg-card p-4">
+        <h2 className="text-sm font-medium text-foreground">Voz padrão</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Escolha a voz usada ao regenerar o áudio de todas as obras.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Select value={vozGlobal} onValueChange={setVozGlobal}>
+            <SelectTrigger className="min-h-11 w-60" aria-label="Voz padrão">
+              <SelectValue placeholder="Voz" />
+            </SelectTrigger>
+            <SelectContent>
+              {VOZES_PADRAO.map((v) => (
+                <SelectItem key={v.id} value={v.id}>
+                  {v.rotulo}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={handleAmostra}
+            disabled={tocandoAmostra}
+            className="min-h-11"
+            aria-label="Ouvir amostra da voz padrão"
+          >
+            {tocandoAmostra ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Volume2 aria-hidden="true" />
+            )}
+            <span>Ouvir amostra</span>
+          </Button>
+          {amostraMsg && (
+            <span className="text-sm text-muted-foreground" role="status">
+              {amostraMsg}
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
         <div className="relative">
@@ -107,6 +182,7 @@ function AdminPagina() {
             textoEstatico={obra.descricao}
             audioEstatico={obra.audio}
             override={mapa.get(obra.num)}
+            vozId={vozGlobal}
             onChanged={() => refetch()}
           />
         ))}
@@ -121,6 +197,7 @@ function ObraEditor({
   textoEstatico,
   audioEstatico,
   override,
+  vozId,
   onChanged,
 }: {
   num: number;
@@ -128,12 +205,11 @@ function ObraEditor({
   textoEstatico: string;
   audioEstatico: string | null;
   override: OverrideObra | undefined;
+  vozId: string;
   onChanged: () => void;
 }) {
   const salvar = useServerFn(salvarTexto);
   const regenerar = useServerFn(regenerarAudio);
-  const buscarAmostra = useServerFn(amostraVoz);
-  const [tocandoAmostra, setTocandoAmostra] = useState(false);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
   const [salvando, setSalvando] = useState(false);
@@ -141,9 +217,6 @@ function ObraEditor({
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
     override?.audioPath ? Date.now().toString() : null,
-  );
-  const [vozId, setVozId] = useState<string>(
-    override?.vozId ?? VOZ_PADRAO_ID,
   );
 
   const protegida = num === OBRA_PROTEGIDA;
@@ -181,30 +254,6 @@ function ObraEditor({
       setGerando(false);
     }
   };
-
-  const handleAmostra = async () => {
-    setTocandoAmostra(true);
-    setMsg(null);
-    try {
-      let url = cacheAmostras.get(vozId);
-      if (!url) {
-        const r = await buscarAmostra({ data: { vozId } });
-        if (!r.ok || !r.url) {
-          setMsg(r.ok ? "Esta voz não tem amostra." : (r.erro ?? "Erro na amostra."));
-          return;
-        }
-        url = r.url;
-        cacheAmostras.set(vozId, url);
-      }
-      await new Audio(url).play();
-    } catch {
-      setMsg("Não foi possível tocar a amostra.");
-    } finally {
-      setTocandoAmostra(false);
-    }
-  };
-
-
 
   const audioSrc = temAudioRegen
     ? `/api/public/obra-audio/${num}?v=${versaoAudio}`
@@ -247,50 +296,19 @@ function ObraEditor({
             Áudio especial preservado
           </span>
         ) : (
-          <>
-            <Select value={vozId} onValueChange={setVozId}>
-              <SelectTrigger
-                className="min-h-11 w-44"
-                aria-label={`Voz da obra ${num}`}
-              >
-                <SelectValue placeholder="Voz" />
-              </SelectTrigger>
-              <SelectContent>
-                {VOZES.map((v) => (
-                  <SelectItem key={v.id} value={v.id}>
-                    {v.nome} ({v.descricao})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              onClick={handleAmostra}
-              disabled={tocandoAmostra}
-              className="min-h-11"
-              aria-label={`Ouvir amostra da voz da obra ${num}`}
-            >
-              {tocandoAmostra ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Volume2 aria-hidden="true" />
-              )}
-              <span>Ouvir amostra</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleRegenerar}
-              disabled={gerando}
-              className="min-h-11"
-            >
-              {gerando ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <RefreshCw aria-hidden="true" />
-              )}
-              <span>Regenerar áudio</span>
-            </Button>
-          </>
+          <Button
+            variant="outline"
+            onClick={handleRegenerar}
+            disabled={gerando}
+            className="min-h-11"
+          >
+            {gerando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <RefreshCw aria-hidden="true" />
+            )}
+            <span>Regenerar áudio</span>
+          </Button>
         )}
 
         {downloadSrc && (
