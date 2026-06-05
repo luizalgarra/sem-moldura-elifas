@@ -37,6 +37,7 @@ export type Database = {
           ano: string | null
           audio_fem_path: string | null
           audio_masc_path: string | null
+          audio_trechos: Json | null
           audio_url: string | null
           autor: string | null
           descricao: string | null
@@ -53,6 +54,7 @@ export type Database = {
           ano?: string | null
           audio_fem_path?: string | null
           audio_masc_path?: string | null
+          audio_trechos?: Json | null
           audio_url?: string | null
           autor?: string | null
           descricao?: string | null
@@ -69,6 +71,7 @@ export type Database = {
           ano?: string | null
           audio_fem_path?: string | null
           audio_masc_path?: string | null
+          audio_trechos?: Json | null
           audio_url?: string | null
           autor?: string | null
           descricao?: string | null
@@ -88,6 +91,7 @@ export type Database = {
           ano: string | null
           audio_fem_path: string | null
           audio_masc_path: string | null
+          audio_trechos: Json | null
           audio_url: string | null
           autor: string | null
           created_at: string
@@ -105,6 +109,7 @@ export type Database = {
           ano?: string | null
           audio_fem_path?: string | null
           audio_masc_path?: string | null
+          audio_trechos?: Json | null
           audio_url?: string | null
           autor?: string | null
           created_at?: string
@@ -122,6 +127,7 @@ export type Database = {
           ano?: string | null
           audio_fem_path?: string | null
           audio_masc_path?: string | null
+          audio_trechos?: Json | null
           audio_url?: string | null
           autor?: string | null
           created_at?: string
