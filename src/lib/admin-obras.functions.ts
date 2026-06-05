@@ -30,6 +30,8 @@ export interface OverrideObra {
 export interface ObraAcervo extends Obra {
   chave: number;
   extra: boolean;
+  audioFem: string | null;
+  audioMasc: string | null;
 }
 
 function versaoDe(updatedAt: string | null | undefined): string {
