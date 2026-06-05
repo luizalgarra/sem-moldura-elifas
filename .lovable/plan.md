@@ -1,30 +1,22 @@
 ## Objetivo
-Permitir escolher a voz (incluindo vozes masculinas) ao regenerar o áudio de cada obra no painel `/admin`, sem precisar saber o ID da voz.
+
+Manter no seletor de voz do painel admin apenas duas opções:
+- **Sarah** (feminina, suave) — voz padrão atual
+- **George** (masculina, madura)
+
+Remover Alice, Brian e Daniel.
 
 ## O que muda
 
-### 1. Lista de vozes nomeadas
-Criar uma pequena lista de vozes disponíveis (nome amigável → ID do ElevenLabs), com opções femininas e masculinas:
-- Sarah (feminina, suave) — `EXAVITQu4vr4xnSDxMaL` (padrão atual)
-- Alice (feminina) — `Xb7hH8MSUJpSbSDYk0k2`
-- George (masculina, madura) — `JBFqnCBsd6RMkjVDRZzb`
-- Brian (masculina, grave) — `nPczCjzI2devNBz1zQrb`
-- Daniel (masculina, locução) — `onwK4e9ZLuTAKqWW03F9`
+**`src/data/vozes.ts`** — único arquivo a ser alterado.
+- Remover os objetos de Alice, Brian e Daniel do array `VOZES`, deixando apenas Sarah e George.
+- `VOZ_PADRAO_ID` continua sendo o ID da Sarah.
+- `vozValida()` passa a aceitar apenas os dois IDs restantes.
 
-### 2. Seletor de voz no painel admin
-Em cada obra (componente `ObraEditor` em `src/routes/admin.tsx`), adicionar um menu suspenso "Voz" ao lado do botão "Regenerar áudio". Ele já vem pré-selecionado com a voz atual da obra (campo `voz_id`) ou a Sarah por padrão.
+## Impacto
 
-### 3. Passar a voz escolhida para a geração
-Ajustar a função `regenerarAudio` (`src/lib/admin-obras.functions.ts`) para aceitar um `vozId` opcional vindo do painel. Hoje ela só lê o `voz_id` já salvo no banco; passará a usar a voz escolhida na tela, validando que o ID pertence à lista de vozes permitidas (segurança). A voz escolhida é salva no campo `voz_id` da obra, então fica memorizada para a próxima vez.
+- O seletor em `src/routes/admin.tsx` lê de `VOZES` automaticamente, então passará a exibir só as duas opções — nenhuma alteração necessária ali.
+- A validação em `regenerarAudio` (`src/lib/admin-obras.functions.ts`) já usa `vozValida()`, então qualquer voz fora das duas será rejeitada/cairá no padrão. Nenhuma alteração necessária.
+- Obras que eventualmente já tenham sido geradas com Alice/Brian/Daniel mantêm o áudio salvo; só não será mais possível escolher essas vozes em novas regenerações.
 
-### 4. Obra protegida
-A obra nº 2 (Arca de Noé, áudio especial com duas vozes) continua bloqueada — sem seletor nem regeneração, como já é hoje.
-
-## Detalhes técnicos
-- `regenerarAudio` recebe `{ chave, vozId? }`; valida `vozId` contra a lista permitida; faz fallback para o `voz_id` salvo ou Sarah.
-- O `upsert` em `obra_overrides` já grava `voz_id`, então a escolha persiste.
-- Nenhuma mudança de banco é necessária (coluna `voz_id` já existe).
-- Sem necessidade de nova chave de API — usa a `ELEVENLABS_API_KEY` já configurada.
-
-## Resultado
-No painel, você seleciona "George" (ou outra voz masculina) na obra desejada, clica em "Regenerar áudio", ouve o resultado no player, e a voz fica salva para aquela obra.
+Sem mudanças de banco de dados e sem nova chave de API.

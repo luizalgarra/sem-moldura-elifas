@@ -16,27 +16,9 @@ export const VOZES: Voz[] = [
     genero: "feminina",
   },
   {
-    id: "Xb7hH8MSUJpSbSDYk0k2",
-    nome: "Alice",
-    descricao: "feminina, clara",
-    genero: "feminina",
-  },
-  {
     id: "JBFqnCBsd6RMkjVDRZzb",
     nome: "George",
     descricao: "masculina, madura",
-    genero: "masculina",
-  },
-  {
-    id: "nPczCjzI2devNBz1zQrb",
-    nome: "Brian",
-    descricao: "masculina, grave",
-    genero: "masculina",
-  },
-  {
-    id: "onwK4e9ZLuTAKqWW03F9",
-    nome: "Daniel",
-    descricao: "masculina, locução",
     genero: "masculina",
   },
 ];
