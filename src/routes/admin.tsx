@@ -69,7 +69,7 @@ function AdminPagina() {
 
   const [busca, setBusca] = useState("");
   const [vozGlobal, setVozGlobal] = useState<string>(VOZ_FEMININA_ID);
-  const [tocandoAmostra, setTocandoAmostra] = useState(false);
+  const [amostraCarregando, setAmostraCarregando] = useState<string | null>(null);
   const [amostraMsg, setAmostraMsg] = useState<string | null>(null);
 
   const filtradas = useMemo(() => {
@@ -81,13 +81,13 @@ function AdminPagina() {
     );
   }, [busca]);
 
-  const handleAmostra = async () => {
-    setTocandoAmostra(true);
+  const handleAmostra = async (vozId: string) => {
+    setAmostraCarregando(vozId);
     setAmostraMsg(null);
     try {
-      let url = cacheAmostras.get(vozGlobal);
+      let url = cacheAmostras.get(vozId);
       if (!url) {
-        const r = await buscarAmostra({ data: { vozId: vozGlobal } });
+        const r = await buscarAmostra({ data: { vozId } });
         if (!r.ok || !r.url) {
           setAmostraMsg(
             r.ok ? "Esta voz não tem amostra." : (r.erro ?? "Erro na amostra."),
@@ -95,13 +95,13 @@ function AdminPagina() {
           return;
         }
         url = r.url;
-        cacheAmostras.set(vozGlobal, url);
+        cacheAmostras.set(vozId, url);
       }
       await new Audio(url).play();
     } catch {
       setAmostraMsg("Não foi possível tocar a amostra.");
     } finally {
-      setTocandoAmostra(false);
+      setAmostraCarregando(null);
     }
   };
 
