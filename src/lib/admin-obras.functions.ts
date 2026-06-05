@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
+import { VOZ_PADRAO_ID, vozValida } from "@/data/vozes";
 
-const VOZ_PADRAO = "EXAVITQu4vr4xnSDxMaL"; // Sarah (suave)
+const VOZ_PADRAO = VOZ_PADRAO_ID; // Sarah (suave)
 const OBRA_PROTEGIDA = 2; // áudio especial com duas vozes unidas (chave fixa)
 const PRIMEIRA_CHAVE_EXTRA = 1000; // identidades internas das obras novas começam aqui
 const MAX_CHAVE = 999999; // limite das identidades internas
