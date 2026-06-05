@@ -425,7 +425,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
       audioFemPath: row.audio_fem_path,
       audioMascPath: row.audio_masc_path,
       audioTrechos: Array.isArray(row.audio_trechos)
-        ? (row.audio_trechos as Trecho[])
+        ? (row.audio_trechos as unknown as Trecho[])
         : null,
       vozId: row.voz_id,
       updatedAt: row.updated_at,
