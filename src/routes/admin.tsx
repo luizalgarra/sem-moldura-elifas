@@ -125,6 +125,9 @@ function ObraEditor({
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
     override?.audioPath ? Date.now().toString() : null,
   );
+  const [vozId, setVozId] = useState<string>(
+    override?.vozId ?? VOZ_PADRAO_ID,
+  );
 
   const protegida = num === OBRA_PROTEGIDA;
   const temAudioRegen = versaoAudio !== null;
