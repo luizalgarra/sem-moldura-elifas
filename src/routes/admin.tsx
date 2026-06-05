@@ -352,7 +352,7 @@ function ObraEditor({
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Gerar áudios (Carla + Danilo)</span>
+            <span>Gerar locução alternada</span>
           </Button>
         )}
 
@@ -360,7 +360,7 @@ function ObraEditor({
           <Button asChild variant="outline" className="min-h-11">
             <a href={downloadSrc} download={`obra-${num}.mp3`}>
               <Download aria-hidden="true" />
-              <span>Baixar áudio</span>
+              <span>Baixar 1º trecho</span>
             </a>
           </Button>
         )}
@@ -372,28 +372,30 @@ function ObraEditor({
         )}
       </div>
 
-      {protegida && audioSrc && (
-        <audio controls preload="none" src={audioSrc} className="mt-3 w-full">
+      {protegida && audioProtegidoSrc && (
+        <audio controls preload="none" src={audioProtegidoSrc} className="mt-3 w-full">
           Seu navegador não suporta áudio.
         </audio>
       )}
 
       {!protegida && temAudioRegen && (
         <div className="mt-3 space-y-2">
-          <div>
-            <p className="text-xs text-muted-foreground">Voz feminina (Carla)</p>
-            <audio controls preload="none" src={audioFemSrc!} className="mt-1 w-full">
-              Seu navegador não suporta áudio.
-            </audio>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Voz masculina (Danilo Tenfen)
-            </p>
-            <audio controls preload="none" src={audioMascSrc!} className="mt-1 w-full">
-              Seu navegador não suporta áudio.
-            </audio>
-          </div>
+          {trechos.map((t, i) => (
+            <div key={i}>
+              <p className="text-xs text-muted-foreground">
+                {i + 1} · {t.rotulo} ·{" "}
+                {t.voz === "masc" ? "masculina (Danilo)" : "feminina (Carla)"}
+              </p>
+              <audio
+                controls
+                preload="none"
+                src={`/api/public/obra-audio/${num}?trecho=${i}&v=${versaoAudio}`}
+                className="mt-1 w-full"
+              >
+                Seu navegador não suporta áudio.
+              </audio>
+            </div>
+          ))}
         </div>
       )}
     </li>
