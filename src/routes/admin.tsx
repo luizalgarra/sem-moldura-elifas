@@ -107,12 +107,14 @@ function ObraEditor({
   num,
   titulo,
   textoEstatico,
+  audioEstatico,
   override,
   onChanged,
 }: {
   num: number;
   titulo: string;
   textoEstatico: string;
+  audioEstatico: string | null;
   override: OverrideObra | undefined;
   onChanged: () => void;
 }) {
