@@ -250,7 +250,7 @@ function ObraEditor({
           </Button>
         )}
 
-
+        {msg && (
           <span className="text-sm text-muted-foreground" role="status">
             {msg}
           </span>
