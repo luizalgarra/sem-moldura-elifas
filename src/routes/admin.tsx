@@ -121,7 +121,7 @@ function AdminPagina() {
     setLoteRodando(false);
     setLoteMsg(
       falhas === 0
-        ? `Pronto! ${alvos.length} obras geradas com as duas vozes.`
+        ? `Pronto! ${alvos.length} obras com locução alternada gerada.`
         : `Concluído com ${falhas} falha(s) de ${alvos.length}.`,
     );
     refetch();
@@ -134,15 +134,16 @@ function AdminPagina() {
           Administração de textos e áudios
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Edite a descrição de cada obra e gere o áudio. Cada obra é gerada com
-          as duas vozes padrão (feminina e masculina).
+          Edite a descrição de cada obra e gere a locução. A leitura alterna as
+          vozes por seção: Audiodescrição (masculina) → Identificação (feminina)
+          → Contexto (masculina) → Análise (feminina).
         </p>
       </header>
 
       <div className="mt-6 rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-medium text-foreground">Vozes padrão</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Cada obra recebe as duas locuções. Ouça as amostras abaixo.
+          As duas vozes usadas no revezamento. Ouça as amostras abaixo.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {VOZES_PADRAO.map((v) => (
@@ -182,7 +183,7 @@ function AdminPagina() {
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Gerar áudios de todas as obras (Carla + Danilo)</span>
+            <span>Gerar locução alternada de todas as obras</span>
           </Button>
           {loteRodando && (
             <span className="text-sm text-muted-foreground" role="status">
@@ -253,13 +254,14 @@ function ObraEditor({
   const [gerando, setGerando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioFemPath || override?.audioMascPath || override?.audioPath
+    override?.audioTrechos && override.audioTrechos.length > 0
       ? Date.now().toString()
       : null,
   );
 
   const protegida = num === OBRA_PROTEGIDA;
-  const temAudioRegen = versaoAudio !== null;
+  const trechos = override?.audioTrechos ?? [];
+  const temAudioRegen = versaoAudio !== null && trechos.length > 0;
 
   const handleSalvar = async () => {
     setSalvando(true);
@@ -282,7 +284,7 @@ function ObraEditor({
       const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
-        setMsg("Áudios gerados (feminina e masculina).");
+        setMsg(`Locução alternada gerada (${r.trechos} trechos).`);
         onChanged();
       } else {
         setMsg(r.erro ?? "Erro ao gerar.");
@@ -294,16 +296,17 @@ function ObraEditor({
     }
   };
 
-  const audioFemSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
-    : null;
-  const audioMascSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=masc&v=${versaoAudio}`
-    : null;
-  const audioSrc = audioFemSrc;
+  // Áudio protegido (#2): mantém o arquivo único legado para conferência.
+  const audioProtegidoSrc = !protegida
+    ? null
+    : override?.audioPath
+      ? `/api/public/obra-audio/${num}?v=${versaoAudio ?? Date.now()}`
+      : audioEstatico;
 
-
-  const downloadSrc = audioSrc ?? audioEstatico;
+  const downloadSrc =
+    (temAudioRegen ? `/api/public/obra-audio/${num}?trecho=0&v=${versaoAudio}` : null) ??
+    audioProtegidoSrc ??
+    audioEstatico;
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
@@ -351,7 +354,7 @@ function ObraEditor({
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Gerar áudios (Carla + Danilo)</span>
+            <span>Gerar locução alternada</span>
           </Button>
         )}
 
@@ -359,7 +362,7 @@ function ObraEditor({
           <Button asChild variant="outline" className="min-h-11">
             <a href={downloadSrc} download={`obra-${num}.mp3`}>
               <Download aria-hidden="true" />
-              <span>Baixar áudio</span>
+              <span>Baixar 1º trecho</span>
             </a>
           </Button>
         )}
@@ -371,28 +374,30 @@ function ObraEditor({
         )}
       </div>
 
-      {protegida && audioSrc && (
-        <audio controls preload="none" src={audioSrc} className="mt-3 w-full">
+      {protegida && audioProtegidoSrc && (
+        <audio controls preload="none" src={audioProtegidoSrc} className="mt-3 w-full">
           Seu navegador não suporta áudio.
         </audio>
       )}
 
       {!protegida && temAudioRegen && (
         <div className="mt-3 space-y-2">
-          <div>
-            <p className="text-xs text-muted-foreground">Voz feminina (Carla)</p>
-            <audio controls preload="none" src={audioFemSrc!} className="mt-1 w-full">
-              Seu navegador não suporta áudio.
-            </audio>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Voz masculina (Danilo Tenfen)
-            </p>
-            <audio controls preload="none" src={audioMascSrc!} className="mt-1 w-full">
-              Seu navegador não suporta áudio.
-            </audio>
-          </div>
+          {trechos.map((t, i) => (
+            <div key={i}>
+              <p className="text-xs text-muted-foreground">
+                {i + 1} · {t.rotulo} ·{" "}
+                {t.voz === "masc" ? "masculina (Danilo)" : "feminina (Carla)"}
+              </p>
+              <audio
+                controls
+                preload="none"
+                src={`/api/public/obra-audio/${num}?trecho=${i}&v=${versaoAudio}`}
+                className="mt-1 w-full"
+              >
+                Seu navegador não suporta áudio.
+              </audio>
+            </div>
+          ))}
         </div>
       )}
     </li>

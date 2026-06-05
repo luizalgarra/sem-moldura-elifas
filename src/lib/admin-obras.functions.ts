@@ -20,8 +20,27 @@ export interface OverrideObra {
   audioPath: string | null;
   audioFemPath: string | null;
   audioMascPath: string | null;
+  audioTrechos: Trecho[] | null;
   vozId: string;
   updatedAt: string | null;
+}
+
+/** Voz de um trecho: feminina (Carla) ou masculina (Danilo). */
+export type VozTipo = "fem" | "masc";
+
+/** Um trecho de áudio já gerado, salvo em `audio_trechos`. */
+export interface Trecho {
+  ordem: number;
+  rotulo: string;
+  voz: VozTipo;
+  path: string;
+}
+
+/** Trecho exposto ao cliente (URL pública em vez do path interno). */
+export interface TrechoPublico {
+  rotulo: string;
+  voz: VozTipo;
+  url: string;
 }
 
 /**
@@ -34,6 +53,7 @@ export interface ObraAcervo extends Obra {
   extra: boolean;
   audioFem: string | null;
   audioMasc: string | null;
+  audioTrechos: TrechoPublico[] | null;
 }
 
 function versaoDe(updatedAt: string | null | undefined): string {
@@ -42,9 +62,183 @@ function versaoDe(updatedAt: string | null | undefined): string {
     : Date.now().toString();
 }
 
+// ----- Divisão do texto em seções (locução alternada) -----
+
+interface SecaoDef {
+  chaves: string[];
+  rotulo: string;
+  voz: VozTipo;
+}
+
+/**
+ * Ordem de REPRODUÇÃO: a audiodescrição abre (voz masculina) e as vozes se
+ * revezam entre fato e leitura.
+ */
+const SECOES: SecaoDef[] = [
+  {
+    chaves: [
+      "audiodescricao",
+      "audio descricao",
+      "audiodescricao da obra",
+      "descricao da imagem",
+    ],
+    rotulo: "Audiodescrição",
+    voz: "masc",
+  },
+  {
+    chaves: ["identificacao da obra", "identificacao"],
+    rotulo: "Identificação",
+    voz: "fem",
+  },
+  {
+    chaves: [
+      "contexto historico e cultural",
+      "contexto historico",
+      "contexto cultural",
+      "contexto",
+    ],
+    rotulo: "Contexto",
+    voz: "masc",
+  },
+  {
+    chaves: ["analise interpretativa", "analise"],
+    rotulo: "Análise",
+    voz: "fem",
+  },
+];
+
+const VOZES_FALLBACK: VozTipo[] = ["masc", "fem", "masc", "fem"];
+const ROTULOS_FALLBACK = ["Parte 1", "Parte 2", "Parte 3", "Parte 4"];
+
+function normalizar(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Remove marcações de título (#, *, :, traços) de uma linha. */
+function limparTitulo(linha: string): string {
+  return linha
+    .replace(/^[#*\->\s]+/, "")
+    .replace(/[:*\s]+$/, "")
+    .trim();
+}
+
+/** Distribui parágrafos/frases em `n` blocos equilibrados por tamanho. */
+function dividirEmBlocos(texto: string, n: number): string[] {
+  let partes = texto
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (partes.length < n) {
+    partes = texto
+      .split(/(?<=[.!?])\s+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }
+  if (partes.length === 0) return [];
+  if (partes.length <= n) return partes;
+
+  const total = partes.reduce((a, p) => a + p.length, 0);
+  const alvo = total / n;
+  const blocos: string[] = [];
+  let atual = "";
+  for (const parte of partes) {
+    atual = atual ? `${atual}\n\n${parte}` : parte;
+    if (blocos.length < n - 1 && atual.length >= alvo) {
+      blocos.push(atual);
+      atual = "";
+    }
+  }
+  if (atual) blocos.push(atual);
+  return blocos;
+}
+
+interface TrechoTexto {
+  rotulo: string;
+  voz: VozTipo;
+  texto: string;
+}
+
+/**
+ * Divide o texto da obra na ordem de reprodução alternada. Usa os títulos do
+ * prompt quando existem; senão divide "como der" em 4 blocos alternando vozes.
+ */
+export function dividirTrechos(texto: string): TrechoTexto[] {
+  const limpo = texto.trim();
+  if (!limpo) return [];
+
+  // Mapa normalizado: chave de seção -> índice em SECOES.
+  const mapa = new Map<string, number>();
+  SECOES.forEach((sec, i) => {
+    for (const chave of sec.chaves) mapa.set(normalizar(chave), i);
+  });
+
+  const linhas = limpo.split(/\r?\n/);
+  const capturado = new Map<number, string[]>();
+  let secaoAtual = -1;
+  let achouTitulo = false;
+
+  for (const linha of linhas) {
+    const titulo = limparTitulo(linha);
+    const norm = normalizar(titulo);
+    const idx =
+      titulo.length > 0 && titulo.length <= 60 ? mapa.get(norm) : undefined;
+    if (idx !== undefined) {
+      secaoAtual = idx;
+      achouTitulo = true;
+      if (!capturado.has(idx)) capturado.set(idx, []);
+      continue;
+    }
+    if (secaoAtual >= 0 && linha.trim()) {
+      capturado.get(secaoAtual)!.push(linha.trim());
+    }
+  }
+
+  if (achouTitulo) {
+    const trechos: TrechoTexto[] = [];
+    SECOES.forEach((sec, i) => {
+      const corpo = (capturado.get(i) ?? []).join("\n").trim();
+      if (corpo)
+        trechos.push({ rotulo: sec.rotulo, voz: sec.voz, texto: corpo });
+    });
+    if (trechos.length > 0) return trechos;
+  }
+
+  // Fallback: divide em até 4 blocos alternando vozes.
+  const blocos = dividirEmBlocos(limpo, 4);
+  return blocos.map((texto, i) => ({
+    rotulo: ROTULOS_FALLBACK[i] ?? `Parte ${i + 1}`,
+    voz: VOZES_FALLBACK[i % VOZES_FALLBACK.length],
+    texto,
+  }));
+}
+
 type SupabaseAdmin = Awaited<
   typeof import("@/integrations/supabase/client.server")
 >["supabaseAdmin"];
+
+/** Converte os trechos salvos no banco em URLs públicas (ou null). */
+function trechosPublicos(
+  raw: unknown,
+  num: number,
+  v: string,
+): TrechoPublico[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const lista = (raw as Trecho[])
+    .slice()
+    .sort((a, b) => a.ordem - b.ordem)
+    .map((t, i) => ({
+      rotulo: t.rotulo,
+      voz: t.voz,
+      url: `/api/public/obra-audio/${num}?trecho=${i}&v=${v}`,
+    }));
+  return lista.length > 0 ? lista : null;
+}
 
 /**
  * Monta o acervo completo (fixas + extras), já com edições aplicadas e
@@ -59,12 +253,12 @@ async function construirAcervo(
     supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
       ),
     supabaseAdmin
       .from("obras_extras")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
       ),
     supabaseAdmin.from("acervo_ordem").select("chave, posicao"),
   ]);
@@ -103,6 +297,7 @@ async function construirAcervo(
       audio: audioFem,
       audioFem,
       audioMasc,
+      audioTrechos: trechosPublicos(ov?.audio_trechos, obra.num, v),
       extra: false,
     });
   }
@@ -133,6 +328,7 @@ async function construirAcervo(
       audio: audioFem,
       audioFem,
       audioMasc,
+      audioTrechos: trechosPublicos(ex.audio_trechos, ex.num, v),
       extra: true,
     });
   }
@@ -206,7 +402,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, voz_id, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, voz_id, updated_at",
       )
       .order("num", { ascending: true });
 
@@ -228,6 +424,9 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
       audioPath: row.audio_url,
       audioFemPath: row.audio_fem_path,
       audioMascPath: row.audio_masc_path,
+      audioTrechos: Array.isArray(row.audio_trechos)
+        ? (row.audio_trechos as unknown as Trecho[])
+        : null,
       vozId: row.voz_id,
       updatedAt: row.updated_at,
     }));
@@ -583,8 +782,8 @@ export const salvarTexto = createServerFn({ method: "POST" })
   });
 
 /**
- * Gera (em lote) as DUAS locuções de uma obra — feminina (Carla) e
- * masculina (Danilo) — via ElevenLabs e salva ambas no storage.
+ * Gera a locução ALTERNADA de uma obra: divide o texto em seções (na ordem de
+ * reprodução) e grava um clipe por trecho, alternando as vozes (masc/fem).
  */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
@@ -630,8 +829,18 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return { ok: false as const, erro: "Esta obra não tem texto." };
     }
 
-    // Gera o áudio de uma voz e retorna o buffer.
-    async function gerarVoz(vozId: string): Promise<ArrayBuffer> {
+    const partes = dividirTrechos(texto);
+    if (partes.length === 0) {
+      return { ok: false as const, erro: "Não foi possível dividir o texto." };
+    }
+
+    // Gera o áudio de um trecho (com contexto dos vizinhos) e retorna o buffer.
+    async function gerarVoz(
+      vozId: string,
+      texto: string,
+      prev: string | null,
+      next: string | null,
+    ): Promise<ArrayBuffer> {
       const resp = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${vozId}?output_format=mp3_44100_128`,
         {
@@ -643,6 +852,8 @@ export const regenerarAudio = createServerFn({ method: "POST" })
           body: JSON.stringify({
             text: texto,
             model_id: "eleven_multilingual_v2",
+            ...(prev ? { previous_text: prev.slice(-400) } : {}),
+            ...(next ? { next_text: next.slice(0, 400) } : {}),
             voice_settings: {
               stability: 0.6,
               similarity_boost: 0.75,
@@ -677,17 +888,27 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return path;
     }
 
-    let femPath: string;
-    let mascPath: string;
+    let trechos: Trecho[];
     try {
-      const [femBuf, mascBuf] = await Promise.all([
-        gerarVoz(VOZ_FEMININA_ID),
-        gerarVoz(VOZ_MASCULINA_ID),
-      ]);
-      [femPath, mascPath] = await Promise.all([
-        subir(femBuf, "fem"),
-        subir(mascBuf, "masc"),
-      ]);
+      const buffers = await Promise.all(
+        partes.map((p, i) =>
+          gerarVoz(
+            p.voz === "masc" ? VOZ_MASCULINA_ID : VOZ_FEMININA_ID,
+            p.texto,
+            i > 0 ? partes[i - 1].texto : null,
+            i < partes.length - 1 ? partes[i + 1].texto : null,
+          ),
+        ),
+      );
+      const paths = await Promise.all(
+        buffers.map((buf, i) => subir(buf, `t${i}-${partes[i].voz}`)),
+      );
+      trechos = partes.map((p, i) => ({
+        ordem: i,
+        rotulo: p.rotulo,
+        voz: p.voz,
+        path: paths[i],
+      }));
     } catch (e) {
       console.error("regenerarAudio:", e);
       const erro =
@@ -695,15 +916,16 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return { ok: false as const, erro };
     }
 
-    // Grava as referências no banco.
+    // Grava as referências no banco. Limpa os campos legados de voz única.
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
       .upsert(
         {
           num: chave,
-          audio_url: femPath,
-          audio_fem_path: femPath,
-          audio_masc_path: mascPath,
+          audio_trechos: trechos as unknown as import("@/integrations/supabase/types").Json,
+          audio_url: null,
+          audio_fem_path: null,
+          audio_masc_path: null,
         },
         { onConflict: "num" },
       )
@@ -718,6 +940,7 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     return {
       ok: true as const,
       versao: versaoDe(salvo?.updated_at),
+      trechos: trechos.length,
     };
   });
 
