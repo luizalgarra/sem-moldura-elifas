@@ -2,13 +2,22 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Save, RefreshCw, Search, Lock, Download } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  RefreshCw,
+  Search,
+  Lock,
+  Download,
+  Volume2,
+} from "lucide-react";
 import { obras } from "@/data/obras";
 import { VOZES, VOZ_PADRAO_ID } from "@/data/vozes";
 import {
   listarOverrides,
   salvarTexto,
   regenerarAudio,
+  amostraVoz,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
@@ -23,6 +32,9 @@ import {
 } from "@/components/ui/select";
 
 const OBRA_PROTEGIDA = 2;
+
+// Cache de URLs de amostra por voz, compartilhado entre os itens.
+const cacheAmostras = new Map<string, string>();
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -120,6 +132,8 @@ function ObraEditor({
 }) {
   const salvar = useServerFn(salvarTexto);
   const regenerar = useServerFn(regenerarAudio);
+  const buscarAmostra = useServerFn(amostraVoz);
+  const [tocandoAmostra, setTocandoAmostra] = useState(false);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
   const [salvando, setSalvando] = useState(false);
@@ -167,6 +181,30 @@ function ObraEditor({
       setGerando(false);
     }
   };
+
+  const handleAmostra = async () => {
+    setTocandoAmostra(true);
+    setMsg(null);
+    try {
+      let url = cacheAmostras.get(vozId);
+      if (!url) {
+        const r = await buscarAmostra({ data: { vozId } });
+        if (!r.ok || !r.url) {
+          setMsg(r.ok ? "Esta voz não tem amostra." : (r.erro ?? "Erro na amostra."));
+          return;
+        }
+        url = r.url;
+        cacheAmostras.set(vozId, url);
+      }
+      await new Audio(url).play();
+    } catch {
+      setMsg("Não foi possível tocar a amostra.");
+    } finally {
+      setTocandoAmostra(false);
+    }
+  };
+
+
 
   const audioSrc = temAudioRegen
     ? `/api/public/obra-audio/${num}?v=${versaoAudio}`
@@ -225,6 +263,20 @@ function ObraEditor({
                 ))}
               </SelectContent>
             </Select>
+            <Button
+              variant="outline"
+              onClick={handleAmostra}
+              disabled={tocandoAmostra}
+              className="min-h-11"
+              aria-label={`Ouvir amostra da voz da obra ${num}`}
+            >
+              {tocandoAmostra ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Volume2 aria-hidden="true" />
+              )}
+              <span>Ouvir amostra</span>
+            </Button>
             <Button
               variant="outline"
               onClick={handleRegenerar}
