@@ -150,7 +150,7 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { chave: num } });
+      const r = await regenerar({ data: { chave: num, vozId } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
         setMsg("Áudio regenerado.");
