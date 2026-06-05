@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Save, RefreshCw, Search, Lock } from "lucide-react";
+import { Loader2, Save, RefreshCw, Search, Lock, Download } from "lucide-react";
 import { obras } from "@/data/obras";
 import { VOZES, VOZ_PADRAO_ID } from "@/data/vozes";
 import {
