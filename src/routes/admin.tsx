@@ -265,6 +265,20 @@ function ObraEditor({
             </Select>
             <Button
               variant="outline"
+              onClick={handleAmostra}
+              disabled={tocandoAmostra}
+              className="min-h-11"
+              aria-label={`Ouvir amostra da voz da obra ${num}`}
+            >
+              {tocandoAmostra ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Volume2 aria-hidden="true" />
+              )}
+              <span>Ouvir amostra</span>
+            </Button>
+            <Button
+              variant="outline"
               onClick={handleRegenerar}
               disabled={gerando}
               className="min-h-11"
