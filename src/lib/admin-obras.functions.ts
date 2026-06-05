@@ -24,6 +24,24 @@ export interface OverrideObra {
   updatedAt: string | null;
 }
 
+/** Voz de um trecho: feminina (Carla) ou masculina (Danilo). */
+export type VozTipo = "fem" | "masc";
+
+/** Um trecho de áudio já gerado, salvo em `audio_trechos`. */
+export interface Trecho {
+  ordem: number;
+  rotulo: string;
+  voz: VozTipo;
+  path: string;
+}
+
+/** Trecho exposto ao cliente (URL pública em vez do path interno). */
+export interface TrechoPublico {
+  rotulo: string;
+  voz: VozTipo;
+  url: string;
+}
+
 /**
  * Obra pronta para exibição.
  * - `num`: número EXIBIDO (a posição na sequência; 1, 2, 3, ...).
@@ -34,12 +52,169 @@ export interface ObraAcervo extends Obra {
   extra: boolean;
   audioFem: string | null;
   audioMasc: string | null;
+  audioTrechos: TrechoPublico[] | null;
 }
 
 function versaoDe(updatedAt: string | null | undefined): string {
   return updatedAt
     ? new Date(updatedAt).getTime().toString()
     : Date.now().toString();
+}
+
+// ----- Divisão do texto em seções (locução alternada) -----
+
+interface SecaoDef {
+  chaves: string[];
+  rotulo: string;
+  voz: VozTipo;
+}
+
+/**
+ * Ordem de REPRODUÇÃO: a audiodescrição abre (voz masculina) e as vozes se
+ * revezam entre fato e leitura.
+ */
+const SECOES: SecaoDef[] = [
+  {
+    chaves: [
+      "audiodescricao",
+      "audio descricao",
+      "audiodescricao da obra",
+      "descricao da imagem",
+    ],
+    rotulo: "Audiodescrição",
+    voz: "masc",
+  },
+  {
+    chaves: ["identificacao da obra", "identificacao"],
+    rotulo: "Identificação",
+    voz: "fem",
+  },
+  {
+    chaves: [
+      "contexto historico e cultural",
+      "contexto historico",
+      "contexto cultural",
+      "contexto",
+    ],
+    rotulo: "Contexto",
+    voz: "masc",
+  },
+  {
+    chaves: ["analise interpretativa", "analise"],
+    rotulo: "Análise",
+    voz: "fem",
+  },
+];
+
+const VOZES_FALLBACK: VozTipo[] = ["masc", "fem", "masc", "fem"];
+const ROTULOS_FALLBACK = ["Parte 1", "Parte 2", "Parte 3", "Parte 4"];
+
+function normalizar(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Remove marcações de título (#, *, :, traços) de uma linha. */
+function limparTitulo(linha: string): string {
+  return linha
+    .replace(/^[#*\->\s]+/, "")
+    .replace(/[:*\s]+$/, "")
+    .trim();
+}
+
+/** Distribui parágrafos/frases em `n` blocos equilibrados por tamanho. */
+function dividirEmBlocos(texto: string, n: number): string[] {
+  let partes = texto
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (partes.length < n) {
+    partes = texto
+      .split(/(?<=[.!?])\s+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }
+  if (partes.length === 0) return [];
+  if (partes.length <= n) return partes;
+
+  const total = partes.reduce((a, p) => a + p.length, 0);
+  const alvo = total / n;
+  const blocos: string[] = [];
+  let atual = "";
+  for (const parte of partes) {
+    atual = atual ? `${atual}\n\n${parte}` : parte;
+    if (blocos.length < n - 1 && atual.length >= alvo) {
+      blocos.push(atual);
+      atual = "";
+    }
+  }
+  if (atual) blocos.push(atual);
+  return blocos;
+}
+
+interface TrechoTexto {
+  rotulo: string;
+  voz: VozTipo;
+  texto: string;
+}
+
+/**
+ * Divide o texto da obra na ordem de reprodução alternada. Usa os títulos do
+ * prompt quando existem; senão divide "como der" em 4 blocos alternando vozes.
+ */
+export function dividirTrechos(texto: string): TrechoTexto[] {
+  const limpo = texto.trim();
+  if (!limpo) return [];
+
+  // Mapa normalizado: chave de seção -> índice em SECOES.
+  const mapa = new Map<string, number>();
+  SECOES.forEach((sec, i) => {
+    for (const chave of sec.chaves) mapa.set(normalizar(chave), i);
+  });
+
+  const linhas = limpo.split(/\r?\n/);
+  const capturado = new Map<number, string[]>();
+  let secaoAtual = -1;
+  let achouTitulo = false;
+
+  for (const linha of linhas) {
+    const titulo = limparTitulo(linha);
+    const norm = normalizar(titulo);
+    const idx =
+      titulo.length > 0 && titulo.length <= 60 ? mapa.get(norm) : undefined;
+    if (idx !== undefined) {
+      secaoAtual = idx;
+      achouTitulo = true;
+      if (!capturado.has(idx)) capturado.set(idx, []);
+      continue;
+    }
+    if (secaoAtual >= 0 && linha.trim()) {
+      capturado.get(secaoAtual)!.push(linha.trim());
+    }
+  }
+
+  if (achouTitulo) {
+    const trechos: TrechoTexto[] = [];
+    SECOES.forEach((sec, i) => {
+      const corpo = (capturado.get(i) ?? []).join("\n").trim();
+      if (corpo)
+        trechos.push({ rotulo: sec.rotulo, voz: sec.voz, texto: corpo });
+    });
+    if (trechos.length > 0) return trechos;
+  }
+
+  // Fallback: divide em até 4 blocos alternando vozes.
+  const blocos = dividirEmBlocos(limpo, 4);
+  return blocos.map((texto, i) => ({
+    rotulo: ROTULOS_FALLBACK[i] ?? `Parte ${i + 1}`,
+    voz: VOZES_FALLBACK[i % VOZES_FALLBACK.length],
+    texto,
+  }));
 }
 
 type SupabaseAdmin = Awaited<
