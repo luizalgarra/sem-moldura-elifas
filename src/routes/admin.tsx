@@ -134,15 +134,16 @@ function AdminPagina() {
           Administração de textos e áudios
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Edite a descrição de cada obra e gere o áudio. Cada obra é gerada com
-          as duas vozes padrão (feminina e masculina).
+          Edite a descrição de cada obra e gere a locução. A leitura alterna as
+          vozes por seção: Audiodescrição (masculina) → Identificação (feminina)
+          → Contexto (masculina) → Análise (feminina).
         </p>
       </header>
 
       <div className="mt-6 rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-medium text-foreground">Vozes padrão</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Cada obra recebe as duas locuções. Ouça as amostras abaixo.
+          As duas vozes usadas no revezamento. Ouça as amostras abaixo.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {VOZES_PADRAO.map((v) => (
