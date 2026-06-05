@@ -221,6 +221,24 @@ type SupabaseAdmin = Awaited<
   typeof import("@/integrations/supabase/client.server")
 >["supabaseAdmin"];
 
+/** Converte os trechos salvos no banco em URLs públicas (ou null). */
+function trechosPublicos(
+  raw: unknown,
+  num: number,
+  v: string,
+): TrechoPublico[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const lista = (raw as Trecho[])
+    .slice()
+    .sort((a, b) => a.ordem - b.ordem)
+    .map((t, i) => ({
+      rotulo: t.rotulo,
+      voz: t.voz,
+      url: `/api/public/obra-audio/${num}?trecho=${i}&v=${v}`,
+    }));
+  return lista.length > 0 ? lista : null;
+}
+
 /**
  * Monta o acervo completo (fixas + extras), já com edições aplicadas e
  * ordenado pela tabela `acervo_ordem`. O `num` de cada obra é a POSIÇÃO
