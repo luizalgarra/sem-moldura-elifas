@@ -600,7 +600,7 @@ export const regenerarAudio = createServerFn({ method: "POST" })
 
     const estatica = fixa ? getObra(chave) : undefined;
     const texto = existente?.descricao ?? estatica?.descricao ?? "";
-    const vozId = existente?.voz_id ?? VOZ_PADRAO;
+    const vozId = vozEscolhida ?? existente?.voz_id ?? VOZ_PADRAO;
 
     if (!texto.trim()) {
       return { ok: false as const, erro: "Esta obra não tem texto." };
