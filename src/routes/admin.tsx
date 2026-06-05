@@ -236,7 +236,6 @@ function ObraEditor({
   textoEstatico,
   audioEstatico,
   override,
-  vozId,
   onChanged,
 }: {
   num: number;
@@ -244,7 +243,6 @@ function ObraEditor({
   textoEstatico: string;
   audioEstatico: string | null;
   override: OverrideObra | undefined;
-  vozId: string;
   onChanged: () => void;
 }) {
   const salvar = useServerFn(salvarTexto);
@@ -255,7 +253,9 @@ function ObraEditor({
   const [gerando, setGerando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioPath ? Date.now().toString() : null,
+    override?.audioFemPath || override?.audioMascPath || override?.audioPath
+      ? Date.now().toString()
+      : null,
   );
 
   const protegida = num === OBRA_PROTEGIDA;
@@ -279,24 +279,29 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { chave: num, vozId } });
+      const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
-        setMsg("Áudio regenerado.");
+        setMsg("Áudios gerados (feminina e masculina).");
         onChanged();
       } else {
-        setMsg(r.erro ?? "Erro ao regenerar.");
+        setMsg(r.erro ?? "Erro ao gerar.");
       }
     } catch {
-      setMsg("Erro ao regenerar.");
+      setMsg("Erro ao gerar.");
     } finally {
       setGerando(false);
     }
   };
 
-  const audioSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?v=${versaoAudio}`
+  const audioFemSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
     : null;
+  const audioMascSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=masc&v=${versaoAudio}`
+    : null;
+  const audioSrc = audioFemSrc;
+
 
   const downloadSrc = audioSrc ?? audioEstatico;
 
