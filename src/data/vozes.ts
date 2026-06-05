@@ -12,6 +12,12 @@ export interface Voz {
 export const VOZES: Voz[] = [
   // Brasileiras (profissionais, pt-BR)
   {
+    id: "7eUAxNOneHxqfyRS77mW",
+    nome: "Carla (Conversacional)",
+    descricao: "feminina, conversacional",
+    genero: "feminina",
+  },
+  {
     id: "KHmfNHtEjHhLK9eER20w",
     nome: "Fernanda",
     descricao: "feminina, formal e neutra",
@@ -21,12 +27,6 @@ export const VOZES: Voz[] = [
     id: "x8FWrDHAK5xiFTJLpnHq",
     nome: "Carla (Rural)",
     descricao: "feminina, dinâmica e articulada",
-    genero: "feminina",
-  },
-  {
-    id: "7eUAxNOneHxqfyRS77mW",
-    nome: "Carla (Conversacional)",
-    descricao: "feminina, conversacional",
     genero: "feminina",
   },
   {
@@ -116,7 +116,7 @@ export const VOZES: Voz[] = [
   },
 ];
 
-export const VOZ_PADRAO_ID = "KHmfNHtEjHhLK9eER20w"; // Fernanda
+export const VOZ_PADRAO_ID = "7eUAxNOneHxqfyRS77mW"; // Carla (Conversacional)
 
 const IDS_VALIDOS = new Set(VOZES.map((v) => v.id));
 
