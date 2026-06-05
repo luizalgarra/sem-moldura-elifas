@@ -296,6 +296,7 @@ async function construirAcervo(
       audio: audioFem,
       audioFem,
       audioMasc,
+      audioTrechos: trechosPublicos(ov?.audio_trechos, obra.num, v),
       extra: false,
     });
   }
