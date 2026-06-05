@@ -782,8 +782,8 @@ export const salvarTexto = createServerFn({ method: "POST" })
   });
 
 /**
- * Gera (em lote) as DUAS locuções de uma obra — feminina (Carla) e
- * masculina (Danilo) — via ElevenLabs e salva ambas no storage.
+ * Gera a locução ALTERNADA de uma obra: divide o texto em seções (na ordem de
+ * reprodução) e grava um clipe por trecho, alternando as vozes (masc/fem).
  */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
@@ -829,8 +829,18 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return { ok: false as const, erro: "Esta obra não tem texto." };
     }
 
-    // Gera o áudio de uma voz e retorna o buffer.
-    async function gerarVoz(vozId: string): Promise<ArrayBuffer> {
+    const partes = dividirTrechos(texto);
+    if (partes.length === 0) {
+      return { ok: false as const, erro: "Não foi possível dividir o texto." };
+    }
+
+    // Gera o áudio de um trecho (com contexto dos vizinhos) e retorna o buffer.
+    async function gerarVoz(
+      vozId: string,
+      texto: string,
+      prev: string | null,
+      next: string | null,
+    ): Promise<ArrayBuffer> {
       const resp = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${vozId}?output_format=mp3_44100_128`,
         {
@@ -842,6 +852,8 @@ export const regenerarAudio = createServerFn({ method: "POST" })
           body: JSON.stringify({
             text: texto,
             model_id: "eleven_multilingual_v2",
+            ...(prev ? { previous_text: prev.slice(-400) } : {}),
+            ...(next ? { next_text: next.slice(0, 400) } : {}),
             voice_settings: {
               stability: 0.6,
               similarity_boost: 0.75,
@@ -876,17 +888,27 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return path;
     }
 
-    let femPath: string;
-    let mascPath: string;
+    let trechos: Trecho[];
     try {
-      const [femBuf, mascBuf] = await Promise.all([
-        gerarVoz(VOZ_FEMININA_ID),
-        gerarVoz(VOZ_MASCULINA_ID),
-      ]);
-      [femPath, mascPath] = await Promise.all([
-        subir(femBuf, "fem"),
-        subir(mascBuf, "masc"),
-      ]);
+      const buffers = await Promise.all(
+        partes.map((p, i) =>
+          gerarVoz(
+            p.voz === "masc" ? VOZ_MASCULINA_ID : VOZ_FEMININA_ID,
+            p.texto,
+            i > 0 ? partes[i - 1].texto : null,
+            i < partes.length - 1 ? partes[i + 1].texto : null,
+          ),
+        ),
+      );
+      const paths = await Promise.all(
+        buffers.map((buf, i) => subir(buf, `t${i}-${partes[i].voz}`)),
+      );
+      trechos = partes.map((p, i) => ({
+        ordem: i,
+        rotulo: p.rotulo,
+        voz: p.voz,
+        path: paths[i],
+      }));
     } catch (e) {
       console.error("regenerarAudio:", e);
       const erro =
@@ -894,15 +916,16 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return { ok: false as const, erro };
     }
 
-    // Grava as referências no banco.
+    // Grava as referências no banco. Limpa os campos legados de voz única.
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
       .upsert(
         {
           num: chave,
-          audio_url: femPath,
-          audio_fem_path: femPath,
-          audio_masc_path: mascPath,
+          audio_trechos: trechos as unknown as Record<string, unknown>[],
+          audio_url: null,
+          audio_fem_path: null,
+          audio_masc_path: null,
         },
         { onConflict: "num" },
       )
@@ -917,6 +940,7 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     return {
       ok: true as const,
       versao: versaoDe(salvo?.updated_at),
+      trechos: trechos.length,
     };
   });
 
