@@ -206,7 +206,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, voz_id, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, voz_id, updated_at",
       )
       .order("num", { ascending: true });
 
@@ -226,6 +226,8 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
       descricao: row.descricao,
       imagemPath: row.imagem_path,
       audioPath: row.audio_url,
+      audioFemPath: row.audio_fem_path,
+      audioMascPath: row.audio_masc_path,
       vozId: row.voz_id,
       updatedAt: row.updated_at,
     }));
