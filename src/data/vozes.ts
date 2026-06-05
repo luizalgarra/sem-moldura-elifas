@@ -1,5 +1,6 @@
 // Vozes disponíveis para a áudio-descrição (ElevenLabs, modelo multilingual).
 // Nome amigável -> ID da voz. Apenas estes IDs são aceitos na regeneração.
+// Somente vozes brasileiras (pt-BR) e as vozes próprias da conta.
 
 export interface Voz {
   id: string;
@@ -9,113 +10,113 @@ export interface Voz {
 }
 
 export const VOZES: Voz[] = [
-  // Femininas
+  // Brasileiras (profissionais, pt-BR)
   {
-    id: "EXAVITQu4vr4xnSDxMaL",
-    nome: "Sarah",
-    descricao: "feminina, suave",
+    id: "KHmfNHtEjHhLK9eER20w",
+    nome: "Fernanda",
+    descricao: "feminina, formal e neutra",
     genero: "feminina",
   },
   {
-    id: "FGY2WhTYpPnrIDTdsKH5",
-    nome: "Laura",
-    descricao: "feminina, jovem e animada",
+    id: "x8FWrDHAK5xiFTJLpnHq",
+    nome: "Carla (Rural)",
+    descricao: "feminina, dinâmica e articulada",
     genero: "feminina",
   },
   {
-    id: "Xb7hH8MSUJpSbSDYk0k2",
-    nome: "Alice",
-    descricao: "feminina, clara (britânica)",
+    id: "7eUAxNOneHxqfyRS77mW",
+    nome: "Carla (Conversacional)",
+    descricao: "feminina, conversacional",
     genero: "feminina",
   },
   {
-    id: "XrExE9yKIg1WjnnlVkGX",
-    nome: "Matilda",
-    descricao: "feminina, calorosa",
+    id: "gX4eTo1XOTTALJXnDro4",
+    nome: "Mulher Brasileira",
+    descricao: "feminina, adulta",
     genero: "feminina",
   },
   {
-    id: "cgSgspJ2msm6clMCkdW9",
-    nome: "Jessica",
-    descricao: "feminina, expressiva",
+    id: "KITnmtUQzTcNTfun1PuL",
+    nome: "Israela",
+    descricao: "feminina, clara",
     genero: "feminina",
   },
   {
-    id: "pFZP5JQG7iQjIQuC4Bku",
-    nome: "Lily",
-    descricao: "feminina, suave (britânica)",
+    id: "RGymW84CSmfVugnA5tvA",
+    nome: "Roberta",
+    descricao: "feminina, conversacional",
     genero: "feminina",
   },
-  // Masculinas
   {
-    id: "JBFqnCBsd6RMkjVDRZzb",
-    nome: "George",
-    descricao: "masculina, madura",
+    id: "lWq4KDY8znfkV0DrK8Vb",
+    nome: "Yasmin",
+    descricao: "feminina, brasileira",
+    genero: "feminina",
+  },
+  {
+    id: "4J31DrhygVjvFsoj7BsM",
+    nome: "Eduardo S.",
+    descricao: "masculina, claro e profissional",
     genero: "masculina",
   },
   {
-    id: "CwhRBWXzGAHq8TQ4Fs17",
-    nome: "Roger",
-    descricao: "masculina, natural",
+    id: "GIuLCSVfgJaUuh7hYOY8",
+    nome: "Lucas",
+    descricao: "masculina, narrador profundo",
     genero: "masculina",
   },
   {
-    id: "IKne3meq5aSn9XLyUdCD",
-    nome: "Charlie",
-    descricao: "masculina, confiante (australiana)",
+    id: "rVRk0uJAtO8T38Gm03mf",
+    nome: "Danilo Tenfen",
+    descricao: "masculina, voz documental",
+    genero: "masculina",
+  },
+  // Minhas vozes (clonadas/geradas na conta)
+  {
+    id: "7RayHCB0HjokjhjlhgJh",
+    nome: "Clau Q 2",
+    descricao: "feminina, clonada",
+    genero: "feminina",
+  },
+  {
+    id: "YByYS1BfwsfB4yG6Npgc",
+    nome: "Olivia G",
+    descricao: "feminina, clonada",
+    genero: "feminina",
+  },
+  {
+    id: "AXnnxJ1JdrlSrvHJCGaq",
+    nome: "Claudia Q",
+    descricao: "feminina, clonada",
+    genero: "feminina",
+  },
+  {
+    id: "vofTy3egc8t4WQffImNo",
+    nome: "Nelma Narradora",
+    descricao: "feminina, gerada",
+    genero: "feminina",
+  },
+  {
+    id: "QCSfV4N2pgkM9p49cZS1",
+    nome: "Voz Tratamento Esgoto",
+    descricao: "clonada",
+    genero: "feminina",
+  },
+  {
+    id: "sVgLvEbz3B0k5Tfpp8vZ",
+    nome: "Ricardo Porto Bank",
+    descricao: "masculina, gerada",
     genero: "masculina",
   },
   {
-    id: "N2lVS1w4EtoT3dr4eOWO",
-    nome: "Callum",
-    descricao: "masculina, intensa",
-    genero: "masculina",
-  },
-  {
-    id: "TX3LPaxmHKxFdv7VOQHJ",
-    nome: "Liam",
-    descricao: "masculina, articulada",
-    genero: "masculina",
-  },
-  {
-    id: "bIHbv24MWmeRgasZH58o",
-    nome: "Will",
-    descricao: "masculina, amigável",
-    genero: "masculina",
-  },
-  {
-    id: "cjVigY5qzO86Huf0OWal",
-    nome: "Eric",
-    descricao: "masculina, clássica",
-    genero: "masculina",
-  },
-  {
-    id: "iP95p4xoKVk53GoZ742B",
-    nome: "Chris",
-    descricao: "masculina, casual",
-    genero: "masculina",
-  },
-  {
-    id: "nPczCjzI2devNBz1zQrb",
-    nome: "Brian",
-    descricao: "masculina, profunda",
-    genero: "masculina",
-  },
-  {
-    id: "onwK4e9ZLuTAKqWW03F9",
-    nome: "Daniel",
-    descricao: "masculina, locução",
-    genero: "masculina",
-  },
-  {
-    id: "pqHfZKP75CvOlQylNhV4",
-    nome: "Bill",
-    descricao: "masculina, narração",
+    id: "52W17QcGf83bCDb464tN",
+    nome: "Rubens Portela",
+    descricao: "masculina, gerada",
     genero: "masculina",
   },
 ];
 
-export const VOZ_PADRAO_ID = "EXAVITQu4vr4xnSDxMaL"; // Sarah
+export const VOZ_PADRAO_ID = "KHmfNHtEjHhLK9eER20w"; // Fernanda
 
 const IDS_VALIDOS = new Set(VOZES.map((v) => v.id));
 

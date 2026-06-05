@@ -1,32 +1,42 @@
 ## Objetivo
 
-Adicionar um botão de **amostra** ao lado do seletor de voz no painel `/admin`, para ouvir como soa a voz selecionada antes de regenerar o áudio da obra.
+No seletor de voz do admin, mostrar **apenas vozes brasileiras** (português do Brasil) e **as suas próprias vozes** (clonadas/geradas na sua conta ElevenLabs), removendo todas as vozes em inglês.
 
-## Abordagem
+## O que muda
 
-Cada voz da ElevenLabs tem uma URL de prévia (`preview_url`) — um MP3 curto hospedado pela própria ElevenLabs. Vamos buscar essa URL via API (sem custo de geração de áudio) e tocá-la no navegador.
+Editar somente `src/data/vozes.ts` — a lista `VOZES`. Nenhuma mudança de banco, API ou de outra tela. O botão de amostra e a regeneração continuam funcionando, pois usam essa mesma lista.
 
-## Mudanças
+### Vozes brasileiras (profissionais, pt-BR)
 
-### 1. Nova server function — `src/lib/admin-obras.functions.ts`
+- Carla – Rural, dinâmica (feminina)
+- Carla – Conversacional (feminina)
+- Adult Brazilian woman (feminina)
+- Fernanda – formal e neutra (feminina)
+- Israela (feminina)
+- Roberta – conversacional (feminina)
+- Yasmin (feminina)
+- Eduardo S. – claro e profissional (masculina)
+- Lucas – narrador profundo (masculina)
+- Danilo Tenfen – voz documental (masculina)
 
-Adicionar `amostraVoz`:
-- Recebe `vozId` (validado com `vozValida()` e `z`).
-- Lê `ELEVENLABS_API_KEY` de `process.env`.
-- Faz `GET https://api.elevenlabs.io/v1/voices/{vozId}` com header `xi-api-key`.
-- Retorna `{ ok: true, url: preview_url }` ou `{ ok: false, erro }`.
+### Minhas vozes (clonadas/geradas na sua conta)
 
-### 2. UI — `src/routes/admin.tsx`
+- Clau Q 2 (clonada)
+- Olivia G (clonada)
+- Claudia Q (clonada)
+- Nelma Narradora (gerada)
+- Ricardo Porto Bank (gerada)
+- Rubens Portela (gerada)
+- voz tratamento esgoto (clonada)
 
-- Importar o ícone `Volume2` (e `Loader2` já existe) de `lucide-react` e a função `amostraVoz`.
-- No componente `ObraEditor`, ao lado do `<Select>` de voz, adicionar um botão **"Ouvir amostra"**:
-  - Ao clicar: chama `amostraVoz({ data: { vozId } })`, recebe a URL e toca com um `new Audio(url)`.
-  - Mostra estado de carregamento (spinner) enquanto busca; reaproveita um cache local (`Map` por `vozId`) para não rebuscar a mesma voz.
-  - Em erro, exibe mensagem na área de status já existente (`setMsg`).
-- O botão fica visível apenas quando a obra não é protegida (mesma condição do seletor de voz).
+> Observação: a voz "Adilson" foi descartada por ser **português europeu**, não brasileiro.
+
+### Voz padrão
+
+Como Sarah (inglês) sai da lista, a voz padrão (`VOZ_PADRAO_ID`) passa a ser uma voz brasileira — sugestão **Fernanda** (formal e neutra), boa para áudio-descrição. Áudios já gerados continuam tocando normalmente; ao reabrir uma obra antiga, o seletor simplesmente mostrará a voz padrão se a antiga não estiver mais na lista.
 
 ## Detalhes técnicos
 
-- A reprodução usa `new Audio(previewUrl).play()` no handler do clique (gesto do usuário), evitando bloqueio de autoplay.
-- Sem mudanças de banco de dados. Usa a chave `ELEVENLABS_API_KEY` já existente.
-- `amostraVoz` não gera fala nova (apenas lê metadados da voz), então não consome créditos de TTS.
+- Reescrever o array `VOZES` com os IDs acima, separados por comentários `// Brasileiras` e `// Minhas vozes`, mantendo o campo `genero` para o agrupamento existente na UI.
+- Atualizar `VOZ_PADRAO_ID` para o ID da Fernanda (`KHmfNHtEjHhLK9eER20w`).
+- `vozValida()` e `IDS_VALIDOS` continuam derivando automaticamente do array, sem alteração de lógica.
