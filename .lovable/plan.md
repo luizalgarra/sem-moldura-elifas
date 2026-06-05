@@ -1,29 +1,25 @@
 ## Objetivo
 
-Substituir a escolha de voz **por obra** por uma única escolha **global**: alternar entre a voz feminina padrão (**Carla**) e a masculina padrão (**Danilo Tenfen**). Os seletores de voz de cada obra desaparecem.
+No controle global de voz, separar Carla e Danilo Tenfen em **dois botões lado a lado**, cada um com sua própria amostra. Clicar em um botão define essa voz como a usada para regenerar o áudio.
 
 ## O que muda
 
 Editar apenas `src/routes/admin.tsx`.
 
-### Controle global (topo da página)
+### Controle global (topo)
 
-- Adicionar, abaixo do cabeçalho, um seletor único com duas opções:
-  - **Carla** (feminina) — `7eUAxNOneHxqfyRS77mW`
-  - **Danilo Tenfen** (masculina) — `rVRk0uJAtO8T38Gm03mf`
-- Estado `vozGlobal` em `AdminPagina`, iniciando em Carla.
-- Botão **Ouvir amostra** ao lado, usando a função `amostraVoz` já existente, para a voz global escolhida.
-- Essa voz vale para **todas** as regenerações de áudio.
+- Remover o `<Select>` único de voz padrão.
+- Mostrar dois botões lado a lado:
+  - **Carla (feminina)** — `7eUAxNOneHxqfyRS77mW`
+  - **Danilo Tenfen (masculina)** — `rVRk0uJAtO8T38Gm03mf`
+- O botão correspondente à voz ativa fica destacado (variant `default`); o outro fica como `outline`. Clicar troca a voz ativa (`vozGlobal`).
+- Ao lado de cada botão, um botão menor **Ouvir amostra** que toca a amostra daquela voz específica (reaproveita `amostraVoz` e o cache existente).
 
-### Em cada obra (ObraEditor)
+### Restante
 
-- Remover o `<Select>` de voz e o botão "Ouvir amostra" individuais.
-- O botão **Regenerar áudio** passa a usar a voz global (recebida via prop), em vez do estado local.
-- Mantém intactos: edição de texto, salvar, player e botão de baixar áudio.
+- A voz ativa (`vozGlobal`) continua sendo passada para cada `ObraEditor` e usada na regeneração — sem mudanças nessa parte nem nos componentes de obra.
 
 ## Detalhes técnicos
 
-- `AdminPagina` passa `vozId={vozGlobal}` para cada `ObraEditor`.
-- Em `ObraEditor`, remover os estados `vozId`, `tocandoAmostra` e a função `handleAmostra`; `handleRegenerar` usa a prop `vozId`.
-- A lógica de amostra (cache + `new Audio().play()`) sobe para `AdminPagina`.
-- `VOZES` e `vozes.ts` permanecem como estão (a lista completa continua válida no backend); o admin apenas oferece as duas opções padrão.
+- A função de amostra passa a receber o `id` da voz como argumento (em vez de usar só `vozGlobal`), para tocar a amostra de qualquer um dos dois botões.
+- Estado de "tocando amostra" por voz (ou um id em carregamento) para mostrar o spinner no botão certo.
