@@ -129,6 +129,8 @@ function ObraEditor({
 }) {
   const salvar = useServerFn(salvarTexto);
   const regenerar = useServerFn(regenerarAudio);
+  const buscarAmostra = useServerFn(amostraVoz);
+  const [tocandoAmostra, setTocandoAmostra] = useState(false);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
   const [salvando, setSalvando] = useState(false);
