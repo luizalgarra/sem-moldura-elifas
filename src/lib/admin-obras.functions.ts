@@ -582,20 +582,21 @@ export const salvarTexto = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-/** Regenera o áudio de uma obra via ElevenLabs e salva no storage. */
+/**
+ * Gera (em lote) as DUAS locuções de uma obra — feminina (Carla) e
+ * masculina (Danilo) — via ElevenLabs e salva ambas no storage.
+ */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
         chave: z.number().int().min(1).max(MAX_CHAVE),
-        vozId: z.string().min(1).max(100).optional(),
       })
       .parse(input),
   )
   .handler(async ({ data }) => {
     const { chave } = data;
     const fixa = ehObraFixa(chave);
-    const vozEscolhida = vozValida(data.vozId) ? data.vozId! : null;
 
     if (chave === OBRA_PROTEGIDA) {
       return {
@@ -618,27 +619,25 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     // Texto: usa o registro salvo se existir, senão o texto estático (fixas).
     const { data: existente } = await supabaseAdmin
       .from(tabela)
-      .select("descricao, voz_id")
+      .select("descricao")
       .eq("num", chave)
       .maybeSingle();
 
     const estatica = fixa ? getObra(chave) : undefined;
     const texto = existente?.descricao ?? estatica?.descricao ?? "";
-    const vozId = vozEscolhida ?? existente?.voz_id ?? VOZ_PADRAO;
 
     if (!texto.trim()) {
       return { ok: false as const, erro: "Esta obra não tem texto." };
     }
 
-    // Gera o áudio.
-    let audioBuffer: ArrayBuffer;
-    try {
+    // Gera o áudio de uma voz e retorna o buffer.
+    async function gerarVoz(vozId: string): Promise<ArrayBuffer> {
       const resp = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${vozId}?output_format=mp3_44100_128`,
         {
           method: "POST",
           headers: {
-            "xi-api-key": apiKey,
+            "xi-api-key": apiKey!,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -654,39 +653,60 @@ export const regenerarAudio = createServerFn({ method: "POST" })
           }),
         },
       );
-
       if (!resp.ok) {
         const err = await resp.text();
         console.error("ElevenLabs:", resp.status, err);
-        return {
-          ok: false as const,
-          erro: `Falha ao gerar áudio (${resp.status}).`,
-        };
+        throw new Error(`Falha ao gerar áudio (${resp.status}).`);
       }
-      audioBuffer = await resp.arrayBuffer();
+      return resp.arrayBuffer();
+    }
+
+    // Faz upload de um buffer e retorna o caminho gravado.
+    async function subir(buffer: ArrayBuffer, sufixo: string): Promise<string> {
+      const path = `obra-${chave}-${sufixo}-${Date.now()}.mp3`;
+      const { error: upErr } = await supabaseAdmin.storage
+        .from("audios-obras")
+        .upload(path, new Uint8Array(buffer), {
+          contentType: "audio/mpeg",
+          upsert: true,
+        });
+      if (upErr) {
+        console.error("upload:", upErr.message);
+        throw new Error("Não foi possível salvar o áudio.");
+      }
+      return path;
+    }
+
+    let femPath: string;
+    let mascPath: string;
+    try {
+      const [femBuf, mascBuf] = await Promise.all([
+        gerarVoz(VOZ_FEMININA_ID),
+        gerarVoz(VOZ_MASCULINA_ID),
+      ]);
+      [femPath, mascPath] = await Promise.all([
+        subir(femBuf, "fem"),
+        subir(mascBuf, "masc"),
+      ]);
     } catch (e) {
-      console.error("regenerarAudio fetch:", e);
-      return { ok: false as const, erro: "Serviço de voz indisponível." };
+      console.error("regenerarAudio:", e);
+      const erro =
+        e instanceof Error ? e.message : "Serviço de voz indisponível.";
+      return { ok: false as const, erro };
     }
 
-    // Faz upload no storage (bucket privado).
-    const path = `obra-${chave}-${Date.now()}.mp3`;
-    const { error: upErr } = await supabaseAdmin.storage
-      .from("audios-obras")
-      .upload(path, new Uint8Array(audioBuffer), {
-        contentType: "audio/mpeg",
-        upsert: true,
-      });
-
-    if (upErr) {
-      console.error("upload:", upErr.message);
-      return { ok: false as const, erro: "Não foi possível salvar o áudio." };
-    }
-
-    // Grava a referência no banco.
+    // Grava as referências no banco.
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
-      .upsert({ num: chave, audio_url: path, voz_id: vozId }, { onConflict: "num" })
+      .upsert(
+        {
+          num: chave,
+          audio_url: femPath,
+          audio_fem_path: femPath,
+          audio_masc_path: mascPath,
+        },
+        { onConflict: "num" },
+      )
       .select("updated_at")
       .single();
 
