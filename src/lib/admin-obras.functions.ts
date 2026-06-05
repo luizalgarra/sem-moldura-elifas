@@ -57,12 +57,12 @@ async function construirAcervo(
     supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, updated_at",
       ),
     supabaseAdmin
       .from("obras_extras")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, updated_at",
       ),
     supabaseAdmin.from("acervo_ordem").select("chave, posicao"),
   ]);
@@ -76,6 +76,15 @@ async function construirAcervo(
   for (const obra of obras) {
     if (ocultas.has(obra.num)) continue;
     const ov = overrides.get(obra.num);
+    const v = versaoDe(ov?.updated_at);
+    const audioFem = ov?.audio_fem_path
+      ? `/api/public/obra-audio/${obra.num}?voz=fem&v=${v}`
+      : ov?.audio_url
+        ? `/api/public/obra-audio/${obra.num}?v=${v}`
+        : obra.audio;
+    const audioMasc = ov?.audio_masc_path
+      ? `/api/public/obra-audio/${obra.num}?voz=masc&v=${v}`
+      : null;
     disponiveis.set(obra.num, {
       num: obra.num, // provisório; será sobrescrito pela posição
       chave: obra.num,
@@ -87,16 +96,25 @@ async function construirAcervo(
       parede: ov?.parede ?? obra.parede,
       descricao: ov?.descricao ?? obra.descricao,
       imagem: ov?.imagem_path
-        ? `/api/public/obra-imagem/${obra.num}?v=${versaoDe(ov.updated_at)}`
+        ? `/api/public/obra-imagem/${obra.num}?v=${v}`
         : obra.imagem,
-      audio: ov?.audio_url
-        ? `/api/public/obra-audio/${obra.num}?v=${versaoDe(ov.updated_at)}`
-        : obra.audio,
+      audio: audioFem,
+      audioFem,
+      audioMasc,
       extra: false,
     });
   }
 
   for (const ex of extrasRes.data ?? []) {
+    const v = versaoDe(ex.updated_at);
+    const audioFem = ex.audio_fem_path
+      ? `/api/public/obra-audio/${ex.num}?voz=fem&v=${v}`
+      : ex.audio_url
+        ? `/api/public/obra-audio/${ex.num}?v=${v}`
+        : null;
+    const audioMasc = ex.audio_masc_path
+      ? `/api/public/obra-audio/${ex.num}?voz=masc&v=${v}`
+      : null;
     disponiveis.set(ex.num, {
       num: ex.num,
       chave: ex.num,
@@ -108,14 +126,15 @@ async function construirAcervo(
       parede: ex.parede ?? "Parede 4",
       descricao: ex.descricao ?? "",
       imagem: ex.imagem_path
-        ? `/api/public/obra-imagem/${ex.num}?v=${versaoDe(ex.updated_at)}`
+        ? `/api/public/obra-imagem/${ex.num}?v=${v}`
         : null,
-      audio: ex.audio_url
-        ? `/api/public/obra-audio/${ex.num}?v=${versaoDe(ex.updated_at)}`
-        : null,
+      audio: audioFem,
+      audioFem,
+      audioMasc,
       extra: true,
     });
   }
+
 
   // Define a ordem das chaves.
   const ordemRows = (ordemRes.data ?? [])
