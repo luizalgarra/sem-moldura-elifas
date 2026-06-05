@@ -61,9 +61,14 @@ function AdminPagina() {
   }, [overrides]);
 
   const [busca, setBusca] = useState("");
-  const [vozGlobal, setVozGlobal] = useState<string>(VOZ_FEMININA_ID);
   const [amostraCarregando, setAmostraCarregando] = useState<string | null>(null);
   const [amostraMsg, setAmostraMsg] = useState<string | null>(null);
+
+  // Geração em lote (todas as obras).
+  const regenerar = useServerFn(regenerarAudio);
+  const [loteRodando, setLoteRodando] = useState(false);
+  const [loteFeito, setLoteFeito] = useState(0);
+  const [loteMsg, setLoteMsg] = useState<string | null>(null);
 
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
@@ -98,6 +103,30 @@ function AdminPagina() {
     }
   };
 
+  const handleLote = async () => {
+    const alvos = obras.filter((o) => o.num !== OBRA_PROTEGIDA);
+    setLoteRodando(true);
+    setLoteFeito(0);
+    setLoteMsg(null);
+    let falhas = 0;
+    for (let i = 0; i < alvos.length; i++) {
+      try {
+        const r = await regenerar({ data: { chave: alvos[i].num } });
+        if (!r.ok) falhas++;
+      } catch {
+        falhas++;
+      }
+      setLoteFeito(i + 1);
+    }
+    setLoteRodando(false);
+    setLoteMsg(
+      falhas === 0
+        ? `Pronto! ${alvos.length} obras geradas com as duas vozes.`
+        : `Concluído com ${falhas} falha(s) de ${alvos.length}.`,
+    );
+    refetch();
+  };
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <header>
@@ -105,52 +134,67 @@ function AdminPagina() {
           Administração de textos e áudios
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Edite a descrição de cada obra e regenere o áudio. As mudanças ficam
-          salvas e aparecem para os visitantes.
+          Edite a descrição de cada obra e gere o áudio. Cada obra é gerada com
+          as duas vozes padrão (feminina e masculina).
         </p>
       </header>
 
       <div className="mt-6 rounded-lg border border-border bg-card p-4">
-        <h2 className="text-sm font-medium text-foreground">Voz padrão</h2>
+        <h2 className="text-sm font-medium text-foreground">Vozes padrão</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Selecione a voz usada ao regenerar o áudio de todas as obras.
+          Cada obra recebe as duas locuções. Ouça as amostras abaixo.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {VOZES_PADRAO.map((v) => {
-            const ativa = v.id === vozGlobal;
-            return (
-              <div key={v.id} className="flex items-center gap-2">
-                <Button
-                  variant={ativa ? "default" : "outline"}
-                  onClick={() => setVozGlobal(v.id)}
-                  className="min-h-11 flex-1 justify-start"
-                  aria-pressed={ativa}
-                >
-                  <span>{v.rotulo}</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleAmostra(v.id)}
-                  disabled={amostraCarregando === v.id}
-                  className="min-h-11 min-w-11"
-                  aria-label={`Ouvir amostra de ${v.rotulo}`}
-                >
-                  {amostraCarregando === v.id ? (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Volume2 aria-hidden="true" />
-                  )}
-                </Button>
-              </div>
-            );
-          })}
+          {VOZES_PADRAO.map((v) => (
+            <div key={v.id} className="flex items-center gap-2">
+              <span className="flex-1 text-sm text-foreground">{v.rotulo}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleAmostra(v.id)}
+                disabled={amostraCarregando === v.id}
+                className="min-h-11 min-w-11"
+                aria-label={`Ouvir amostra de ${v.rotulo}`}
+              >
+                {amostraCarregando === v.id ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Volume2 aria-hidden="true" />
+                )}
+              </Button>
+            </div>
+          ))}
         </div>
         {amostraMsg && (
           <p className="mt-2 text-sm text-muted-foreground" role="status">
             {amostraMsg}
           </p>
         )}
+
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+          <Button
+            onClick={handleLote}
+            disabled={loteRodando}
+            className="min-h-11"
+          >
+            {loteRodando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <RefreshCw aria-hidden="true" />
+            )}
+            <span>Gerar áudios de todas as obras (Carla + Danilo)</span>
+          </Button>
+          {loteRodando && (
+            <span className="text-sm text-muted-foreground" role="status">
+              Gerando… {loteFeito}/{obras.filter((o) => o.num !== OBRA_PROTEGIDA).length}
+            </span>
+          )}
+          {!loteRodando && loteMsg && (
+            <span className="text-sm text-muted-foreground" role="status">
+              {loteMsg}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
@@ -178,7 +222,6 @@ function AdminPagina() {
             textoEstatico={obra.descricao}
             audioEstatico={obra.audio}
             override={mapa.get(obra.num)}
-            vozId={vozGlobal}
             onChanged={() => refetch()}
           />
         ))}
@@ -193,7 +236,6 @@ function ObraEditor({
   textoEstatico,
   audioEstatico,
   override,
-  vozId,
   onChanged,
 }: {
   num: number;
@@ -201,7 +243,6 @@ function ObraEditor({
   textoEstatico: string;
   audioEstatico: string | null;
   override: OverrideObra | undefined;
-  vozId: string;
   onChanged: () => void;
 }) {
   const salvar = useServerFn(salvarTexto);
@@ -212,7 +253,9 @@ function ObraEditor({
   const [gerando, setGerando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioPath ? Date.now().toString() : null,
+    override?.audioFemPath || override?.audioMascPath || override?.audioPath
+      ? Date.now().toString()
+      : null,
   );
 
   const protegida = num === OBRA_PROTEGIDA;
@@ -236,24 +279,29 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { chave: num, vozId } });
+      const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
-        setMsg("Áudio regenerado.");
+        setMsg("Áudios gerados (feminina e masculina).");
         onChanged();
       } else {
-        setMsg(r.erro ?? "Erro ao regenerar.");
+        setMsg(r.erro ?? "Erro ao gerar.");
       }
     } catch {
-      setMsg("Erro ao regenerar.");
+      setMsg("Erro ao gerar.");
     } finally {
       setGerando(false);
     }
   };
 
-  const audioSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?v=${versaoAudio}`
+  const audioFemSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
     : null;
+  const audioMascSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=masc&v=${versaoAudio}`
+    : null;
+  const audioSrc = audioFemSrc;
+
 
   const downloadSrc = audioSrc ?? audioEstatico;
 
@@ -303,7 +351,7 @@ function ObraEditor({
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Regenerar áudio</span>
+            <span>Gerar áudios (Carla + Danilo)</span>
           </Button>
         )}
 
@@ -323,10 +371,29 @@ function ObraEditor({
         )}
       </div>
 
-      {audioSrc && (
+      {protegida && audioSrc && (
         <audio controls preload="none" src={audioSrc} className="mt-3 w-full">
           Seu navegador não suporta áudio.
         </audio>
+      )}
+
+      {!protegida && temAudioRegen && (
+        <div className="mt-3 space-y-2">
+          <div>
+            <p className="text-xs text-muted-foreground">Voz feminina (Carla)</p>
+            <audio controls preload="none" src={audioFemSrc!} className="mt-1 w-full">
+              Seu navegador não suporta áudio.
+            </audio>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Voz masculina (Danilo Tenfen)
+            </p>
+            <audio controls preload="none" src={audioMascSrc!} className="mt-1 w-full">
+              Seu navegador não suporta áudio.
+            </audio>
+          </div>
+        </div>
       )}
     </li>
   );

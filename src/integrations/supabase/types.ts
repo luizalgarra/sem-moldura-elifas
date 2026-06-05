@@ -35,6 +35,8 @@ export type Database = {
       obra_overrides: {
         Row: {
           ano: string | null
+          audio_fem_path: string | null
+          audio_masc_path: string | null
           audio_url: string | null
           autor: string | null
           descricao: string | null
@@ -49,6 +51,8 @@ export type Database = {
         }
         Insert: {
           ano?: string | null
+          audio_fem_path?: string | null
+          audio_masc_path?: string | null
           audio_url?: string | null
           autor?: string | null
           descricao?: string | null
@@ -63,6 +67,8 @@ export type Database = {
         }
         Update: {
           ano?: string | null
+          audio_fem_path?: string | null
+          audio_masc_path?: string | null
           audio_url?: string | null
           autor?: string | null
           descricao?: string | null
@@ -80,6 +86,8 @@ export type Database = {
       obras_extras: {
         Row: {
           ano: string | null
+          audio_fem_path: string | null
+          audio_masc_path: string | null
           audio_url: string | null
           autor: string | null
           created_at: string
@@ -95,6 +103,8 @@ export type Database = {
         }
         Insert: {
           ano?: string | null
+          audio_fem_path?: string | null
+          audio_masc_path?: string | null
           audio_url?: string | null
           autor?: string | null
           created_at?: string
@@ -110,6 +120,8 @@ export type Database = {
         }
         Update: {
           ano?: string | null
+          audio_fem_path?: string | null
+          audio_masc_path?: string | null
           audio_url?: string | null
           autor?: string | null
           created_at?: string

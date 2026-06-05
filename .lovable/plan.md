@@ -1,25 +1,46 @@
 ## Objetivo
 
-No controle global de voz, separar Carla e Danilo Tenfen em **dois botões lado a lado**, cada um com sua própria amostra. Clicar em um botão define essa voz como a usada para regenerar o áudio.
+Cada obra passa a ter **duas locuções padrão**: feminina (**Carla**) e masculina (**Danilo Tenfen**). A geração é em lote (gera as duas de uma vez), tanto por obra quanto para todas. No site público, o visitante alterna entre voz feminina e masculina.
 
-## O que muda
+## Banco de dados (migração)
 
-Editar apenas `src/routes/admin.tsx`.
+Adicionar duas colunas em `obra_overrides` e `obras_extras`:
+- `audio_fem_path text` — caminho do MP3 da voz feminina (Carla)
+- `audio_masc_path text` — caminho do MP3 da voz masculina (Danilo)
 
-### Controle global (topo)
+A coluna atual `audio_url` é mantida (usada pela obra especial #2 e como fallback). `voz_id` deixa de ser usada para a escolha, mas permanece para não quebrar registros antigos.
 
-- Remover o `<Select>` único de voz padrão.
-- Mostrar dois botões lado a lado:
-  - **Carla (feminina)** — `7eUAxNOneHxqfyRS77mW`
-  - **Danilo Tenfen (masculina)** — `rVRk0uJAtO8T38Gm03mf`
-- O botão correspondente à voz ativa fica destacado (variant `default`); o outro fica como `outline`. Clicar troca a voz ativa (`vozGlobal`).
-- Ao lado de cada botão, um botão menor **Ouvir amostra** que toca a amostra daquela voz específica (reaproveita `amostraVoz` e o cache existente).
+## Vozes (`src/data/vozes.ts`)
 
-### Restante
+Exportar constantes:
+- `VOZ_FEMININA_ID = "7eUAxNOneHxqfyRS77mW"` (Carla)
+- `VOZ_MASCULINA_ID = "rVRk0uJAtO8T38Gm03mf"` (Danilo Tenfen)
 
-- A voz ativa (`vozGlobal`) continua sendo passada para cada `ObraEditor` e usada na regeneração — sem mudanças nessa parte nem nos componentes de obra.
+## Backend (`src/lib/admin-obras.functions.ts`)
 
-## Detalhes técnicos
+- **`regenerarAudio`**: passa a gerar **as duas vozes** para uma obra (Carla e Danilo), salvando em `audio_fem_path` e `audio_masc_path`. Retorna `versao` e quais vozes foram geradas. A obra protegida (#2) continua bloqueada.
+- **`construirAcervo`** e `ObraAcervo`: expor `audioFem` e `audioMasc` (URLs `/api/public/obra-audio/<num>?voz=fem|masc`). Manter `audio` como fallback (feminina, ou o áudio especial da #2).
+- **`listarOverrides`**: incluir `audioFemPath` e `audioMascPath` para o admin saber o que já existe.
 
-- A função de amostra passa a receber o `id` da voz como argumento (em vez de usar só `vozGlobal`), para tocar a amostra de qualquer um dos dois botões.
-- Estado de "tocando amostra" por voz (ou um id em carregamento) para mostrar o spinner no botão certo.
+## Rota pública de áudio (`src/routes/api/public/obra-audio.$num.ts`)
+
+- Ler o query param `voz` (`fem` | `masc`, padrão `fem`).
+- Servir `audio_fem_path` ou `audio_masc_path`; se faltar, cair para `audio_url`.
+
+## Admin (`src/routes/admin.tsx`)
+
+- Os dois botões de voz no topo deixam de ser "voz ativa": viram referência/amostra das duas vozes padrão.
+- Adicionar botão geral **"Gerar áudios de todas as obras (Carla + Danilo)"** que percorre as obras no cliente, chamando `regenerarAudio` por obra em sequência, com indicador de progresso.
+- Em cada obra, o botão passa a ser **"Gerar áudios (Carla + Danilo)"**, gerando as duas vozes.
+- Player de prévia por obra mostra a versão feminina e a masculina.
+
+## Site público (`AudioDescricao.tsx` + `obras.$num.tsx`)
+
+- `AudioDescricao` recebe `audioFem` e `audioMasc`.
+- Adicionar um seletor **Feminina / Masculina** que troca o `src` do player. Esconde o seletor quando só existe uma das vozes (ex.: obra especial #2).
+- Reproduz com os controles atuais (ouvir, parar, velocidade).
+
+## Observações técnicas
+
+- A geração em lote é feita no cliente (um pedido por obra) para evitar timeout do runtime serverless em chamadas longas à ElevenLabs.
+- Cada `regenerarAudio` faz duas chamadas à ElevenLabs (uma por voz) e dois uploads no bucket `audios-obras`.

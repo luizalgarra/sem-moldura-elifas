@@ -118,6 +118,10 @@ export const VOZES: Voz[] = [
 
 export const VOZ_PADRAO_ID = "7eUAxNOneHxqfyRS77mW"; // Carla (Conversacional)
 
+// Vozes padrão usadas na geração em lote (uma feminina, uma masculina).
+export const VOZ_FEMININA_ID = "7eUAxNOneHxqfyRS77mW"; // Carla (Conversacional)
+export const VOZ_MASCULINA_ID = "rVRk0uJAtO8T38Gm03mf"; // Danilo Tenfen
+
 const IDS_VALIDOS = new Set(VOZES.map((v) => v.id));
 
 export function vozValida(id: string | null | undefined): boolean {

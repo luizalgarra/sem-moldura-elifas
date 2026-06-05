@@ -5,29 +5,48 @@ import { Button } from "@/components/ui/button";
 interface AudioDescricaoProps {
   texto: string;
   audio?: string | null;
+  audioFem?: string | null;
+  audioMasc?: string | null;
 }
 
 const VELOCIDADES = [0.75, 1, 1.25] as const;
 
-export function AudioDescricao({ texto, audio }: AudioDescricaoProps) {
-  if (audio) {
-    return <AudioArquivo src={audio} />;
+export function AudioDescricao({
+  texto,
+  audio,
+  audioFem,
+  audioMasc,
+}: AudioDescricaoProps) {
+  const fem = audioFem ?? audio ?? null;
+  const masc = audioMasc ?? null;
+  if (fem || masc) {
+    return <AudioArquivo fem={fem} masc={masc} />;
   }
   return <AudioVoz texto={texto} />;
 }
 
 // ---- Reprodução do MP3 pré-gerado (ElevenLabs) ----
-function AudioArquivo({ src }: { src: string }) {
+function AudioArquivo({
+  fem,
+  masc,
+}: {
+  fem: string | null;
+  masc: string | null;
+}) {
+  // Voz inicial: feminina quando existir, senão masculina.
+  const [voz, setVoz] = useState<"fem" | "masc">(fem ? "fem" : "masc");
+  const src = (voz === "masc" ? masc : fem) ?? fem ?? masc ?? "";
+  const temAmbas = !!fem && !!masc;
+
   const [tocando, setTocando] = useState(false);
   const [pausado, setPausado] = useState(false);
   const [velocidade, setVelocidade] = useState<number>(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Reinicia o estado ao trocar de obra
+  // Reinicia o estado ao trocar de obra ou de voz
   useEffect(() => {
     setTocando(false);
     setPausado(false);
-    setVelocidade(1);
   }, [src]);
 
   const alternar = useCallback(() => {
@@ -53,12 +72,46 @@ function AudioArquivo({ src }: { src: string }) {
     setPausado(false);
   }, []);
 
+
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
         <Volume2 className="size-5 text-accent" aria-hidden="true" />
         <span>Áudio-descrição</span>
       </div>
+
+      {temAmbas && (
+        <div
+          className="mt-3 flex items-center gap-1"
+          role="group"
+          aria-label="Voz da áudio-descrição"
+        >
+          <Button
+            size="sm"
+            variant={voz === "fem" ? "default" : "outline"}
+            className="min-h-11"
+            aria-pressed={voz === "fem"}
+            onClick={() => {
+              parar();
+              setVoz("fem");
+            }}
+          >
+            Voz feminina
+          </Button>
+          <Button
+            size="sm"
+            variant={voz === "masc" ? "default" : "outline"}
+            className="min-h-11"
+            aria-pressed={voz === "masc"}
+            onClick={() => {
+              parar();
+              setVoz("masc");
+            }}
+          >
+            Voz masculina
+          </Button>
+        </div>
+      )}
 
       <audio
         ref={audioRef}
@@ -69,6 +122,7 @@ function AudioArquivo({ src }: { src: string }) {
           setPausado(false);
         }}
       />
+
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button

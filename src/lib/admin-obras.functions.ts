@@ -1,9 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
-import { VOZ_PADRAO_ID, vozValida } from "@/data/vozes";
+import { VOZ_FEMININA_ID, VOZ_MASCULINA_ID, vozValida } from "@/data/vozes";
 
-const VOZ_PADRAO = VOZ_PADRAO_ID; // Sarah (suave)
 const OBRA_PROTEGIDA = 2; // áudio especial com duas vozes unidas (chave fixa)
 const PRIMEIRA_CHAVE_EXTRA = 1000; // identidades internas das obras novas começam aqui
 const MAX_CHAVE = 999999; // limite das identidades internas
@@ -19,6 +18,8 @@ export interface OverrideObra {
   descricao: string | null;
   imagemPath: string | null;
   audioPath: string | null;
+  audioFemPath: string | null;
+  audioMascPath: string | null;
   vozId: string;
   updatedAt: string | null;
 }
@@ -31,6 +32,8 @@ export interface OverrideObra {
 export interface ObraAcervo extends Obra {
   chave: number;
   extra: boolean;
+  audioFem: string | null;
+  audioMasc: string | null;
 }
 
 function versaoDe(updatedAt: string | null | undefined): string {
@@ -56,12 +59,12 @@ async function construirAcervo(
     supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, updated_at",
       ),
     supabaseAdmin
       .from("obras_extras")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, updated_at",
       ),
     supabaseAdmin.from("acervo_ordem").select("chave, posicao"),
   ]);
@@ -75,6 +78,15 @@ async function construirAcervo(
   for (const obra of obras) {
     if (ocultas.has(obra.num)) continue;
     const ov = overrides.get(obra.num);
+    const v = versaoDe(ov?.updated_at);
+    const audioFem = ov?.audio_fem_path
+      ? `/api/public/obra-audio/${obra.num}?voz=fem&v=${v}`
+      : ov?.audio_url
+        ? `/api/public/obra-audio/${obra.num}?v=${v}`
+        : obra.audio;
+    const audioMasc = ov?.audio_masc_path
+      ? `/api/public/obra-audio/${obra.num}?voz=masc&v=${v}`
+      : null;
     disponiveis.set(obra.num, {
       num: obra.num, // provisório; será sobrescrito pela posição
       chave: obra.num,
@@ -86,16 +98,25 @@ async function construirAcervo(
       parede: ov?.parede ?? obra.parede,
       descricao: ov?.descricao ?? obra.descricao,
       imagem: ov?.imagem_path
-        ? `/api/public/obra-imagem/${obra.num}?v=${versaoDe(ov.updated_at)}`
+        ? `/api/public/obra-imagem/${obra.num}?v=${v}`
         : obra.imagem,
-      audio: ov?.audio_url
-        ? `/api/public/obra-audio/${obra.num}?v=${versaoDe(ov.updated_at)}`
-        : obra.audio,
+      audio: audioFem,
+      audioFem,
+      audioMasc,
       extra: false,
     });
   }
 
   for (const ex of extrasRes.data ?? []) {
+    const v = versaoDe(ex.updated_at);
+    const audioFem = ex.audio_fem_path
+      ? `/api/public/obra-audio/${ex.num}?voz=fem&v=${v}`
+      : ex.audio_url
+        ? `/api/public/obra-audio/${ex.num}?v=${v}`
+        : null;
+    const audioMasc = ex.audio_masc_path
+      ? `/api/public/obra-audio/${ex.num}?voz=masc&v=${v}`
+      : null;
     disponiveis.set(ex.num, {
       num: ex.num,
       chave: ex.num,
@@ -107,14 +128,15 @@ async function construirAcervo(
       parede: ex.parede ?? "Parede 4",
       descricao: ex.descricao ?? "",
       imagem: ex.imagem_path
-        ? `/api/public/obra-imagem/${ex.num}?v=${versaoDe(ex.updated_at)}`
+        ? `/api/public/obra-imagem/${ex.num}?v=${v}`
         : null,
-      audio: ex.audio_url
-        ? `/api/public/obra-audio/${ex.num}?v=${versaoDe(ex.updated_at)}`
-        : null,
+      audio: audioFem,
+      audioFem,
+      audioMasc,
       extra: true,
     });
   }
+
 
   // Define a ordem das chaves.
   const ordemRows = (ordemRes.data ?? [])
@@ -184,7 +206,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, voz_id, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, voz_id, updated_at",
       )
       .order("num", { ascending: true });
 
@@ -204,6 +226,8 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
       descricao: row.descricao,
       imagemPath: row.imagem_path,
       audioPath: row.audio_url,
+      audioFemPath: row.audio_fem_path,
+      audioMascPath: row.audio_masc_path,
       vozId: row.voz_id,
       updatedAt: row.updated_at,
     }));
@@ -558,20 +582,21 @@ export const salvarTexto = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
-/** Regenera o áudio de uma obra via ElevenLabs e salva no storage. */
+/**
+ * Gera (em lote) as DUAS locuções de uma obra — feminina (Carla) e
+ * masculina (Danilo) — via ElevenLabs e salva ambas no storage.
+ */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
         chave: z.number().int().min(1).max(MAX_CHAVE),
-        vozId: z.string().min(1).max(100).optional(),
       })
       .parse(input),
   )
   .handler(async ({ data }) => {
     const { chave } = data;
     const fixa = ehObraFixa(chave);
-    const vozEscolhida = vozValida(data.vozId) ? data.vozId! : null;
 
     if (chave === OBRA_PROTEGIDA) {
       return {
@@ -594,27 +619,25 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     // Texto: usa o registro salvo se existir, senão o texto estático (fixas).
     const { data: existente } = await supabaseAdmin
       .from(tabela)
-      .select("descricao, voz_id")
+      .select("descricao")
       .eq("num", chave)
       .maybeSingle();
 
     const estatica = fixa ? getObra(chave) : undefined;
     const texto = existente?.descricao ?? estatica?.descricao ?? "";
-    const vozId = vozEscolhida ?? existente?.voz_id ?? VOZ_PADRAO;
 
     if (!texto.trim()) {
       return { ok: false as const, erro: "Esta obra não tem texto." };
     }
 
-    // Gera o áudio.
-    let audioBuffer: ArrayBuffer;
-    try {
+    // Gera o áudio de uma voz e retorna o buffer.
+    async function gerarVoz(vozId: string): Promise<ArrayBuffer> {
       const resp = await fetch(
         `https://api.elevenlabs.io/v1/text-to-speech/${vozId}?output_format=mp3_44100_128`,
         {
           method: "POST",
           headers: {
-            "xi-api-key": apiKey,
+            "xi-api-key": apiKey!,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -630,39 +653,60 @@ export const regenerarAudio = createServerFn({ method: "POST" })
           }),
         },
       );
-
       if (!resp.ok) {
         const err = await resp.text();
         console.error("ElevenLabs:", resp.status, err);
-        return {
-          ok: false as const,
-          erro: `Falha ao gerar áudio (${resp.status}).`,
-        };
+        throw new Error(`Falha ao gerar áudio (${resp.status}).`);
       }
-      audioBuffer = await resp.arrayBuffer();
+      return resp.arrayBuffer();
+    }
+
+    // Faz upload de um buffer e retorna o caminho gravado.
+    async function subir(buffer: ArrayBuffer, sufixo: string): Promise<string> {
+      const path = `obra-${chave}-${sufixo}-${Date.now()}.mp3`;
+      const { error: upErr } = await supabaseAdmin.storage
+        .from("audios-obras")
+        .upload(path, new Uint8Array(buffer), {
+          contentType: "audio/mpeg",
+          upsert: true,
+        });
+      if (upErr) {
+        console.error("upload:", upErr.message);
+        throw new Error("Não foi possível salvar o áudio.");
+      }
+      return path;
+    }
+
+    let femPath: string;
+    let mascPath: string;
+    try {
+      const [femBuf, mascBuf] = await Promise.all([
+        gerarVoz(VOZ_FEMININA_ID),
+        gerarVoz(VOZ_MASCULINA_ID),
+      ]);
+      [femPath, mascPath] = await Promise.all([
+        subir(femBuf, "fem"),
+        subir(mascBuf, "masc"),
+      ]);
     } catch (e) {
-      console.error("regenerarAudio fetch:", e);
-      return { ok: false as const, erro: "Serviço de voz indisponível." };
+      console.error("regenerarAudio:", e);
+      const erro =
+        e instanceof Error ? e.message : "Serviço de voz indisponível.";
+      return { ok: false as const, erro };
     }
 
-    // Faz upload no storage (bucket privado).
-    const path = `obra-${chave}-${Date.now()}.mp3`;
-    const { error: upErr } = await supabaseAdmin.storage
-      .from("audios-obras")
-      .upload(path, new Uint8Array(audioBuffer), {
-        contentType: "audio/mpeg",
-        upsert: true,
-      });
-
-    if (upErr) {
-      console.error("upload:", upErr.message);
-      return { ok: false as const, erro: "Não foi possível salvar o áudio." };
-    }
-
-    // Grava a referência no banco.
+    // Grava as referências no banco.
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
-      .upsert({ num: chave, audio_url: path, voz_id: vozId }, { onConflict: "num" })
+      .upsert(
+        {
+          num: chave,
+          audio_url: femPath,
+          audio_fem_path: femPath,
+          audio_masc_path: mascPath,
+        },
+        { onConflict: "num" },
+      )
       .select("updated_at")
       .single();
 
