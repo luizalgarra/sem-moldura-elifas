@@ -1,60 +1,62 @@
 ## Objetivo
 
-Substituir o modelo atual (dois MP3s completos + botão de alternar voz) por uma **locução única alternada por seção**. O player abre direto pela audiodescrição e reveza as vozes na ordem:
+Tornar a planilha **Consolidada** a fonte oficial do acervo: cada obra de parede passa a usar o **Nº de impressão** da planilha (1–88) e recebe os dados atualizados de **Título, Ano, Técnica, Dimensão e Parede**. Os textos de audiodescrição, imagens e áudios já existentes são **preservados** e remapeados para o novo número. Vídeos e shapes ficam para depois (apenas mantidos no final, sem alteração).
+
+## O que muda para o visitante
+
+- A numeração do site passa a bater com o catálogo impresso (ex.: "Gabriela" vira a obra **#1**; "Secos e Molhados, Opinião" vira **#2**).
+- Ficha técnica de cada obra corrigida conforme a planilha.
+- Nenhuma audiodescrição, imagem ou áudio é perdido — tudo acompanha a obra para o novo número.
+
+## Mapa de numeração (resumo)
+
+As 88 obras de parede recebem o Nº da planilha. As obras que existem no site mas **não** estão na planilha (Arca de Noé 2, Brasil História, Calunga, Legião Estrangeira, Movimento, Fátima Guedes ×2, Mão/Movimento, Muro de Arrimo, O Processo, Papai Noel, Pixinguinha) e os **duplicados** (2ª "Pirotecnico Zacarias", 2ª e 3ª "Passaros") vão para o **final da lista** (89 em diante), preservando seus dados. Vídeos e shapes seguem no fim.
+
+Trechos principais do remapeamento (antigo → novo):
 
 ```text
-1. Audiodescrição              → voz masculina (Danilo)
-2. Identificação da obra       → voz feminina (Carla)
-3. Contexto histórico/cultural → voz masculina (Danilo)
-4. Análise interpretativa      → voz feminina (Carla)
+115 → 1    Gabriela            1 → 2     Secos e Molhados
+2 → 3      Arca de Noé         97 → 27   Dom Paulo (= "Opinião_DOM PAULO")
+92 → 48    Samba de Dandara    100 → 84  Nervos de Aço
+91 → 81    Encarte Cavaquinho  78 → 83   Passaros (mantida)
+26 → 89    Pirotecnico (dup)   80,81 → 90,91  Passaros (dups)
+86..101 → 92..103   (obras fora da planilha)
+102..114 → 104..116 (vídeos)   116 → 117 (shapes)
 ```
 
-A imagem mental (descrição) vem primeiro; as vozes se revezam entre "fato" e "leitura".
+Correspondências por título com ajustes manuais nas quase-iguais:
+"Dom Paulo, Opinião"="Opinião_DOM PAULO"; "Pirotecnico Zacarias"="Capa Pirotecnico Zacarias"; "Encarte disco Paulinho da Viola"="Encarte Cavaquinho".
 
-## Como vai funcionar
+Observação: a planilha tem **#30 "Paulinho da Viola – Homenagem a Heitor dos Prazeres"** que hoje existe só como obra cadastrada no painel (não no arquivo estático). Ela será preenchida com os dados da planilha (sem imagem/áudio até serem gerados) para o número 30 não ficar vago.
 
-- Cada obra passa a ter **4 trechos de áudio**, cada um já gravado com a voz definida pela posição (masc, fem, masc, fem).
-- No site público, ao tocar, o player reproduz os 4 trechos **em sequência automática**, sem corte perceptível. O botão "alternar voz" sai.
-- Os controles atuais (Ouvir/Pausar, Parar, velocidade 0,75×/1×/1,25×) continuam, agora atuando sobre a sequência inteira.
-- Um pequeno indicador mostra qual seção está tocando (ex.: "Audiodescrição · voz masculina").
+## Etapas técnicas
 
-## Divisão do texto em seções
+### 1. Reescrever `src/data/obras.ts`
+- Gerar a lista com os **novos números** conforme o mapa.
+- Para as 88 obras de parede: aplicar **Título, Ano, Técnica, Dimensão e Parede** da planilha; manter `descricao`, `imagem` e `audio` herdados da obra correspondente.
+- Obras fora da planilha e duplicados: mantidos no final com os dados atuais.
+- Adicionar entrada estática para a obra **#30** (Homenagem a Heitor) com a ficha da planilha.
 
-A divisão usa os títulos gerados pelo prompt: **Identificação da obra**, **Audiodescrição**, **Contexto histórico e cultural**, **Análise interpretativa**.
+### 2. Renomear os ponteiros de mídia
+- Em `src/assets/obras/` e `src/assets/audio/`, renomear `obra-<antigo>.jpg.asset.json` e `obra-<antigo>.mp3.asset.json` para o **novo número**, seguindo o mesmo mapa (feito via cópia em ordem segura para evitar colisões). Assim cada obra mantém sua imagem e áudio.
 
-- Quando os títulos existem (como na obra #53), cada seção vira um trecho, reordenados para a sequência de reprodução (descrição primeiro).
-- Quando a obra **não tem esses títulos** (a maioria hoje), o texto é dividido "como der": quebrado em 4 blocos aproximadamente iguais por parágrafos/frases, recebendo as vozes na mesma ordem alternada (masc, fem, masc, fem). Assim toda obra ganha o efeito de revezamento mesmo sem estrutura formal.
-- A obra protegida #2 (áudio especial) continua intocada.
+### 3. Migração no banco (remapear edições para o novo número)
+Aplicar o mesmo mapa antigo→novo em:
+- `obra_overrides.num` — textos editados hoje em 78→83, 81→91, 115→1 (e 1→2).
+- `obras_ocultas.num` — itens ocultos (86–101, 116) movidos para seus novos números.
+- `acervo_ordem.chave` — preservar a ordenação manual reapontando para os novos números (chaves ≥1000 das obras cadastradas no painel permanecem).
+- A migração será feita com uma tabela de-para temporária e atualização em bloco, sem perder linhas.
 
-## Etapas
+### 4. Reconciliar obras cadastradas no painel (`obras_extras`)
+- "Samba de Dandara" passa a existir como obra estática **#48** e também como cadastro (nº 1006): manter a estática e **ocultar/remover** o cadastro duplicado.
+- "Homenagem a Heitor" (cadastro 1000) vira a estática **#30**: mesma reconciliação.
+- Shapes (1001–1005) ficam intocados (tratamento adiado).
 
-### 1. Banco de dados (migração)
-Adicionar uma coluna `audio_trechos jsonb` em `obra_overrides` e `obras_extras`, guardando a lista ordenada de trechos: `[{ ordem, rotulo, voz, path }]`. As colunas antigas (`audio_url`, `audio_fem_path`, `audio_masc_path`) permanecem para não quebrar a obra #2 e registros legados.
+### 5. Conferência
+- Validar build, abrir o acervo e checar: contagem por parede igual à planilha (Parede 1: 11, Parede 2: 27, Parede 3: 47, Parede 4: 7 + Trainel 1), fichas corretas em amostras (#1 Gabriela, #2 Secos, #56 Adoniran), e que imagens/áudios/textos seguiram corretamente após o remapeamento.
 
-### 2. Backend (`src/lib/admin-obras.functions.ts`)
-- Nova função utilitária que **separa o texto em seções** (com títulos ou por blocos) e devolve a lista ordenada com a voz de cada trecho.
-- `regenerarAudio`: passa a gerar **um clipe por trecho** (4 chamadas à ElevenLabs, em paralelo), faz upload de cada um e salva o array em `audio_trechos`.
-- `construirAcervo`/`ObraAcervo`: expõe `audioTrechos` — lista de `{ rotulo, voz, url }` apontando para a rota pública com índice. Mantém `audio` como fallback (obra #2 e legados).
+## Riscos e cuidados
 
-### 3. Rota pública de áudio (`src/routes/api/public/obra-audio.$num.ts`)
-- Aceitar o parâmetro `trecho` (índice 0..3) e servir o arquivo correspondente lido de `audio_trechos`.
-- Manter o comportamento antigo (`voz=fem|masc` / `audio_url`) como fallback para a obra #2.
-
-### 4. Player do site (`src/components/AudioDescricao.tsx` + `obras.$num.tsx`)
-- Trocar a lógica de "um `<audio>` com troca de `src`" por **reprodução encadeada** dos trechos: ao terminar um, inicia o próximo automaticamente.
-- Remover o seletor feminina/masculina.
-- Pausar/continuar e parar atuam sobre a sequência; a velocidade é aplicada a todos os trechos.
-- Mostrar o rótulo da seção atual e a voz.
-- Fallback: obra #2 (áudio único) e obras sem trechos gerados continuam tocando o arquivo completo atual; sem nenhum áudio, cai na leitura por voz do navegador.
-
-### 5. Admin (`src/routes/admin.tsx`)
-- O botão por obra e o de lote continuam, mas agora geram os **4 trechos alternados**.
-- A prévia por obra mostra os 4 players na ordem de reprodução, cada um rotulado (ex.: "1 · Audiodescrição · masculina").
-- Atualizar os textos de ajuda para refletir o novo modelo.
-
-## Observações técnicas
-
-- A geração continua no cliente (uma chamada `regenerarAudio` por obra) para evitar timeout; dentro do servidor, os 4 trechos são gerados em paralelo.
-- Para naturalidade entre cortes, as chamadas à ElevenLabs podem usar `previous_text`/`next_text` (request stitching) com os trechos vizinhos.
-- Como o esquema de seções muda, **será preciso regenerar os áudios** (em lote) depois da implementação para todas as obras passarem a ter os 4 trechos. Antes disso, elas seguem tocando o áudio antigo via fallback.
-- A obra #53 (Adoniran Palhaço) ainda aguarda sua geração de áudio aprovada por você; com este modelo, ela será gerada já com os 4 trechos.
+- Renumerar é destrutivo; por isso o de-para é aplicado de forma **idêntica** em arquivo estático, mídias e banco, e validado por contagem antes/depois.
+- "Imprimir? = Não" não altera visibilidade (conforme sua escolha de manter visíveis).
+- Vídeos e shapes não recebem dados novos agora — apenas mantêm posição no fim.
