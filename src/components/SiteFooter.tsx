@@ -61,7 +61,7 @@ export function SiteFooter() {
       </div>
 
       {/* Assinatura institucional — barras fiéis ao cartaz */}
-      <div className="border-t border-border bg-background py-8">
+      <div className="border-t border-border bg-black py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-8 px-4 sm:flex-row sm:justify-between">
           <img
             src={marca.barraRealizacao}
