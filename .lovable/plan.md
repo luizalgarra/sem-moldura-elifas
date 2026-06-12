@@ -1,29 +1,27 @@
 ## Objetivo
 
-Adicionar à página `/qrcodes` um QR Code institucional que aponta para `https://institutoelifasandreato.org.br`, separado da grade de QR Codes das obras.
+Adicionar à seção "Institucional" da página `/qrcodes` um segundo QR Code, apontando para a programação da Caixa Cultural:
+`https://www.caixacultural.gov.br/Paginas/Programacao.aspx?idEvento=4588`
 
 ## Mudança
 
-Em `src/routes/qrcodes.tsx`, incluir um bloco destacado (acima ou abaixo da grade de obras) com:
+Em `src/routes/qrcodes.tsx`, na `<section>` "Institucional" já existente, transformar o card único em uma pequena grade com dois cards lado a lado:
 
-- Um `<QrCode valor="https://institutoelifasandreato.org.br" tamanho={150} rotulo="..." />`
-- Um rótulo curto, ex.: "Instituto Elifas Andreato"
+1. **Instituto Elifas Andreato** (já existente) — `https://institutoelifasandreato.org.br`
+2. **Caixa Cultural — Programação** (novo) — URL acima
 
 ```text
-[ Cabeçalho QR Codes das obras ]
-
-[ Card destacado ]
-  ┌──────────────┐
-  │   QR Code    │
-  │  Instituto   │
-  └──────────────┘
-
-[ Grade de QR Codes das obras ]
+[ Institucional ]
+  ┌──────────────┐   ┌──────────────┐
+  │   QR Code    │   │   QR Code    │
+  │  Instituto   │   │ Caixa Cult.  │
+  └──────────────┘   └──────────────┘
 ```
 
-Reutiliza o componente existente `QrCode`. Nenhuma alteração de dados ou backend.
+Reutiliza o componente existente `QrCode`, mantendo o mesmo estilo dos cards (`rounded-lg border border-border bg-card p-4 text-center`). Nenhuma alteração de dados ou backend.
 
 ## Detalhe técnico
 
-- Card seguindo o mesmo estilo dos cards existentes (`rounded-lg border border-border bg-card p-4 text-center`).
-- O QR Code aponta para a URL externa fixa, não para uma obra.
+- Trocar o wrapper único por um container flex/grid (ex.: `flex flex-wrap gap-4`) contendo os dois cards.
+- Novo card: `<QrCode valor="https://www.caixacultural.gov.br/Paginas/Programacao.aspx?idEvento=4588" tamanho={150} rotulo="QR Code da Caixa Cultural" />` com legenda "Caixa Cultural — Programação".
+</plan_content>
