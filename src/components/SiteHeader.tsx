@@ -8,13 +8,10 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-3">
           <img
-            src={marca.seloCaixaCultural}
-            alt="Caixa Cultural"
-            className="h-9 w-auto border-r border-border pr-3 sm:h-11"
+            src={marca.barraCaixaCulturalApresenta}
+            alt="Caixa Cultural apresenta"
+            className="h-10 w-auto border-r border-border pr-3 sm:h-12"
           />
-          <span className="text-xs uppercase tracking-widest text-muted-foreground">
-            Apresenta
-          </span>
           <Link
             to="/"
             className="flex items-center gap-3 focus-visible:outline-none"

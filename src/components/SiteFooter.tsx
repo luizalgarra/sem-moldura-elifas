@@ -60,42 +60,19 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* Assinatura institucional — fiel ao cartaz (fundo escuro, dois grupos) */}
+      {/* Assinatura institucional — barras fiéis ao cartaz */}
       <div className="border-t border-border bg-background py-8">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-10 px-4 sm:flex-row sm:items-start sm:justify-between">
-          {/* Realização */}
-          <div className="grid grid-cols-[auto_auto] items-center gap-x-4">
-            <img
-              src={marca.seloSecom}
-              alt="Tem patrocínio, tem Governo do Brasil"
-              className="col-start-1 row-start-2 h-12 w-auto object-contain"
-            />
-            <span className="col-start-2 row-start-1 text-center text-xs font-semibold uppercase tracking-wide text-foreground/70">
-              Realização
-            </span>
-            <img
-              src={marca.seloInstitutoElifas}
-              alt="Instituto Elifas Andreato"
-              className="col-start-2 row-start-2 h-10 w-auto object-contain"
-            />
-          </div>
-
-          {/* Patrocínio */}
-          <div className="grid grid-cols-[auto_auto] items-center gap-x-5">
-            <span className="col-start-1 row-start-1 text-center text-xs font-semibold uppercase tracking-wide text-foreground/70">
-              Patrocínio
-            </span>
-            <img
-              src={marca.seloCaixa}
-              alt="Caixa"
-              className="col-start-1 row-start-2 h-7 w-auto object-contain"
-            />
-            <img
-              src={marca.seloGovernoBrasil}
-              alt="Governo do Brasil"
-              className="col-start-2 row-start-2 h-12 w-auto object-contain"
-            />
-          </div>
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-8 px-4 sm:flex-row sm:justify-between">
+          <img
+            src={marca.barraRealizacao}
+            alt="Realização: Tem patrocínio, tem Governo do Brasil · Instituto Elifas Andreato"
+            className="h-auto w-full max-w-xs object-contain"
+          />
+          <img
+            src={marca.barraPatrocinio}
+            alt="Patrocínio: Caixa · Governo do Brasil, do lado do povo brasileiro"
+            className="h-auto w-full max-w-xs object-contain"
+          />
         </div>
       </div>
     </footer>

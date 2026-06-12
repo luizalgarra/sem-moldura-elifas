@@ -12,6 +12,9 @@ import seloInstitutoElifas from "./selo-instituto-elifas-andreato.png.asset.json
 import seloSecom from "./selo-secom.png.asset.json";
 import iconeClassificacao from "./icone-classificacao.png.asset.json";
 import iconeAcessibilidade from "./icone-acessibilidade.png.asset.json";
+import barraCaixaCulturalApresenta from "./barra-caixa-cultural-apresenta.png.asset.json";
+import barraRealizacao from "./barra-realizacao.png.asset.json";
+import barraPatrocinio from "./barra-patrocinio.png.asset.json";
 
 export const marca = {
   logoFirmaBranco: logoFirmaBranco.url,
@@ -28,4 +31,7 @@ export const marca = {
   seloSecom: seloSecom.url,
   iconeClassificacao: iconeClassificacao.url,
   iconeAcessibilidade: iconeAcessibilidade.url,
+  barraCaixaCulturalApresenta: barraCaixaCulturalApresenta.url,
+  barraRealizacao: barraRealizacao.url,
+  barraPatrocinio: barraPatrocinio.url,
 } as const;

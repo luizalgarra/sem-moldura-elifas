@@ -1,33 +1,32 @@
-## Problema
+## Objetivo
 
-Ao clicar em "Gerar PDF para impressão →", a URL muda para `/qrcodes/imprimir`, mas a página continua mostrando a listagem de QR Codes (conteúdo de `/qrcodes`) — a tela de seleção e o botão "Gerar PDF" nunca aparecem.
+Substituir os logos institucionais separados (montados em grid com textos "Realização"/"Patrocínio"/"Apresenta") pelas 3 barras prontas dos PSDs, mantendo o fundo preto original das imagens.
 
-## Causa
+## Imagens novas (do PSD, fundo preto)
 
-No roteamento por arquivos do TanStack Router, a existência de `src/routes/qrcodes.imprimir.tsx` transforma `src/routes/qrcodes.tsx` em **rota de layout pai** de `/qrcodes/imprimir`. Como `qrcodes.tsx` não renderiza `<Outlet />`, a rota filha casa mas não tem onde ser exibida — então o usuário vê sempre o conteúdo do pai (a listagem).
+| Arquivo PSD | Conteúdo | Onde aplicar |
+|---|---|---|
+| Logo_Caixa Cultural Apresenta | CAIXA CULTURAL + "apresenta" | Cabeçalho |
+| Barra logos_Realização | "Realização" + SECOM + Instituto Elifas | Rodapé |
+| Barra logos_Patrocínio | "Patrocínio" + CAIXA + Governo do Brasil | Rodapé |
 
-## Solução
+## Passos
 
-Reorganizar para o padrão correto de layout + index do TanStack:
+1. **Converter e subir os PSDs como assets PNG** (camada achatada, fundo preto) via `lovable-assets`, gerando 3 novos `.asset.json` em `src/assets/marca/`:
+   - `barra-caixa-cultural-apresenta.png`
+   - `barra-realizacao.png`
+   - `barra-patrocinio.png`
 
-1. **Criar `src/routes/qrcodes.index.tsx`** — mover para cá todo o conteúdo atual de `qrcodes.tsx` (a página de listagem "QR Codes das obras", com os QR Codes institucionais e das obras). A rota passa a ser `/qrcodes/` (index).
+2. **Registrar em `src/assets/marca/index.ts`** as 3 novas entradas.
 
-2. **Transformar `src/routes/qrcodes.tsx`** em uma rota de layout simples, que apenas renderiza `<Outlet />`:
+3. **`SiteHeader.tsx`** — substituir o bloco atual (selo `seloCaixaCultural` + texto "Apresenta") pela imagem única `barra-caixa-cultural-apresenta`, mantendo o link para a home e a logo "Além da Moldura" ao lado.
 
-```tsx
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+4. **`SiteFooter.tsx`** — substituir toda a assinatura institucional (o grid com `seloSecom`, `seloInstitutoElifas`, `seloCaixa`, `seloGovernoBrasil` e os textos "Realização"/"Patrocínio") pelas duas barras únicas `barra-realizacao` e `barra-patrocinio`, lado a lado em telas largas e empilhadas no mobile. Como as barras já têm fundo preto e os rótulos embutidos, o bloco fica mais simples.
 
-export const Route = createFileRoute("/qrcodes")({
-  component: () => <Outlet />,
-});
-```
+5. **Limpeza opcional**: os assets antigos que deixarem de ser usados (`selo-caixa-cultural`, `selo-secom`, `selo-instituto-elifas-andreato`, `selo-caixa`, `selo-governo-brasil`) podem ser removidos depois. Manterei por segurança nesta etapa, removendo apenas as referências no header/rodapé.
 
-Resultado:
-- `/qrcodes` → renderiza `qrcodes.index.tsx` (listagem, igual a hoje)
-- `/qrcodes/imprimir` → renderiza `qrcodes.imprimir.tsx` (seleção + botão "Gerar PDF" funcionando)
+## Detalhes técnicos
 
-## Observações
-
-- Nenhuma alteração na lógica de geração do PDF (`jsPDF` + `qrcode`) — ela já está correta, só não estava sendo exibida.
-- O `routeTree.gen.ts` é regenerado automaticamente; não será editado à mão.
-- Após a correção, validar na pré-visualização que `/qrcodes/imprimir` mostra a tela de seleção e o download do PDF é disparado.
+- As imagens têm fundo preto sólido; serão usadas como estão (sem transparência), sobre o fundo escuro do site, garantindo contraste do bloco institucional.
+- Alt text descritivo em cada imagem para acessibilidade (já que os logos vêm embutidos na barra).
+- Sem mudanças de lógica/backend — apenas apresentação (header/footer e assets).
