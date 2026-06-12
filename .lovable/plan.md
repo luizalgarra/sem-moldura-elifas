@@ -1,37 +1,33 @@
-## Objetivo
+## Problema
 
-Atualizar o domínio usado para gerar os QR Codes das obras, refletindo a mudança para o novo endereço do projeto:
+Ao clicar em "Gerar PDF para impressão →", a URL muda para `/qrcodes/imprimir`, mas a página continua mostrando a listagem de QR Codes (conteúdo de `/qrcodes`) — a tela de seleção e o botão "Gerar PDF" nunca aparecem.
 
-`https://www.institutoelifasandreato.org.br/alemdamoldura`
+## Causa
 
-## Mudança
+No roteamento por arquivos do TanStack Router, a existência de `src/routes/qrcodes.imprimir.tsx` transforma `src/routes/qrcodes.tsx` em **rota de layout pai** de `/qrcodes/imprimir`. Como `qrcodes.tsx` não renderiza `<Outlet />`, a rota filha casa mas não tem onde ser exibida — então o usuário vê sempre o conteúdo do pai (a listagem).
 
-Em `src/lib/site.ts`, alterar a constante `SITE_URL`:
+## Solução
 
-```ts
-// antes
-export const SITE_URL = "https://sem-moldura-elifas.lovable.app";
-// depois
-export const SITE_URL = "https://www.institutoelifasandreato.org.br/alemdamoldura";
+Reorganizar para o padrão correto de layout + index do TanStack:
+
+1. **Criar `src/routes/qrcodes.index.tsx`** — mover para cá todo o conteúdo atual de `qrcodes.tsx` (a página de listagem "QR Codes das obras", com os QR Codes institucionais e das obras). A rota passa a ser `/qrcodes/` (index).
+
+2. **Transformar `src/routes/qrcodes.tsx`** em uma rota de layout simples, que apenas renderiza `<Outlet />`:
+
+```tsx
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/qrcodes")({
+  component: () => <Outlet />,
+});
 ```
 
-Com isso, todos os QR Codes das obras passam a apontar para:
+Resultado:
+- `/qrcodes` → renderiza `qrcodes.index.tsx` (listagem, igual a hoje)
+- `/qrcodes/imprimir` → renderiza `qrcodes.imprimir.tsx` (seleção + botão "Gerar PDF" funcionando)
 
-```text
-https://www.institutoelifasandreato.org.br/alemdamoldura/obras/{num}
-```
+## Observações
 
-Isso afeta automaticamente:
-- `src/routes/qrcodes.tsx` (grade de QR Codes das obras)
-- `src/routes/qrcodes.imprimir.tsx` (versão para impressão/PDF)
-
-## Mantido sem alteração
-
-- Os dois QR Codes institucionais já existentes permanecem iguais:
-  - **Instituto Elifas Andreato** — `https://institutoelifasandreato.org.br`
-  - **Caixa Cultural — Programação** — URL atual
-- Nenhuma alteração de dados, backend ou metadados.
-
-## Observação
-
-A constante `SITE_URL` é o único ponto que precisa mudar — os QR Codes das obras são derivados dela.
+- Nenhuma alteração na lógica de geração do PDF (`jsPDF` + `qrcode`) — ela já está correta, só não estava sendo exibida.
+- O `routeTree.gen.ts` é regenerado automaticamente; não será editado à mão.
+- Após a correção, validar na pré-visualização que `/qrcodes/imprimir` mostra a tela de seleção e o download do PDF é disparado.
