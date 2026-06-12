@@ -20,6 +20,11 @@ export function SiteFooter() {
         <nav aria-label="Rodapé" className="mt-4">
           <ul className="flex flex-wrap gap-4">
             <li>
+              <Link to="/sobre" className="hover:text-accent">
+                Sobre a exposição
+              </Link>
+            </li>
+            <li>
               <Link to="/obras" className="hover:text-accent">
                 Acervo
               </Link>

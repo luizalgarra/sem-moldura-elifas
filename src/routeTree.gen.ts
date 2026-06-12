@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as QrcodesRouteImport } from './routes/qrcodes'
 import { Route as LinhasDaVidaRouteImport } from './routes/linhas-da-vida'
 import { Route as EditarRouteImport } from './routes/editar'
@@ -22,6 +23,11 @@ import { Route as ObrasNumRouteImport } from './routes/obras.$num'
 import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QrcodesRoute = QrcodesRouteImport.update({
   id: '/qrcodes',
   path: '/qrcodes',
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
+  '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras': typeof ObrasIndexRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
+  '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/editar'
     | '/linhas-da-vida'
     | '/qrcodes'
+    | '/sobre'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras/'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/como-usar'
     | '/editar'
     | '/linhas-da-vida'
+    | '/sobre'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/editar'
     | '/linhas-da-vida'
     | '/qrcodes'
+    | '/sobre'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras/'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   EditarRoute: typeof EditarRoute
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
   QrcodesRoute: typeof QrcodesRouteWithChildren
+  SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
   ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
@@ -184,6 +197,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/qrcodes': {
       id: '/qrcodes'
       path: '/qrcodes'
@@ -291,6 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditarRoute: EditarRoute,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
   QrcodesRoute: QrcodesRouteWithChildren,
+  SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
   ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
