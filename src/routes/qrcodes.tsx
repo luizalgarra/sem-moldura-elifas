@@ -38,6 +38,22 @@ function QrCodes() {
         </Link>
       </header>
 
+      <section className="mb-8">
+        <h2 className="mb-3 font-serif text-xl font-semibold text-foreground">
+          Institucional
+        </h2>
+        <div className="flex max-w-xs flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 text-center">
+          <QrCode
+            valor="https://institutoelifasandreato.org.br"
+            tamanho={150}
+            rotulo="QR Code do Instituto Elifas Andreato"
+          />
+          <p className="font-serif text-sm font-semibold text-card-foreground">
+            Instituto Elifas Andreato
+          </p>
+        </div>
+      </section>
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {obras.map((obra) => {
           const url = `${SITE_URL}/obras/${obra.num}`;
