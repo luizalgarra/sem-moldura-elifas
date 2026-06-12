@@ -14,6 +14,7 @@ import { Route as EditarRouteImport } from './routes/editar'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QrcodesIndexRouteImport } from './routes/qrcodes.index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const QrcodesIndexRoute = QrcodesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => QrcodesRoute,
 } as any)
 const ObrasIndexRoute = ObrasIndexRouteImport.update({
   id: '/obras/',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
+  '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
@@ -88,10 +95,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
-  '/qrcodes': typeof QrcodesRouteWithChildren
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras': typeof ObrasIndexRoute
+  '/qrcodes': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
@@ -105,6 +112,7 @@ export interface FileRoutesById {
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/obras/': typeof ObrasIndexRoute
+  '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
@@ -119,6 +127,7 @@ export interface FileRouteTypes {
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras/'
+    | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
   fileRoutesByTo: FileRoutesByTo
@@ -127,10 +136,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/como-usar'
     | '/editar'
-    | '/qrcodes'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras'
+    | '/qrcodes'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
   id:
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/obras/'
+    | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
   fileRoutesById: FileRoutesById
@@ -196,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/qrcodes/': {
+      id: '/qrcodes/'
+      path: '/'
+      fullPath: '/qrcodes/'
+      preLoaderRoute: typeof QrcodesIndexRouteImport
+      parentRoute: typeof QrcodesRoute
+    }
     '/obras/': {
       id: '/obras/'
       path: '/obras'
@@ -236,10 +253,12 @@ declare module '@tanstack/react-router' {
 
 interface QrcodesRouteChildren {
   QrcodesImprimirRoute: typeof QrcodesImprimirRoute
+  QrcodesIndexRoute: typeof QrcodesIndexRoute
 }
 
 const QrcodesRouteChildren: QrcodesRouteChildren = {
   QrcodesImprimirRoute: QrcodesImprimirRoute,
+  QrcodesIndexRoute: QrcodesIndexRoute,
 }
 
 const QrcodesRouteWithChildren =
@@ -259,3 +278,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
