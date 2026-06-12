@@ -25,6 +25,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link to="/linhas-da-vida" className="hover:text-accent">
+                Linhas da Vida
+              </Link>
+            </li>
+            <li>
               <Link to="/como-usar" className="hover:text-accent">
                 Como usar
               </Link>
