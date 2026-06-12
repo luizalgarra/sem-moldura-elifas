@@ -43,6 +43,11 @@ export function SiteHeader() {
                 </Link>
               </li>
               <li>
+                <Link to="/sobre" className="hover:text-accent" activeProps={{ className: "text-accent" }}>
+                  Sobre
+                </Link>
+              </li>
+              <li>
                 <Link to="/como-usar" className="hover:text-accent" activeProps={{ className: "text-accent" }}>
                   Como usar
                 </Link>
