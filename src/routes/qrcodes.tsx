@@ -42,15 +42,27 @@ function QrCodes() {
         <h2 className="mb-3 font-serif text-xl font-semibold text-foreground">
           Institucional
         </h2>
-        <div className="flex max-w-xs flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 text-center">
-          <QrCode
-            valor="https://institutoelifasandreato.org.br"
-            tamanho={150}
-            rotulo="QR Code do Instituto Elifas Andreato"
-          />
-          <p className="font-serif text-sm font-semibold text-card-foreground">
-            Instituto Elifas Andreato
-          </p>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex max-w-xs flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 text-center">
+            <QrCode
+              valor="https://institutoelifasandreato.org.br"
+              tamanho={150}
+              rotulo="QR Code do Instituto Elifas Andreato"
+            />
+            <p className="font-serif text-sm font-semibold text-card-foreground">
+              Instituto Elifas Andreato
+            </p>
+          </div>
+          <div className="flex max-w-xs flex-col items-center gap-2 rounded-lg border border-border bg-card p-4 text-center">
+            <QrCode
+              valor="https://www.caixacultural.gov.br/Paginas/Programacao.aspx?idEvento=4588"
+              tamanho={150}
+              rotulo="QR Code da Caixa Cultural"
+            />
+            <p className="font-serif text-sm font-semibold text-card-foreground">
+              Caixa Cultural — Programação
+            </p>
+          </div>
         </div>
       </section>
 
