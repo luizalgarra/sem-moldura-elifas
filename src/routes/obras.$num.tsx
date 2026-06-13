@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { ImageOff, ZoomIn, X } from "lucide-react";
+import { ImageOff, ZoomIn, X, ArrowUpRight } from "lucide-react";
 import { obras } from "@/data/obras";
 import { listarAcervo } from "@/lib/admin-obras.functions";
 import { anosMarcos } from "@/data/timeline";
