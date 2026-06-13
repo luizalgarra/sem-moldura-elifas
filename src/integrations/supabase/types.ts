@@ -32,6 +32,21 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_emails: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
       obra_overrides: {
         Row: {
           ano: string | null
@@ -167,6 +182,7 @@ export type Database = {
         Args: { p_chave: number; p_posicao: number }
         Returns: undefined
       }
+      is_admin: { Args: never; Returns: boolean }
       remover_da_ordem: { Args: { p_chave: number }; Returns: undefined }
     }
     Enums: {
