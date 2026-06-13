@@ -56,6 +56,17 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
             </ul>
           </nav>
           <ControlesAcessibilidade />
+          {onSair && (
+            <button
+              type="button"
+              onClick={onSair}
+              className="inline-flex items-center gap-1 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              aria-label="Sair"
+            >
+              <LogOut className="size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Sair</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
