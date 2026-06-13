@@ -1,33 +1,23 @@
 ## Objetivo
-Cruzar os anos das obras do Acervo com os marcos das **Linhas da Vida** e criar links nos dois sentidos, aproximando ao marco mais próximo quando o ano exato não existir na linha do tempo.
 
-## Lógica de correspondência (compartilhada)
-Criar um utilitário em `src/lib/anos.ts`:
-- `extrairAno(ano: string): number | null` — extrai o primeiro número de 4 dígitos (cobre "1974", "Década 1980" → 1980, "2000").
-- `marcoMaisProximo(ano: number, anosMarcos: number[]): number` — retorna o ano de marco com menor distância (desempate pelo mais antigo).
-- Lista dos anos de marco derivada de uma fonte única.
+Dar mais destaque visual ao link "↗ Veja na linha do tempo" que aparece na ficha de cada obra do acervo (`src/routes/obras.$num.tsx`), para que o visitante perceba e use a conexão com as Linhas da Vida.
 
-Para isso, extrair o array `marcos` de `linhas-da-vida.tsx` para `src/data/timeline.ts` (exportando `marcos` e `anosMarcos`), e a página passa a importar de lá. Sem mudança visual na linha do tempo.
+## O que muda
 
-## Sentido 1 — Obra → Linha do tempo
-Em `src/routes/obras.$num.tsx`:
-- Calcular o marco correspondente ao `obra.ano` (exato ou mais próximo).
-- Abaixo da ficha técnica, adicionar um bloco discreto no padrão do site: um `<Link>` para `/linhas-da-vida` com `hash` no ano do marco (ex.: `#ano-1974`), com rótulo como "Veja 1974 na linha do tempo" (e, quando aproximado, "Contexto da década na linha do tempo — 1980").
+Apenas estilo/apresentação do bloco do link já existente — sem alterar a lógica de correspondência (`marcoDaObra`) nem dados.
 
-## Sentido 2 — Linha do tempo → Obras
-Em `src/routes/linhas-da-vida.tsx`:
-- Adicionar `loader` chamando `listarAcervo()` e agrupar as obras por marco (cada obra cai no marco exato ou mais próximo).
-- Dar `id="ano-<ano>"` e `scroll-mt-24` a cada item da timeline, para os links âncora funcionarem.
-- Em cada marco que tiver obras associadas, renderizar uma lista de chips/links "Obras relacionadas" apontando para `/obras/$num` (usando o `num` exibido vindo do acervo), no padrão visual do site.
+Mudanças propostas no bloco `{corresp && (...)}`:
 
-## Detalhes técnicos
-- Apenas frontend/apresentação; nenhuma alteração de schema ou de áudio/imagem.
-- Navegação com `<Link to=... params=... hash=...>` (nunca `<a href>`), conforme TanStack Router.
-- `extrairAno`/`marcoMaisProximo` cobrem anos fora da linha (2000, 2006, 2010) aproximando ao marco mais próximo.
-- `routeTree.gen.ts` é gerado automaticamente; não será editado à mão.
+- **Cor de marca / contraste**: trocar o atual cartão neutro (`bg-card` + borda discreta) por um bloco em destaque usando o âmbar de acento (`bg-accent text-accent-foreground`), padrão de chamada de ação do site.
+- **Hierarquia**: adicionar um rótulo curto acima do link (ex.: "Conexão com a história") e aumentar levemente o peso/tamanho da fonte do link principal.
+- **Ícone**: substituir a seta textual `↗` por um ícone consistente do `lucide-react` (ex.: `History` ou `ArrowUpRight`) já usado no projeto.
+- **Espaçamento/posição**: manter logo após a ficha técnica, com `mt-6` e largura total no mobile, mantendo área de toque acessível (min 44px).
+- **Foco/hover**: garantir estados de hover e foco visíveis coerentes com o tema.
 
-## Arquivos afetados
-- `src/data/timeline.ts` (novo — dados dos marcos)
-- `src/lib/anos.ts` (novo — utilitários de correspondência)
-- `src/routes/linhas-da-vida.tsx` (loader + âncoras + obras relacionadas)
-- `src/routes/obras.$num.tsx` (link para a linha do tempo)
+## Arquivo afetado
+
+- `src/routes/obras.$num.tsx` — apenas o JSX/classes do bloco `corresp`.
+
+## Fora de escopo
+
+Lógica de datas, dados (`timeline.ts`, `anos.ts`), e a página Linhas da Vida permanecem inalterados.
