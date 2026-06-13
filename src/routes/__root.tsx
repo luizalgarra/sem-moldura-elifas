@@ -10,9 +10,12 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { Loader2 } from "lucide-react";
+
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AcessibilidadeProvider } from "../hooks/useAcessibilidade";
+import { AdminAuthProvider, useAdminAuth } from "../hooks/useAdminAuth";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
 import { marca } from "../assets/marca";
@@ -145,29 +148,89 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  // Enquanto a home estiver "Em construção", escondemos topo e rodapé
-  // (e todos os links para outras páginas) apenas na rota "/".
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const emConstrucao = pathname === "/";
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AcessibilidadeProvider>
-        <a
-          href="#conteudo"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
-        >
-          Pular para o conteúdo
-        </a>
-        <div className="flex min-h-screen flex-col">
-          {!emConstrucao && <SiteHeader />}
-          <main id="conteudo" className="flex-1">
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-          </main>
-          {!emConstrucao && <SiteFooter />}
-        </div>
-      </AcessibilidadeProvider>
+      <AdminAuthProvider>
+        <AcessibilidadeProvider>
+          <a
+            href="#conteudo"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+          >
+            Pular para o conteúdo
+          </a>
+          <Conteudo />
+        </AcessibilidadeProvider>
+      </AdminAuthProvider>
     </QueryClientProvider>
+  );
+}
+
+function Conteudo() {
+  const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { carregando, session, isAdmin, sair } = useAdminAuth();
+
+  // A home ("/") fica pública em modo "Em construção": sem topo/rodapé.
+  const emConstrucao = pathname === "/";
+  // A tela de login é pública e não usa o layout interno.
+  const ehAuth = pathname === "/auth";
+
+  // Páginas internas: exigem administrador.
+  const protegida = !emConstrucao && !ehAuth;
+
+  if (protegida) {
+    if (carregando) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
+        </div>
+      );
+    }
+
+    if (!session) {
+      router.navigate({ to: "/auth" });
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
+        </div>
+      );
+    }
+
+    if (!isAdmin) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background px-4">
+          <div className="max-w-md text-center">
+            <h1 className="font-serif text-2xl font-bold text-foreground">
+              Acesso restrito
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Sua conta não tem permissão para acessar esta área.
+            </p>
+            <div className="mt-6">
+              <button
+                onClick={() => sair()}
+                className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  const mostrarLayout = !emConstrucao && !ehAuth;
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      {mostrarLayout && <SiteHeader onSair={() => sair()} />}
+      <main id="conteudo" className="flex-1">
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </main>
+      {mostrarLayout && <SiteFooter />}
+    </div>
   );
 }
