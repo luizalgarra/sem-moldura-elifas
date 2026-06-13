@@ -111,16 +111,24 @@ function ObraPagina() {
       </dl>
 
       {corresp && (
-        <div className="mt-4">
+        <div className="mt-6">
+          <p className="text-xs font-medium uppercase tracking-wide text-accent">
+            Conexão com a história
+          </p>
           <Link
             to="/linhas-da-vida"
             hash={`ano-${corresp.marco}`}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="group mt-2 flex min-h-14 w-full items-center justify-between gap-3 rounded-lg bg-accent px-5 py-4 text-base font-semibold text-accent-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:brightness-105 focus-visible:-translate-y-0.5"
           >
-            <span aria-hidden="true">↗</span>
-            {corresp.exato
-              ? `Veja ${corresp.marco} na linha do tempo`
-              : `Contexto na linha do tempo — ${corresp.marco}`}
+            <span>
+              {corresp.exato
+                ? `Veja ${corresp.marco} na linha do tempo`
+                : `Contexto na linha do tempo — ${corresp.marco}`}
+            </span>
+            <ArrowUpRight
+              className="shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              aria-hidden="true"
+            />
           </Link>
         </div>
       )}
