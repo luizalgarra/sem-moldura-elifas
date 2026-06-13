@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
+import { LogOut } from "lucide-react";
 import { ControlesAcessibilidade } from "@/components/ControlesAcessibilidade";
 import { marca } from "@/assets/marca";
 
-export function SiteHeader() {
+export function SiteHeader({ onSair }: { onSair?: () => void }) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
