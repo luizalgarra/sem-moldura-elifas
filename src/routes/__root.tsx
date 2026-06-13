@@ -179,17 +179,17 @@ function Conteudo() {
   // Páginas internas: exigem administrador.
   const protegida = !emConstrucao && !ehAuth;
 
-  if (protegida) {
-    if (carregando) {
-      return (
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
-        </div>
-      );
-    }
+  const semSessao = protegida && !carregando && !session;
 
-    if (!session) {
+  // Redireciona para o login fora da renderização (evita aviso do React).
+  useEffect(() => {
+    if (semSessao) {
       router.navigate({ to: "/auth" });
+    }
+  }, [semSessao, router]);
+
+  if (protegida) {
+    if (carregando || !session) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-background">
           <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
