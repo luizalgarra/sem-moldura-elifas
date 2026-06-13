@@ -7,17 +7,56 @@ import { marca } from "@/assets/marca";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Elifas Andreato — Além da Moldura · Catálogo Virtual" },
+      { title: "Em breve — Elifas Andreato" },
       {
         name: "description",
         content:
-          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Além da Moldura. Obras com áudio-descrição e acesso por QR Code.",
+          "Estamos preparando o catálogo virtual da exposição Elifas Andreato: Além da Moldura. Volte em breve.",
       },
     ],
   }),
-  component: Index,
+  component: EmConstrucao,
 });
 
+// Página temporária "Em construção".
+// Para reativar a home original, troque `component: EmConstrucao` por
+// `component: Index` acima e restaure o `head()` original.
+function EmConstrucao() {
+  return (
+    <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-background px-4 py-20">
+      <img
+        src={marca.heroElifasArte}
+        alt=""
+        className="pointer-events-none absolute inset-0 size-full object-cover opacity-30"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/85 to-background"
+        aria-hidden="true"
+      />
+      <div className="relative flex max-w-xl flex-col items-center text-center">
+        <img
+          src={marca.logoFirmaBranco}
+          alt="Elifas Andreato — Além da Moldura"
+          className="h-16 w-auto sm:h-20"
+          width={220}
+          height={80}
+        />
+        <p className="mt-8 font-semibold uppercase tracking-[0.3em] text-brand-yellow">
+          80 anos
+        </p>
+        <h1 className="mt-4 text-4xl font-bold leading-tight text-foreground sm:text-5xl">
+          Em breve
+        </h1>
+        <p className="mt-6 text-lg text-foreground/80">
+          Estamos preparando o catálogo virtual da exposição. Volte em breve.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Index() {
   const destaques = obras.filter((o) => o.imagem).slice(0, 6);
 
