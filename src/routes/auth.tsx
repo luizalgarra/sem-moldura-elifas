@@ -74,6 +74,14 @@ function AuthPagina() {
           setMsg("E-mail ou senha incorretos.");
           return;
         }
+        // Confirma se a conta tem acesso de administrador.
+        const { data: ehAdmin } = await supabase.rpc("is_admin");
+        if (ehAdmin === true) {
+          router.navigate({ to: "/obras" });
+        } else {
+          await supabase.auth.signOut();
+          setMsg("Esta conta não tem acesso de administrador.");
+        }
       }
     } catch {
       setMsg("Não foi possível concluir. Tente novamente.");
