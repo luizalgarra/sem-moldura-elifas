@@ -145,6 +145,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Enquanto a home estiver "Em construção", escondemos topo e rodapé
+  // (e todos os links para outras páginas) apenas na rota "/".
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const emConstrucao = pathname === "/";
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -156,12 +160,12 @@ function RootComponent() {
           Pular para o conteúdo
         </a>
         <div className="flex min-h-screen flex-col">
-          <SiteHeader />
+          {!emConstrucao && <SiteHeader />}
           <main id="conteudo" className="flex-1">
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
           </main>
-          <SiteFooter />
+          {!emConstrucao && <SiteFooter />}
         </div>
       </AcessibilidadeProvider>
     </QueryClientProvider>
