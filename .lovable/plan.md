@@ -1,25 +1,22 @@
-# Página "Em construção" na home
+# Esconder navegação na página "Em construção"
 
-## Objetivo
-Esconder o site da maioria dos visitantes: ao abrir a página inicial (`/`), em vez do conteúdo atual, mostrar uma tela "Em construção" com a logo da exposição e uma mensagem curta. As demais páginas (`/obras`, `/linhas-da-vida`, `/sobre` etc.) continuam funcionando por link direto, conforme escolhido.
+## Problema
+O menu superior (`SiteHeader`) e o rodapé (`SiteFooter`) são renderizados no layout raiz (`src/routes/__root.tsx`), então aparecem em **todas** as rotas — inclusive na home "Em construção". Ambos contêm links para outras páginas (Acervo, Linhas da Vida, Sobre, Como usar, QR Codes), que devem desaparecer enquanto o site estiver escondido.
 
 ## O que muda
-- **`src/routes/index.tsx`**: o conteúdo atual da home (hero, destaques, cards) é substituído pela tela "Em construção". O código original é preservado comentado/guardado no mesmo arquivo, para eu reativar facilmente quando você avisar no chat.
+- **`src/routes/__root.tsx`**: no `RootComponent`, detectar a rota atual e, quando for a home (`/`), **não renderizar** `SiteHeader` nem `SiteFooter`. Nas demais rotas, tudo continua igual.
 
-A tela mostrará:
-- A logo "Elifas Andreato — Além da Moldura" (`marca.logoFirmaBranco`), centralizada.
-- A barra "Caixa Cultural apresenta" (mantendo a identidade), opcional e discreta.
-- Título curto: **"Em breve"**.
-- Mensagem curta: ex. *"Estamos preparando o catálogo virtual da exposição. Volte em breve."*
-- Fundo na identidade do site (cores semânticas do tema, sem cores fixas), centralizado vertical e horizontalmente, responsivo e acessível (contraste adequado, um único H1).
+Resultado: a tela "Em construção" fica limpa, só com a logo e a mensagem, sem topo, sem rodapé e sem nenhum link para outras páginas.
 
 ## Detalhes técnicos
-- Mantém `createFileRoute("/")` e a estrutura de rota intacta (sem mexer em `routeTree.gen.ts` nem no `__root.tsx`).
-- Atualiza o `head()` da home com title/description neutros ("Em breve — Elifas Andreato"), para que quem compartilhar o link da home não exponha o catálogo ainda.
-- Sem mudanças em dados, backend ou outras rotas.
-- Reversão: quando você pedir, restauro o componente `Index` original (guardado no arquivo) e o `head()` anterior.
+- Usar o estado do roteador (ex.: `useRouterState` para ler o `location.pathname`) dentro de `RootComponent`.
+- Renderizar `SiteHeader`/`SiteFooter` condicionalmente: ocultos quando `pathname === "/"`.
+- O `<main>` com `<Outlet />` permanece intacto (necessário para as rotas filhas).
+- Sem mudanças em dados, backend, outras rotas ou nos próprios componentes de header/footer.
+
+## Reversão
+Quando o site voltar ao ar (junto com a restauração da home original), basta remover a condição e voltar a renderizar header e footer sempre.
 
 ## Fora de escopo
-- Bloqueio das outras páginas (você escolheu manter só a home escondida).
-- Senha/acesso secreto (você reativará avisando no chat).
-- Data de estreia e contato/redes (não solicitados).
+- Conteúdo da tela "Em construção" (já existe).
+- Bloqueio das outras páginas (continuam acessíveis por link direto, conforme escolhido).
