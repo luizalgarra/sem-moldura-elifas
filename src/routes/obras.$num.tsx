@@ -46,6 +46,8 @@ export const Route = createFileRoute("/obras/$num")({
 function ObraPagina() {
   const { obra, total } = Route.useLoaderData();
   const [ampliada, setAmpliada] = useState(false);
+  const corresp = marcoDaObra(obra.ano, anosMarcos);
+
 
 
   return (
@@ -107,6 +109,21 @@ function ObraPagina() {
         <FichaItem rotulo="Técnica" valor={obra.tecnica} />
         <FichaItem rotulo="Dimensão do original" valor={obra.dimensao} />
       </dl>
+
+      {corresp && (
+        <div className="mt-4">
+          <Link
+            to="/linhas-da-vida"
+            hash={`ano-${corresp.marco}`}
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          >
+            <span aria-hidden="true">↗</span>
+            {corresp.exato
+              ? `Veja ${corresp.marco} na linha do tempo`
+              : `Contexto na linha do tempo — ${corresp.marco}`}
+          </Link>
+        </div>
+      )}
 
       <section className="mt-6" aria-labelledby="descricao-titulo">
         <h2 id="descricao-titulo" className="font-serif text-xl font-semibold text-foreground">
