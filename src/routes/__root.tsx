@@ -10,9 +10,12 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { Loader2 } from "lucide-react";
+
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AcessibilidadeProvider } from "../hooks/useAcessibilidade";
+import { AdminAuthProvider, useAdminAuth } from "../hooks/useAdminAuth";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
 import { marca } from "../assets/marca";
