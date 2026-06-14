@@ -114,6 +114,7 @@ export function SiteHeader({
           )}
 
           {/* Navegação mobile colapsável */}
+          {!ocultarNavegacao && (
           <Sheet open={menuAberto} onOpenChange={setMenuAberto}>
             <SheetTrigger asChild>
               <button
