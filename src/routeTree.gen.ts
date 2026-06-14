@@ -38,6 +38,7 @@ import { Route as ParticipeAgendaRouteImport } from './routes/participe.agenda'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
 import { Route as InstitutoTransparenciaRouteImport } from './routes/instituto.transparencia'
 import { Route as InstitutoRedeDeParceirosRouteImport } from './routes/instituto.rede-de-parceiros'
+import { Route as InstitutoProjetosEIniciativasRouteImport } from './routes/instituto.projetos-e-iniciativas'
 import { Route as InstitutoPilaresRouteImport } from './routes/instituto.pilares'
 import { Route as InstitutoMissaoELegadoRouteImport } from './routes/instituto.missao-e-legado'
 import { Route as InstitutoLauraAndreatoRouteImport } from './routes/instituto.laura-andreato'
@@ -207,6 +208,12 @@ const InstitutoRedeDeParceirosRoute =
     path: '/rede-de-parceiros',
     getParentRoute: () => InstitutoRoute,
   } as any)
+const InstitutoProjetosEIniciativasRoute =
+  InstitutoProjetosEIniciativasRouteImport.update({
+    id: '/projetos-e-iniciativas',
+    path: '/projetos-e-iniciativas',
+    getParentRoute: () => InstitutoRoute,
+  } as any)
 const InstitutoPilaresRoute = InstitutoPilaresRouteImport.update({
   id: '/pilares',
   path: '/pilares',
@@ -364,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/projetos-e-iniciativas': typeof InstitutoProjetosEIniciativasRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
   '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
@@ -411,6 +419,7 @@ export interface FileRoutesByTo {
   '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/projetos-e-iniciativas': typeof InstitutoProjetosEIniciativasRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
   '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
@@ -465,6 +474,7 @@ export interface FileRoutesById {
   '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/projetos-e-iniciativas': typeof InstitutoProjetosEIniciativasRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
   '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
@@ -520,6 +530,7 @@ export interface FileRouteTypes {
     | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
+    | '/instituto/projetos-e-iniciativas'
     | '/instituto/rede-de-parceiros'
     | '/instituto/transparencia'
     | '/obras/$num'
@@ -567,6 +578,7 @@ export interface FileRouteTypes {
     | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
+    | '/instituto/projetos-e-iniciativas'
     | '/instituto/rede-de-parceiros'
     | '/instituto/transparencia'
     | '/obras/$num'
@@ -620,6 +632,7 @@ export interface FileRouteTypes {
     | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
+    | '/instituto/projetos-e-iniciativas'
     | '/instituto/rede-de-parceiros'
     | '/instituto/transparencia'
     | '/obras/$num'
@@ -865,6 +878,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstitutoRedeDeParceirosRouteImport
       parentRoute: typeof InstitutoRoute
     }
+    '/instituto/projetos-e-iniciativas': {
+      id: '/instituto/projetos-e-iniciativas'
+      path: '/projetos-e-iniciativas'
+      fullPath: '/instituto/projetos-e-iniciativas'
+      preLoaderRoute: typeof InstitutoProjetosEIniciativasRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
     '/instituto/pilares': {
       id: '/instituto/pilares'
       path: '/pilares'
@@ -1094,6 +1114,7 @@ interface InstitutoRouteChildren {
   InstitutoLauraAndreatoRoute: typeof InstitutoLauraAndreatoRoute
   InstitutoMissaoELegadoRoute: typeof InstitutoMissaoELegadoRoute
   InstitutoPilaresRoute: typeof InstitutoPilaresRoute
+  InstitutoProjetosEIniciativasRoute: typeof InstitutoProjetosEIniciativasRoute
   InstitutoRedeDeParceirosRoute: typeof InstitutoRedeDeParceirosRoute
   InstitutoTransparenciaRoute: typeof InstitutoTransparenciaRoute
   InstitutoIndexRoute: typeof InstitutoIndexRoute
@@ -1105,6 +1126,7 @@ const InstitutoRouteChildren: InstitutoRouteChildren = {
   InstitutoLauraAndreatoRoute: InstitutoLauraAndreatoRoute,
   InstitutoMissaoELegadoRoute: InstitutoMissaoELegadoRoute,
   InstitutoPilaresRoute: InstitutoPilaresRoute,
+  InstitutoProjetosEIniciativasRoute: InstitutoProjetosEIniciativasRoute,
   InstitutoRedeDeParceirosRoute: InstitutoRedeDeParceirosRoute,
   InstitutoTransparenciaRoute: InstitutoTransparenciaRoute,
   InstitutoIndexRoute: InstitutoIndexRoute,
