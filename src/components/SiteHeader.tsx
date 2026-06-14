@@ -52,6 +52,7 @@ export function SiteHeader({
 
         <div className="flex items-center gap-3">
           {/* Navegação desktop com menus suspensos */}
+          {!ocultarNavegacao && (
           <NavigationMenu className="hidden lg:flex">
             <NavigationMenuList>
               {navegacao.map((grupo) => (
