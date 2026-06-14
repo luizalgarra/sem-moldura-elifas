@@ -23,7 +23,12 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcervoRouteImport } from './routes/acervo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QrcodesIndexRouteImport } from './routes/qrcodes.index'
+import { Route as ParticipeIndexRouteImport } from './routes/participe.index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
+import { Route as InstitutoIndexRouteImport } from './routes/instituto.index'
+import { Route as EspacosDeMemoriaIndexRouteImport } from './routes/espacos-de-memoria.index'
+import { Route as ElifasAndreatoIndexRouteImport } from './routes/elifas-andreato.index'
+import { Route as AcervoIndexRouteImport } from './routes/acervo.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
 import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
@@ -99,10 +104,35 @@ const QrcodesIndexRoute = QrcodesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => QrcodesRoute,
 } as any)
+const ParticipeIndexRoute = ParticipeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ParticipeRoute,
+} as any)
 const ObrasIndexRoute = ObrasIndexRouteImport.update({
   id: '/obras/',
   path: '/obras/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const InstitutoIndexRoute = InstitutoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const EspacosDeMemoriaIndexRoute = EspacosDeMemoriaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EspacosDeMemoriaRoute,
+} as any)
+const ElifasAndreatoIndexRoute = ElifasAndreatoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ElifasAndreatoRoute,
+} as any)
+const AcervoIndexRoute = AcervoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AcervoRoute,
 } as any)
 const QrcodesImprimirRoute = QrcodesImprimirRouteImport.update({
   id: '/imprimir',
@@ -127,41 +157,46 @@ const ApiPublicObraAudioNumRoute = ApiPublicObraAudioNumRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/acervo': typeof AcervoRoute
+  '/acervo': typeof AcervoRouteWithChildren
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
-  '/elifas-andreato': typeof ElifasAndreatoRoute
-  '/espacos-de-memoria': typeof EspacosDeMemoriaRoute
-  '/instituto': typeof InstitutoRoute
+  '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
+  '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
+  '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
-  '/participe': typeof ParticipeRoute
+  '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/acervo/': typeof AcervoIndexRoute
+  '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
+  '/espacos-de-memoria/': typeof EspacosDeMemoriaIndexRoute
+  '/instituto/': typeof InstitutoIndexRoute
   '/obras/': typeof ObrasIndexRoute
+  '/participe/': typeof ParticipeIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/acervo': typeof AcervoRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
-  '/elifas-andreato': typeof ElifasAndreatoRoute
-  '/espacos-de-memoria': typeof EspacosDeMemoriaRoute
-  '/instituto': typeof InstitutoRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
-  '/participe': typeof ParticipeRoute
   '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/acervo': typeof AcervoIndexRoute
+  '/elifas-andreato': typeof ElifasAndreatoIndexRoute
+  '/espacos-de-memoria': typeof EspacosDeMemoriaIndexRoute
+  '/instituto': typeof InstitutoIndexRoute
   '/obras': typeof ObrasIndexRoute
+  '/participe': typeof ParticipeIndexRoute
   '/qrcodes': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -169,21 +204,26 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/acervo': typeof AcervoRoute
+  '/acervo': typeof AcervoRouteWithChildren
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
-  '/elifas-andreato': typeof ElifasAndreatoRoute
-  '/espacos-de-memoria': typeof EspacosDeMemoriaRoute
-  '/instituto': typeof InstitutoRoute
+  '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
+  '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
+  '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
-  '/participe': typeof ParticipeRoute
+  '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/acervo/': typeof AcervoIndexRoute
+  '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
+  '/espacos-de-memoria/': typeof EspacosDeMemoriaIndexRoute
+  '/instituto/': typeof InstitutoIndexRoute
   '/obras/': typeof ObrasIndexRoute
+  '/participe/': typeof ParticipeIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -206,27 +246,32 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/obras/$num'
     | '/qrcodes/imprimir'
+    | '/acervo/'
+    | '/elifas-andreato/'
+    | '/espacos-de-memoria/'
+    | '/instituto/'
     | '/obras/'
+    | '/participe/'
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/acervo'
     | '/admin'
     | '/auth'
     | '/como-usar'
     | '/editar'
-    | '/elifas-andreato'
-    | '/espacos-de-memoria'
-    | '/instituto'
     | '/linhas-da-vida'
-    | '/participe'
     | '/sobre'
     | '/obras/$num'
     | '/qrcodes/imprimir'
+    | '/acervo'
+    | '/elifas-andreato'
+    | '/espacos-de-memoria'
+    | '/instituto'
     | '/obras'
+    | '/participe'
     | '/qrcodes'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
@@ -247,7 +292,12 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/obras/$num'
     | '/qrcodes/imprimir'
+    | '/acervo/'
+    | '/elifas-andreato/'
+    | '/espacos-de-memoria/'
+    | '/instituto/'
     | '/obras/'
+    | '/participe/'
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
@@ -255,16 +305,16 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AcervoRoute: typeof AcervoRoute
+  AcervoRoute: typeof AcervoRouteWithChildren
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ComoUsarRoute: typeof ComoUsarRoute
   EditarRoute: typeof EditarRoute
-  ElifasAndreatoRoute: typeof ElifasAndreatoRoute
-  EspacosDeMemoriaRoute: typeof EspacosDeMemoriaRoute
-  InstitutoRoute: typeof InstitutoRoute
+  ElifasAndreatoRoute: typeof ElifasAndreatoRouteWithChildren
+  EspacosDeMemoriaRoute: typeof EspacosDeMemoriaRouteWithChildren
+  InstitutoRoute: typeof InstitutoRouteWithChildren
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
-  ParticipeRoute: typeof ParticipeRoute
+  ParticipeRoute: typeof ParticipeRouteWithChildren
   QrcodesRoute: typeof QrcodesRouteWithChildren
   SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
@@ -373,12 +423,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QrcodesIndexRouteImport
       parentRoute: typeof QrcodesRoute
     }
+    '/participe/': {
+      id: '/participe/'
+      path: '/'
+      fullPath: '/participe/'
+      preLoaderRoute: typeof ParticipeIndexRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
     '/obras/': {
       id: '/obras/'
       path: '/obras'
       fullPath: '/obras/'
       preLoaderRoute: typeof ObrasIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/instituto/': {
+      id: '/instituto/'
+      path: '/'
+      fullPath: '/instituto/'
+      preLoaderRoute: typeof InstitutoIndexRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/espacos-de-memoria/': {
+      id: '/espacos-de-memoria/'
+      path: '/'
+      fullPath: '/espacos-de-memoria/'
+      preLoaderRoute: typeof EspacosDeMemoriaIndexRouteImport
+      parentRoute: typeof EspacosDeMemoriaRoute
+    }
+    '/elifas-andreato/': {
+      id: '/elifas-andreato/'
+      path: '/'
+      fullPath: '/elifas-andreato/'
+      preLoaderRoute: typeof ElifasAndreatoIndexRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/acervo/': {
+      id: '/acervo/'
+      path: '/'
+      fullPath: '/acervo/'
+      preLoaderRoute: typeof AcervoIndexRouteImport
+      parentRoute: typeof AcervoRoute
     }
     '/qrcodes/imprimir': {
       id: '/qrcodes/imprimir'
@@ -411,6 +496,64 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AcervoRouteChildren {
+  AcervoIndexRoute: typeof AcervoIndexRoute
+}
+
+const AcervoRouteChildren: AcervoRouteChildren = {
+  AcervoIndexRoute: AcervoIndexRoute,
+}
+
+const AcervoRouteWithChildren =
+  AcervoRoute._addFileChildren(AcervoRouteChildren)
+
+interface ElifasAndreatoRouteChildren {
+  ElifasAndreatoIndexRoute: typeof ElifasAndreatoIndexRoute
+}
+
+const ElifasAndreatoRouteChildren: ElifasAndreatoRouteChildren = {
+  ElifasAndreatoIndexRoute: ElifasAndreatoIndexRoute,
+}
+
+const ElifasAndreatoRouteWithChildren = ElifasAndreatoRoute._addFileChildren(
+  ElifasAndreatoRouteChildren,
+)
+
+interface EspacosDeMemoriaRouteChildren {
+  EspacosDeMemoriaIndexRoute: typeof EspacosDeMemoriaIndexRoute
+}
+
+const EspacosDeMemoriaRouteChildren: EspacosDeMemoriaRouteChildren = {
+  EspacosDeMemoriaIndexRoute: EspacosDeMemoriaIndexRoute,
+}
+
+const EspacosDeMemoriaRouteWithChildren =
+  EspacosDeMemoriaRoute._addFileChildren(EspacosDeMemoriaRouteChildren)
+
+interface InstitutoRouteChildren {
+  InstitutoIndexRoute: typeof InstitutoIndexRoute
+}
+
+const InstitutoRouteChildren: InstitutoRouteChildren = {
+  InstitutoIndexRoute: InstitutoIndexRoute,
+}
+
+const InstitutoRouteWithChildren = InstitutoRoute._addFileChildren(
+  InstitutoRouteChildren,
+)
+
+interface ParticipeRouteChildren {
+  ParticipeIndexRoute: typeof ParticipeIndexRoute
+}
+
+const ParticipeRouteChildren: ParticipeRouteChildren = {
+  ParticipeIndexRoute: ParticipeIndexRoute,
+}
+
+const ParticipeRouteWithChildren = ParticipeRoute._addFileChildren(
+  ParticipeRouteChildren,
+)
+
 interface QrcodesRouteChildren {
   QrcodesImprimirRoute: typeof QrcodesImprimirRoute
   QrcodesIndexRoute: typeof QrcodesIndexRoute
@@ -426,16 +569,16 @@ const QrcodesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AcervoRoute: AcervoRoute,
+  AcervoRoute: AcervoRouteWithChildren,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ComoUsarRoute: ComoUsarRoute,
   EditarRoute: EditarRoute,
-  ElifasAndreatoRoute: ElifasAndreatoRoute,
-  EspacosDeMemoriaRoute: EspacosDeMemoriaRoute,
-  InstitutoRoute: InstitutoRoute,
+  ElifasAndreatoRoute: ElifasAndreatoRouteWithChildren,
+  EspacosDeMemoriaRoute: EspacosDeMemoriaRouteWithChildren,
+  InstitutoRoute: InstitutoRouteWithChildren,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
-  ParticipeRoute: ParticipeRoute,
+  ParticipeRoute: ParticipeRouteWithChildren,
   QrcodesRoute: QrcodesRouteWithChildren,
   SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
@@ -446,3 +589,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
