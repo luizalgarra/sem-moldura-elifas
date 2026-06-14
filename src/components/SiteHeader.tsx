@@ -46,7 +46,7 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
 
         <div className="flex items-center gap-3">
           {/* Navegação desktop com menus suspensos */}
-          <NavigationMenu className="hidden lg:flex" viewport={false}>
+          <NavigationMenu className="hidden lg:flex">
             <NavigationMenuList>
               {navegacao.map((grupo) => (
                 <NavigationMenuItem key={grupo.para}>
