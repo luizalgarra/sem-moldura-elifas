@@ -17,6 +17,11 @@ export const navegacao: GrupoNav[] = [
     itens: [
       { rotulo: "Missão e Legado", para: "/instituto/missao-e-legado" },
       {
+        rotulo: "Laura Andreato",
+        para: "/instituto/laura-andreato",
+        descricao: "Curadoria, pesquisa e finalização do legado",
+      },
+      {
         rotulo: "Pilares",
         para: "/instituto/pilares",
         descricao: "Preservação, Difusão, Ação Educativa",
