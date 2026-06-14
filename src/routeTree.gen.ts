@@ -42,6 +42,7 @@ import { Route as InstitutoPilaresRouteImport } from './routes/instituto.pilares
 import { Route as InstitutoMissaoELegadoRouteImport } from './routes/instituto.missao-e-legado'
 import { Route as InstitutoLauraAndreatoRouteImport } from './routes/instituto.laura-andreato'
 import { Route as InstitutoGovernancaRouteImport } from './routes/instituto.governanca'
+import { Route as InstitutoBentoAndreatoRouteImport } from './routes/instituto.bento-andreato'
 import { Route as EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport } from './routes/espacos-de-memoria.praca-memorial-vladimir-herzog'
 import { Route as ElifasAndreatoReconhecimentosRouteImport } from './routes/elifas-andreato.reconhecimentos'
 import { Route as ElifasAndreatoMusicaPopularBrasileiraRouteImport } from './routes/elifas-andreato.musica-popular-brasileira'
@@ -226,6 +227,11 @@ const InstitutoGovernancaRoute = InstitutoGovernancaRouteImport.update({
   path: '/governanca',
   getParentRoute: () => InstitutoRoute,
 } as any)
+const InstitutoBentoAndreatoRoute = InstitutoBentoAndreatoRouteImport.update({
+  id: '/bento-andreato',
+  path: '/bento-andreato',
+  getParentRoute: () => InstitutoRoute,
+} as any)
 const EspacosDeMemoriaPracaMemorialVladimirHerzogRoute =
   EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport.update({
     id: '/praca-memorial-vladimir-herzog',
@@ -353,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
+  '/instituto/bento-andreato': typeof InstitutoBentoAndreatoRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
@@ -399,6 +406,7 @@ export interface FileRoutesByTo {
   '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
+  '/instituto/bento-andreato': typeof InstitutoBentoAndreatoRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
+  '/instituto/bento-andreato': typeof InstitutoBentoAndreatoRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
@@ -506,6 +515,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato/musica-popular-brasileira'
     | '/elifas-andreato/reconhecimentos'
     | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+    | '/instituto/bento-andreato'
     | '/instituto/governanca'
     | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
@@ -552,6 +562,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato/musica-popular-brasileira'
     | '/elifas-andreato/reconhecimentos'
     | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+    | '/instituto/bento-andreato'
     | '/instituto/governanca'
     | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
@@ -604,6 +615,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato/musica-popular-brasileira'
     | '/elifas-andreato/reconhecimentos'
     | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+    | '/instituto/bento-andreato'
     | '/instituto/governanca'
     | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
@@ -881,6 +893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstitutoGovernancaRouteImport
       parentRoute: typeof InstitutoRoute
     }
+    '/instituto/bento-andreato': {
+      id: '/instituto/bento-andreato'
+      path: '/bento-andreato'
+      fullPath: '/instituto/bento-andreato'
+      preLoaderRoute: typeof InstitutoBentoAndreatoRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
     '/espacos-de-memoria/praca-memorial-vladimir-herzog': {
       id: '/espacos-de-memoria/praca-memorial-vladimir-herzog'
       path: '/praca-memorial-vladimir-herzog'
@@ -1070,6 +1089,7 @@ const EspacosDeMemoriaRouteWithChildren =
   EspacosDeMemoriaRoute._addFileChildren(EspacosDeMemoriaRouteChildren)
 
 interface InstitutoRouteChildren {
+  InstitutoBentoAndreatoRoute: typeof InstitutoBentoAndreatoRoute
   InstitutoGovernancaRoute: typeof InstitutoGovernancaRoute
   InstitutoLauraAndreatoRoute: typeof InstitutoLauraAndreatoRoute
   InstitutoMissaoELegadoRoute: typeof InstitutoMissaoELegadoRoute
@@ -1080,6 +1100,7 @@ interface InstitutoRouteChildren {
 }
 
 const InstitutoRouteChildren: InstitutoRouteChildren = {
+  InstitutoBentoAndreatoRoute: InstitutoBentoAndreatoRoute,
   InstitutoGovernancaRoute: InstitutoGovernancaRoute,
   InstitutoLauraAndreatoRoute: InstitutoLauraAndreatoRoute,
   InstitutoMissaoELegadoRoute: InstitutoMissaoELegadoRoute,
