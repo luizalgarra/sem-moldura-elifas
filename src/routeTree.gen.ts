@@ -31,6 +31,11 @@ import { Route as ElifasAndreatoIndexRouteImport } from './routes/elifas-andreat
 import { Route as AcervoIndexRouteImport } from './routes/acervo.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
+import { Route as InstitutoTransparenciaRouteImport } from './routes/instituto.transparencia'
+import { Route as InstitutoRedeDeParceirosRouteImport } from './routes/instituto.rede-de-parceiros'
+import { Route as InstitutoPilaresRouteImport } from './routes/instituto.pilares'
+import { Route as InstitutoMissaoELegadoRouteImport } from './routes/instituto.missao-e-legado'
+import { Route as InstitutoGovernancaRouteImport } from './routes/instituto.governanca'
 import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
@@ -144,6 +149,32 @@ const ObrasNumRoute = ObrasNumRouteImport.update({
   path: '/obras/$num',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstitutoTransparenciaRoute = InstitutoTransparenciaRouteImport.update({
+  id: '/transparencia',
+  path: '/transparencia',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const InstitutoRedeDeParceirosRoute =
+  InstitutoRedeDeParceirosRouteImport.update({
+    id: '/rede-de-parceiros',
+    path: '/rede-de-parceiros',
+    getParentRoute: () => InstitutoRoute,
+  } as any)
+const InstitutoPilaresRoute = InstitutoPilaresRouteImport.update({
+  id: '/pilares',
+  path: '/pilares',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const InstitutoMissaoELegadoRoute = InstitutoMissaoELegadoRouteImport.update({
+  id: '/missao-e-legado',
+  path: '/missao-e-legado',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const InstitutoGovernancaRoute = InstitutoGovernancaRouteImport.update({
+  id: '/governanca',
+  path: '/governanca',
+  getParentRoute: () => InstitutoRoute,
+} as any)
 const ApiPublicObraImagemNumRoute = ApiPublicObraImagemNumRouteImport.update({
   id: '/api/public/obra-imagem/$num',
   path: '/api/public/obra-imagem/$num',
@@ -169,6 +200,11 @@ export interface FileRoutesByFullPath {
   '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
+  '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
+  '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo/': typeof AcervoIndexRoute
@@ -189,6 +225,11 @@ export interface FileRoutesByTo {
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/sobre': typeof SobreRoute
+  '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
+  '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
+  '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo': typeof AcervoIndexRoute
@@ -216,6 +257,11 @@ export interface FileRoutesById {
   '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
+  '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
+  '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo/': typeof AcervoIndexRoute
@@ -244,6 +290,11 @@ export interface FileRouteTypes {
     | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/instituto/governanca'
+    | '/instituto/missao-e-legado'
+    | '/instituto/pilares'
+    | '/instituto/rede-de-parceiros'
+    | '/instituto/transparencia'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/acervo/'
@@ -264,6 +315,11 @@ export interface FileRouteTypes {
     | '/editar'
     | '/linhas-da-vida'
     | '/sobre'
+    | '/instituto/governanca'
+    | '/instituto/missao-e-legado'
+    | '/instituto/pilares'
+    | '/instituto/rede-de-parceiros'
+    | '/instituto/transparencia'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/acervo'
@@ -290,6 +346,11 @@ export interface FileRouteTypes {
     | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/instituto/governanca'
+    | '/instituto/missao-e-legado'
+    | '/instituto/pilares'
+    | '/instituto/rede-de-parceiros'
+    | '/instituto/transparencia'
     | '/obras/$num'
     | '/qrcodes/imprimir'
     | '/acervo/'
@@ -479,6 +540,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrasNumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/instituto/transparencia': {
+      id: '/instituto/transparencia'
+      path: '/transparencia'
+      fullPath: '/instituto/transparencia'
+      preLoaderRoute: typeof InstitutoTransparenciaRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/rede-de-parceiros': {
+      id: '/instituto/rede-de-parceiros'
+      path: '/rede-de-parceiros'
+      fullPath: '/instituto/rede-de-parceiros'
+      preLoaderRoute: typeof InstitutoRedeDeParceirosRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/pilares': {
+      id: '/instituto/pilares'
+      path: '/pilares'
+      fullPath: '/instituto/pilares'
+      preLoaderRoute: typeof InstitutoPilaresRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/missao-e-legado': {
+      id: '/instituto/missao-e-legado'
+      path: '/missao-e-legado'
+      fullPath: '/instituto/missao-e-legado'
+      preLoaderRoute: typeof InstitutoMissaoELegadoRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/governanca': {
+      id: '/instituto/governanca'
+      path: '/governanca'
+      fullPath: '/instituto/governanca'
+      preLoaderRoute: typeof InstitutoGovernancaRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
     '/api/public/obra-imagem/$num': {
       id: '/api/public/obra-imagem/$num'
       path: '/api/public/obra-imagem/$num'
@@ -531,10 +627,20 @@ const EspacosDeMemoriaRouteWithChildren =
   EspacosDeMemoriaRoute._addFileChildren(EspacosDeMemoriaRouteChildren)
 
 interface InstitutoRouteChildren {
+  InstitutoGovernancaRoute: typeof InstitutoGovernancaRoute
+  InstitutoMissaoELegadoRoute: typeof InstitutoMissaoELegadoRoute
+  InstitutoPilaresRoute: typeof InstitutoPilaresRoute
+  InstitutoRedeDeParceirosRoute: typeof InstitutoRedeDeParceirosRoute
+  InstitutoTransparenciaRoute: typeof InstitutoTransparenciaRoute
   InstitutoIndexRoute: typeof InstitutoIndexRoute
 }
 
 const InstitutoRouteChildren: InstitutoRouteChildren = {
+  InstitutoGovernancaRoute: InstitutoGovernancaRoute,
+  InstitutoMissaoELegadoRoute: InstitutoMissaoELegadoRoute,
+  InstitutoPilaresRoute: InstitutoPilaresRoute,
+  InstitutoRedeDeParceirosRoute: InstitutoRedeDeParceirosRoute,
+  InstitutoTransparenciaRoute: InstitutoTransparenciaRoute,
   InstitutoIndexRoute: InstitutoIndexRoute,
 }
 
