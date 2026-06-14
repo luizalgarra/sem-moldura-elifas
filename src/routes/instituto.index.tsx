@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { IndiceSecao } from "@/components/PaginaStub";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { navegacao } from "@/data/navegacao";
 
 const grupo = navegacao.find((g) => g.para === "/instituto")!;
@@ -65,30 +64,21 @@ function Pagina() {
       </h2>
       <ul className="mt-6 grid gap-3 sm:grid-cols-2">
         {grupo.itens.map((item) => (
-          <IndiceSecaoItem key={item.para} para={item.para} />
+          <li key={item.para}>
+            <Link
+              to={item.para}
+              className="block rounded-lg border border-border p-4 transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <span className="font-medium text-foreground">{item.rotulo}</span>
+              {item.descricao && (
+                <span className="mt-1 block text-sm text-muted-foreground">
+                  {item.descricao}
+                </span>
+              )}
+            </Link>
+          </li>
         ))}
       </ul>
     </div>
-  );
-}
-
-import { Link } from "@tanstack/react-router";
-
-function IndiceSecaoItem({ para }: { para: string }) {
-  const item = grupo.itens.find((i) => i.para === para)!;
-  return (
-    <li>
-      <Link
-        to={item.para}
-        className="block rounded-lg border border-border p-4 transition-colors hover:bg-accent hover:text-accent-foreground"
-      >
-        <span className="font-medium text-foreground">{item.rotulo}</span>
-        {item.descricao && (
-          <span className="mt-1 block text-sm text-muted-foreground">
-            {item.descricao}
-          </span>
-        )}
-      </Link>
-    </li>
   );
 }
