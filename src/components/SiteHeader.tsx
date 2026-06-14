@@ -96,6 +96,8 @@ export function SiteHeader({
               ))}
             </NavigationMenuList>
           </NavigationMenu>
+          )}
+
 
           <ControlesAcessibilidade />
 
