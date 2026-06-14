@@ -176,8 +176,12 @@ function Conteudo() {
   // A tela de login é pública e não usa o layout interno.
   const ehAuth = pathname === "/auth";
 
-  // Páginas internas: exigem administrador.
-  const protegida = !emConstrucao && !ehAuth;
+  // Apenas as áreas administrativas exigem login. As demais páginas de
+  // conteúdo são públicas e visíveis a qualquer visitante.
+  const protegida =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/editar") ||
+    pathname.startsWith("/qrcodes");
 
   const semSessao = protegida && !carregando && !session;
 
