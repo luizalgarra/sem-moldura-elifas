@@ -51,13 +51,7 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
               {navegacao.map((grupo) => (
                 <NavigationMenuItem key={grupo.para}>
                   <NavigationMenuTrigger className="bg-transparent text-foreground hover:text-accent data-[state=open]:text-accent">
-                    <Link
-                      to={grupo.para}
-                      className="hover:text-accent"
-                      activeProps={{ className: "text-accent" }}
-                    >
-                      {grupo.rotulo}
-                    </Link>
+                    {grupo.rotulo}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-64 gap-1 p-2">
