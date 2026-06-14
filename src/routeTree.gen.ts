@@ -40,6 +40,7 @@ import { Route as InstitutoTransparenciaRouteImport } from './routes/instituto.t
 import { Route as InstitutoRedeDeParceirosRouteImport } from './routes/instituto.rede-de-parceiros'
 import { Route as InstitutoPilaresRouteImport } from './routes/instituto.pilares'
 import { Route as InstitutoMissaoELegadoRouteImport } from './routes/instituto.missao-e-legado'
+import { Route as InstitutoLauraAndreatoRouteImport } from './routes/instituto.laura-andreato'
 import { Route as InstitutoGovernancaRouteImport } from './routes/instituto.governanca'
 import { Route as EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport } from './routes/espacos-de-memoria.praca-memorial-vladimir-herzog'
 import { Route as ElifasAndreatoReconhecimentosRouteImport } from './routes/elifas-andreato.reconhecimentos'
@@ -215,6 +216,11 @@ const InstitutoMissaoELegadoRoute = InstitutoMissaoELegadoRouteImport.update({
   path: '/missao-e-legado',
   getParentRoute: () => InstitutoRoute,
 } as any)
+const InstitutoLauraAndreatoRoute = InstitutoLauraAndreatoRouteImport.update({
+  id: '/laura-andreato',
+  path: '/laura-andreato',
+  getParentRoute: () => InstitutoRoute,
+} as any)
 const InstitutoGovernancaRoute = InstitutoGovernancaRouteImport.update({
   id: '/governanca',
   path: '/governanca',
@@ -348,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
@@ -393,6 +400,7 @@ export interface FileRoutesByTo {
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
@@ -445,6 +453,7 @@ export interface FileRoutesById {
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/laura-andreato': typeof InstitutoLauraAndreatoRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
@@ -498,6 +507,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato/reconhecimentos'
     | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
     | '/instituto/governanca'
+    | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
     | '/instituto/rede-de-parceiros'
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato/reconhecimentos'
     | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
     | '/instituto/governanca'
+    | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
     | '/instituto/rede-de-parceiros'
@@ -594,6 +605,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato/reconhecimentos'
     | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
     | '/instituto/governanca'
+    | '/instituto/laura-andreato'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
     | '/instituto/rede-de-parceiros'
@@ -855,6 +867,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstitutoMissaoELegadoRouteImport
       parentRoute: typeof InstitutoRoute
     }
+    '/instituto/laura-andreato': {
+      id: '/instituto/laura-andreato'
+      path: '/laura-andreato'
+      fullPath: '/instituto/laura-andreato'
+      preLoaderRoute: typeof InstitutoLauraAndreatoRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
     '/instituto/governanca': {
       id: '/instituto/governanca'
       path: '/governanca'
@@ -1052,6 +1071,7 @@ const EspacosDeMemoriaRouteWithChildren =
 
 interface InstitutoRouteChildren {
   InstitutoGovernancaRoute: typeof InstitutoGovernancaRoute
+  InstitutoLauraAndreatoRoute: typeof InstitutoLauraAndreatoRoute
   InstitutoMissaoELegadoRoute: typeof InstitutoMissaoELegadoRoute
   InstitutoPilaresRoute: typeof InstitutoPilaresRoute
   InstitutoRedeDeParceirosRoute: typeof InstitutoRedeDeParceirosRoute
@@ -1061,6 +1081,7 @@ interface InstitutoRouteChildren {
 
 const InstitutoRouteChildren: InstitutoRouteChildren = {
   InstitutoGovernancaRoute: InstitutoGovernancaRoute,
+  InstitutoLauraAndreatoRoute: InstitutoLauraAndreatoRoute,
   InstitutoMissaoELegadoRoute: InstitutoMissaoELegadoRoute,
   InstitutoPilaresRoute: InstitutoPilaresRoute,
   InstitutoRedeDeParceirosRoute: InstitutoRedeDeParceirosRoute,
