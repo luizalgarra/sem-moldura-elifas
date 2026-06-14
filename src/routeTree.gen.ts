@@ -30,12 +30,18 @@ import { Route as EspacosDeMemoriaIndexRouteImport } from './routes/espacos-de-m
 import { Route as ElifasAndreatoIndexRouteImport } from './routes/elifas-andreato.index'
 import { Route as AcervoIndexRouteImport } from './routes/acervo.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
+import { Route as ParticipePatrocineRouteImport } from './routes/participe.patrocine'
+import { Route as ParticipeOficinasRouteImport } from './routes/participe.oficinas'
+import { Route as ParticipeContatoRouteImport } from './routes/participe.contato'
+import { Route as ParticipeBoletimRouteImport } from './routes/participe.boletim'
+import { Route as ParticipeAgendaRouteImport } from './routes/participe.agenda'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
 import { Route as InstitutoTransparenciaRouteImport } from './routes/instituto.transparencia'
 import { Route as InstitutoRedeDeParceirosRouteImport } from './routes/instituto.rede-de-parceiros'
 import { Route as InstitutoPilaresRouteImport } from './routes/instituto.pilares'
 import { Route as InstitutoMissaoELegadoRouteImport } from './routes/instituto.missao-e-legado'
 import { Route as InstitutoGovernancaRouteImport } from './routes/instituto.governanca'
+import { Route as EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport } from './routes/espacos-de-memoria.praca-memorial-vladimir-herzog'
 import { Route as ElifasAndreatoReconhecimentosRouteImport } from './routes/elifas-andreato.reconhecimentos'
 import { Route as ElifasAndreatoMusicaPopularBrasileiraRouteImport } from './routes/elifas-andreato.musica-popular-brasileira'
 import { Route as ElifasAndreatoCarreiraEditorialRouteImport } from './routes/elifas-andreato.carreira-editorial'
@@ -158,6 +164,31 @@ const QrcodesImprimirRoute = QrcodesImprimirRouteImport.update({
   path: '/imprimir',
   getParentRoute: () => QrcodesRoute,
 } as any)
+const ParticipePatrocineRoute = ParticipePatrocineRouteImport.update({
+  id: '/patrocine',
+  path: '/patrocine',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeOficinasRoute = ParticipeOficinasRouteImport.update({
+  id: '/oficinas',
+  path: '/oficinas',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeContatoRoute = ParticipeContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeBoletimRoute = ParticipeBoletimRouteImport.update({
+  id: '/boletim',
+  path: '/boletim',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeAgendaRoute = ParticipeAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => ParticipeRoute,
+} as any)
 const ObrasNumRoute = ObrasNumRouteImport.update({
   id: '/obras/$num',
   path: '/obras/$num',
@@ -189,6 +220,12 @@ const InstitutoGovernancaRoute = InstitutoGovernancaRouteImport.update({
   path: '/governanca',
   getParentRoute: () => InstitutoRoute,
 } as any)
+const EspacosDeMemoriaPracaMemorialVladimirHerzogRoute =
+  EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport.update({
+    id: '/praca-memorial-vladimir-herzog',
+    path: '/praca-memorial-vladimir-herzog',
+    getParentRoute: () => EspacosDeMemoriaRoute,
+  } as any)
 const ElifasAndreatoReconhecimentosRoute =
   ElifasAndreatoReconhecimentosRouteImport.update({
     id: '/reconhecimentos',
@@ -309,12 +346,18 @@ export interface FileRoutesByFullPath {
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
   '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
+  '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
   '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
+  '/participe/agenda': typeof ParticipeAgendaRoute
+  '/participe/boletim': typeof ParticipeBoletimRoute
+  '/participe/contato': typeof ParticipeContatoRoute
+  '/participe/oficinas': typeof ParticipeOficinasRoute
+  '/participe/patrocine': typeof ParticipePatrocineRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo/': typeof AcervoIndexRoute
   '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
@@ -348,12 +391,18 @@ export interface FileRoutesByTo {
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
   '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
+  '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
   '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
+  '/participe/agenda': typeof ParticipeAgendaRoute
+  '/participe/boletim': typeof ParticipeBoletimRoute
+  '/participe/contato': typeof ParticipeContatoRoute
+  '/participe/oficinas': typeof ParticipeOficinasRoute
+  '/participe/patrocine': typeof ParticipePatrocineRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo': typeof AcervoIndexRoute
   '/elifas-andreato': typeof ElifasAndreatoIndexRoute
@@ -394,12 +443,18 @@ export interface FileRoutesById {
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
   '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
   '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
+  '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
   '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
   '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
+  '/participe/agenda': typeof ParticipeAgendaRoute
+  '/participe/boletim': typeof ParticipeBoletimRoute
+  '/participe/contato': typeof ParticipeContatoRoute
+  '/participe/oficinas': typeof ParticipeOficinasRoute
+  '/participe/patrocine': typeof ParticipePatrocineRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo/': typeof AcervoIndexRoute
   '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
@@ -441,12 +496,18 @@ export interface FileRouteTypes {
     | '/elifas-andreato/carreira-editorial'
     | '/elifas-andreato/musica-popular-brasileira'
     | '/elifas-andreato/reconhecimentos'
+    | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
     | '/instituto/governanca'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
     | '/instituto/rede-de-parceiros'
     | '/instituto/transparencia'
     | '/obras/$num'
+    | '/participe/agenda'
+    | '/participe/boletim'
+    | '/participe/contato'
+    | '/participe/oficinas'
+    | '/participe/patrocine'
     | '/qrcodes/imprimir'
     | '/acervo/'
     | '/elifas-andreato/'
@@ -480,12 +541,18 @@ export interface FileRouteTypes {
     | '/elifas-andreato/carreira-editorial'
     | '/elifas-andreato/musica-popular-brasileira'
     | '/elifas-andreato/reconhecimentos'
+    | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
     | '/instituto/governanca'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
     | '/instituto/rede-de-parceiros'
     | '/instituto/transparencia'
     | '/obras/$num'
+    | '/participe/agenda'
+    | '/participe/boletim'
+    | '/participe/contato'
+    | '/participe/oficinas'
+    | '/participe/patrocine'
     | '/qrcodes/imprimir'
     | '/acervo'
     | '/elifas-andreato'
@@ -525,12 +592,18 @@ export interface FileRouteTypes {
     | '/elifas-andreato/carreira-editorial'
     | '/elifas-andreato/musica-popular-brasileira'
     | '/elifas-andreato/reconhecimentos'
+    | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
     | '/instituto/governanca'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
     | '/instituto/rede-de-parceiros'
     | '/instituto/transparencia'
     | '/obras/$num'
+    | '/participe/agenda'
+    | '/participe/boletim'
+    | '/participe/contato'
+    | '/participe/oficinas'
+    | '/participe/patrocine'
     | '/qrcodes/imprimir'
     | '/acervo/'
     | '/elifas-andreato/'
@@ -712,6 +785,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QrcodesImprimirRouteImport
       parentRoute: typeof QrcodesRoute
     }
+    '/participe/patrocine': {
+      id: '/participe/patrocine'
+      path: '/patrocine'
+      fullPath: '/participe/patrocine'
+      preLoaderRoute: typeof ParticipePatrocineRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/oficinas': {
+      id: '/participe/oficinas'
+      path: '/oficinas'
+      fullPath: '/participe/oficinas'
+      preLoaderRoute: typeof ParticipeOficinasRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/contato': {
+      id: '/participe/contato'
+      path: '/contato'
+      fullPath: '/participe/contato'
+      preLoaderRoute: typeof ParticipeContatoRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/boletim': {
+      id: '/participe/boletim'
+      path: '/boletim'
+      fullPath: '/participe/boletim'
+      preLoaderRoute: typeof ParticipeBoletimRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/agenda': {
+      id: '/participe/agenda'
+      path: '/agenda'
+      fullPath: '/participe/agenda'
+      preLoaderRoute: typeof ParticipeAgendaRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
     '/obras/$num': {
       id: '/obras/$num'
       path: '/obras/$num'
@@ -753,6 +861,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/instituto/governanca'
       preLoaderRoute: typeof InstitutoGovernancaRouteImport
       parentRoute: typeof InstitutoRoute
+    }
+    '/espacos-de-memoria/praca-memorial-vladimir-herzog': {
+      id: '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+      path: '/praca-memorial-vladimir-herzog'
+      fullPath: '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+      preLoaderRoute: typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport
+      parentRoute: typeof EspacosDeMemoriaRoute
     }
     '/elifas-andreato/reconhecimentos': {
       id: '/elifas-andreato/reconhecimentos'
@@ -922,10 +1037,13 @@ const ElifasAndreatoRouteWithChildren = ElifasAndreatoRoute._addFileChildren(
 )
 
 interface EspacosDeMemoriaRouteChildren {
+  EspacosDeMemoriaPracaMemorialVladimirHerzogRoute: typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
   EspacosDeMemoriaIndexRoute: typeof EspacosDeMemoriaIndexRoute
 }
 
 const EspacosDeMemoriaRouteChildren: EspacosDeMemoriaRouteChildren = {
+  EspacosDeMemoriaPracaMemorialVladimirHerzogRoute:
+    EspacosDeMemoriaPracaMemorialVladimirHerzogRoute,
   EspacosDeMemoriaIndexRoute: EspacosDeMemoriaIndexRoute,
 }
 
@@ -955,10 +1073,20 @@ const InstitutoRouteWithChildren = InstitutoRoute._addFileChildren(
 )
 
 interface ParticipeRouteChildren {
+  ParticipeAgendaRoute: typeof ParticipeAgendaRoute
+  ParticipeBoletimRoute: typeof ParticipeBoletimRoute
+  ParticipeContatoRoute: typeof ParticipeContatoRoute
+  ParticipeOficinasRoute: typeof ParticipeOficinasRoute
+  ParticipePatrocineRoute: typeof ParticipePatrocineRoute
   ParticipeIndexRoute: typeof ParticipeIndexRoute
 }
 
 const ParticipeRouteChildren: ParticipeRouteChildren = {
+  ParticipeAgendaRoute: ParticipeAgendaRoute,
+  ParticipeBoletimRoute: ParticipeBoletimRoute,
+  ParticipeContatoRoute: ParticipeContatoRoute,
+  ParticipeOficinasRoute: ParticipeOficinasRoute,
+  ParticipePatrocineRoute: ParticipePatrocineRoute,
   ParticipeIndexRoute: ParticipeIndexRoute,
 }
 
