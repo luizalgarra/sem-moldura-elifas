@@ -14,7 +14,13 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 import { navegacao } from "@/data/navegacao";
 import { marca } from "@/assets/marca";
 
-export function SiteHeader({ onSair }: { onSair?: () => void }) {
+export function SiteHeader({
+  onSair,
+  ocultarNavegacao,
+}: {
+  onSair?: () => void;
+  ocultarNavegacao?: boolean;
+}) {
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
