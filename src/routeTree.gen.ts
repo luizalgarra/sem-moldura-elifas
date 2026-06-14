@@ -11,11 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as QrcodesRouteImport } from './routes/qrcodes'
+import { Route as ParticipeRouteImport } from './routes/participe'
 import { Route as LinhasDaVidaRouteImport } from './routes/linhas-da-vida'
+import { Route as InstitutoRouteImport } from './routes/instituto'
+import { Route as EspacosDeMemoriaRouteImport } from './routes/espacos-de-memoria'
+import { Route as ElifasAndreatoRouteImport } from './routes/elifas-andreato'
 import { Route as EditarRouteImport } from './routes/editar'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AcervoRouteImport } from './routes/acervo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QrcodesIndexRouteImport } from './routes/qrcodes.index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
@@ -34,9 +39,29 @@ const QrcodesRoute = QrcodesRouteImport.update({
   path: '/qrcodes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParticipeRoute = ParticipeRouteImport.update({
+  id: '/participe',
+  path: '/participe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LinhasDaVidaRoute = LinhasDaVidaRouteImport.update({
   id: '/linhas-da-vida',
   path: '/linhas-da-vida',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstitutoRoute = InstitutoRouteImport.update({
+  id: '/instituto',
+  path: '/instituto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EspacosDeMemoriaRoute = EspacosDeMemoriaRouteImport.update({
+  id: '/espacos-de-memoria',
+  path: '/espacos-de-memoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ElifasAndreatoRoute = ElifasAndreatoRouteImport.update({
+  id: '/elifas-andreato',
+  path: '/elifas-andreato',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditarRoute = EditarRouteImport.update({
@@ -57,6 +82,11 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcervoRoute = AcervoRouteImport.update({
+  id: '/acervo',
+  path: '/acervo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -97,11 +127,16 @@ const ApiPublicObraAudioNumRoute = ApiPublicObraAudioNumRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/acervo': typeof AcervoRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
+  '/elifas-andreato': typeof ElifasAndreatoRoute
+  '/espacos-de-memoria': typeof EspacosDeMemoriaRoute
+  '/instituto': typeof InstitutoRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/participe': typeof ParticipeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
@@ -113,11 +148,16 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/acervo': typeof AcervoRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
+  '/elifas-andreato': typeof ElifasAndreatoRoute
+  '/espacos-de-memoria': typeof EspacosDeMemoriaRoute
+  '/instituto': typeof InstitutoRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/participe': typeof ParticipeRoute
   '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
@@ -129,11 +169,16 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/acervo': typeof AcervoRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
+  '/elifas-andreato': typeof ElifasAndreatoRoute
+  '/espacos-de-memoria': typeof EspacosDeMemoriaRoute
+  '/instituto': typeof InstitutoRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/participe': typeof ParticipeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
   '/obras/$num': typeof ObrasNumRoute
@@ -147,11 +192,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/acervo'
     | '/admin'
     | '/auth'
     | '/como-usar'
     | '/editar'
+    | '/elifas-andreato'
+    | '/espacos-de-memoria'
+    | '/instituto'
     | '/linhas-da-vida'
+    | '/participe'
     | '/qrcodes'
     | '/sobre'
     | '/obras/$num'
@@ -163,11 +213,16 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/acervo'
     | '/admin'
     | '/auth'
     | '/como-usar'
     | '/editar'
+    | '/elifas-andreato'
+    | '/espacos-de-memoria'
+    | '/instituto'
     | '/linhas-da-vida'
+    | '/participe'
     | '/sobre'
     | '/obras/$num'
     | '/qrcodes/imprimir'
@@ -178,11 +233,16 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/acervo'
     | '/admin'
     | '/auth'
     | '/como-usar'
     | '/editar'
+    | '/elifas-andreato'
+    | '/espacos-de-memoria'
+    | '/instituto'
     | '/linhas-da-vida'
+    | '/participe'
     | '/qrcodes'
     | '/sobre'
     | '/obras/$num'
@@ -195,11 +255,16 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AcervoRoute: typeof AcervoRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ComoUsarRoute: typeof ComoUsarRoute
   EditarRoute: typeof EditarRoute
+  ElifasAndreatoRoute: typeof ElifasAndreatoRoute
+  EspacosDeMemoriaRoute: typeof EspacosDeMemoriaRoute
+  InstitutoRoute: typeof InstitutoRoute
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
+  ParticipeRoute: typeof ParticipeRoute
   QrcodesRoute: typeof QrcodesRouteWithChildren
   SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
@@ -224,11 +289,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QrcodesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/participe': {
+      id: '/participe'
+      path: '/participe'
+      fullPath: '/participe'
+      preLoaderRoute: typeof ParticipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/linhas-da-vida': {
       id: '/linhas-da-vida'
       path: '/linhas-da-vida'
       fullPath: '/linhas-da-vida'
       preLoaderRoute: typeof LinhasDaVidaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instituto': {
+      id: '/instituto'
+      path: '/instituto'
+      fullPath: '/instituto'
+      preLoaderRoute: typeof InstitutoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/espacos-de-memoria': {
+      id: '/espacos-de-memoria'
+      path: '/espacos-de-memoria'
+      fullPath: '/espacos-de-memoria'
+      preLoaderRoute: typeof EspacosDeMemoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/elifas-andreato': {
+      id: '/elifas-andreato'
+      path: '/elifas-andreato'
+      fullPath: '/elifas-andreato'
+      preLoaderRoute: typeof ElifasAndreatoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editar': {
@@ -257,6 +350,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acervo': {
+      id: '/acervo'
+      path: '/acervo'
+      fullPath: '/acervo'
+      preLoaderRoute: typeof AcervoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -326,11 +426,16 @@ const QrcodesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AcervoRoute: AcervoRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ComoUsarRoute: ComoUsarRoute,
   EditarRoute: EditarRoute,
+  ElifasAndreatoRoute: ElifasAndreatoRoute,
+  EspacosDeMemoriaRoute: EspacosDeMemoriaRoute,
+  InstitutoRoute: InstitutoRoute,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
+  ParticipeRoute: ParticipeRoute,
   QrcodesRoute: QrcodesRouteWithChildren,
   SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
@@ -341,3 +446,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
