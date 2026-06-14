@@ -160,6 +160,7 @@ export function SiteHeader({
               </nav>
             </SheetContent>
           </Sheet>
+          )}
         </div>
       </div>
     </header>
