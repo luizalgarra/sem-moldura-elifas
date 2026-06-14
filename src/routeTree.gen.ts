@@ -36,6 +36,11 @@ import { Route as InstitutoRedeDeParceirosRouteImport } from './routes/instituto
 import { Route as InstitutoPilaresRouteImport } from './routes/instituto.pilares'
 import { Route as InstitutoMissaoELegadoRouteImport } from './routes/instituto.missao-e-legado'
 import { Route as InstitutoGovernancaRouteImport } from './routes/instituto.governanca'
+import { Route as ElifasAndreatoReconhecimentosRouteImport } from './routes/elifas-andreato.reconhecimentos'
+import { Route as ElifasAndreatoMusicaPopularBrasileiraRouteImport } from './routes/elifas-andreato.musica-popular-brasileira'
+import { Route as ElifasAndreatoCarreiraEditorialRouteImport } from './routes/elifas-andreato.carreira-editorial'
+import { Route as ElifasAndreatoBiografiaRouteImport } from './routes/elifas-andreato.biografia'
+import { Route as ElifasAndreatoArteEResistenciaRouteImport } from './routes/elifas-andreato.arte-e-resistencia'
 import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
@@ -175,6 +180,35 @@ const InstitutoGovernancaRoute = InstitutoGovernancaRouteImport.update({
   path: '/governanca',
   getParentRoute: () => InstitutoRoute,
 } as any)
+const ElifasAndreatoReconhecimentosRoute =
+  ElifasAndreatoReconhecimentosRouteImport.update({
+    id: '/reconhecimentos',
+    path: '/reconhecimentos',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
+const ElifasAndreatoMusicaPopularBrasileiraRoute =
+  ElifasAndreatoMusicaPopularBrasileiraRouteImport.update({
+    id: '/musica-popular-brasileira',
+    path: '/musica-popular-brasileira',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
+const ElifasAndreatoCarreiraEditorialRoute =
+  ElifasAndreatoCarreiraEditorialRouteImport.update({
+    id: '/carreira-editorial',
+    path: '/carreira-editorial',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
+const ElifasAndreatoBiografiaRoute = ElifasAndreatoBiografiaRouteImport.update({
+  id: '/biografia',
+  path: '/biografia',
+  getParentRoute: () => ElifasAndreatoRoute,
+} as any)
+const ElifasAndreatoArteEResistenciaRoute =
+  ElifasAndreatoArteEResistenciaRouteImport.update({
+    id: '/arte-e-resistencia',
+    path: '/arte-e-resistencia',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
 const ApiPublicObraImagemNumRoute = ApiPublicObraImagemNumRouteImport.update({
   id: '/api/public/obra-imagem/$num',
   path: '/api/public/obra-imagem/$num',
@@ -200,6 +234,11 @@ export interface FileRoutesByFullPath {
   '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
+  '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
+  '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
+  '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
@@ -225,6 +264,11 @@ export interface FileRoutesByTo {
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/sobre': typeof SobreRoute
+  '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
+  '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
+  '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
+  '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
@@ -257,6 +301,11 @@ export interface FileRoutesById {
   '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
+  '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
+  '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
+  '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
   '/instituto/governanca': typeof InstitutoGovernancaRoute
   '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
   '/instituto/pilares': typeof InstitutoPilaresRoute
@@ -290,6 +339,11 @@ export interface FileRouteTypes {
     | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/elifas-andreato/arte-e-resistencia'
+    | '/elifas-andreato/biografia'
+    | '/elifas-andreato/carreira-editorial'
+    | '/elifas-andreato/musica-popular-brasileira'
+    | '/elifas-andreato/reconhecimentos'
     | '/instituto/governanca'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
@@ -315,6 +369,11 @@ export interface FileRouteTypes {
     | '/editar'
     | '/linhas-da-vida'
     | '/sobre'
+    | '/elifas-andreato/arte-e-resistencia'
+    | '/elifas-andreato/biografia'
+    | '/elifas-andreato/carreira-editorial'
+    | '/elifas-andreato/musica-popular-brasileira'
+    | '/elifas-andreato/reconhecimentos'
     | '/instituto/governanca'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
@@ -346,6 +405,11 @@ export interface FileRouteTypes {
     | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/elifas-andreato/arte-e-resistencia'
+    | '/elifas-andreato/biografia'
+    | '/elifas-andreato/carreira-editorial'
+    | '/elifas-andreato/musica-popular-brasileira'
+    | '/elifas-andreato/reconhecimentos'
     | '/instituto/governanca'
     | '/instituto/missao-e-legado'
     | '/instituto/pilares'
@@ -575,6 +639,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InstitutoGovernancaRouteImport
       parentRoute: typeof InstitutoRoute
     }
+    '/elifas-andreato/reconhecimentos': {
+      id: '/elifas-andreato/reconhecimentos'
+      path: '/reconhecimentos'
+      fullPath: '/elifas-andreato/reconhecimentos'
+      preLoaderRoute: typeof ElifasAndreatoReconhecimentosRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/musica-popular-brasileira': {
+      id: '/elifas-andreato/musica-popular-brasileira'
+      path: '/musica-popular-brasileira'
+      fullPath: '/elifas-andreato/musica-popular-brasileira'
+      preLoaderRoute: typeof ElifasAndreatoMusicaPopularBrasileiraRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/carreira-editorial': {
+      id: '/elifas-andreato/carreira-editorial'
+      path: '/carreira-editorial'
+      fullPath: '/elifas-andreato/carreira-editorial'
+      preLoaderRoute: typeof ElifasAndreatoCarreiraEditorialRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/biografia': {
+      id: '/elifas-andreato/biografia'
+      path: '/biografia'
+      fullPath: '/elifas-andreato/biografia'
+      preLoaderRoute: typeof ElifasAndreatoBiografiaRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/arte-e-resistencia': {
+      id: '/elifas-andreato/arte-e-resistencia'
+      path: '/arte-e-resistencia'
+      fullPath: '/elifas-andreato/arte-e-resistencia'
+      preLoaderRoute: typeof ElifasAndreatoArteEResistenciaRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
     '/api/public/obra-imagem/$num': {
       id: '/api/public/obra-imagem/$num'
       path: '/api/public/obra-imagem/$num'
@@ -604,10 +703,21 @@ const AcervoRouteWithChildren =
   AcervoRoute._addFileChildren(AcervoRouteChildren)
 
 interface ElifasAndreatoRouteChildren {
+  ElifasAndreatoArteEResistenciaRoute: typeof ElifasAndreatoArteEResistenciaRoute
+  ElifasAndreatoBiografiaRoute: typeof ElifasAndreatoBiografiaRoute
+  ElifasAndreatoCarreiraEditorialRoute: typeof ElifasAndreatoCarreiraEditorialRoute
+  ElifasAndreatoMusicaPopularBrasileiraRoute: typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  ElifasAndreatoReconhecimentosRoute: typeof ElifasAndreatoReconhecimentosRoute
   ElifasAndreatoIndexRoute: typeof ElifasAndreatoIndexRoute
 }
 
 const ElifasAndreatoRouteChildren: ElifasAndreatoRouteChildren = {
+  ElifasAndreatoArteEResistenciaRoute: ElifasAndreatoArteEResistenciaRoute,
+  ElifasAndreatoBiografiaRoute: ElifasAndreatoBiografiaRoute,
+  ElifasAndreatoCarreiraEditorialRoute: ElifasAndreatoCarreiraEditorialRoute,
+  ElifasAndreatoMusicaPopularBrasileiraRoute:
+    ElifasAndreatoMusicaPopularBrasileiraRoute,
+  ElifasAndreatoReconhecimentosRoute: ElifasAndreatoReconhecimentosRoute,
   ElifasAndreatoIndexRoute: ElifasAndreatoIndexRoute,
 }
 
