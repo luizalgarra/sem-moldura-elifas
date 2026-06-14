@@ -41,6 +41,15 @@ import { Route as ElifasAndreatoMusicaPopularBrasileiraRouteImport } from './rou
 import { Route as ElifasAndreatoCarreiraEditorialRouteImport } from './routes/elifas-andreato.carreira-editorial'
 import { Route as ElifasAndreatoBiografiaRouteImport } from './routes/elifas-andreato.biografia'
 import { Route as ElifasAndreatoArteEResistenciaRouteImport } from './routes/elifas-andreato.arte-e-resistencia'
+import { Route as AcervoQuadrosEIlustracoesRouteImport } from './routes/acervo.quadros-e-ilustracoes'
+import { Route as AcervoFotografiasECromosRouteImport } from './routes/acervo.fotografias-e-cromos'
+import { Route as AcervoExposicoesVirtuaisRouteImport } from './routes/acervo.exposicoes-virtuais'
+import { Route as AcervoDatasetsEDownloadsRouteImport } from './routes/acervo.datasets-e-downloads'
+import { Route as AcervoConservacaoERestauroRouteImport } from './routes/acervo.conservacao-e-restauro'
+import { Route as AcervoComoCitarRouteImport } from './routes/acervo.como-citar'
+import { Route as AcervoCapasDeDiscosERevistasRouteImport } from './routes/acervo.capas-de-discos-e-revistas'
+import { Route as AcervoCadernosEManuscritosRouteImport } from './routes/acervo.cadernos-e-manuscritos'
+import { Route as AcervoBuscaRouteImport } from './routes/acervo.busca'
 import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
@@ -209,6 +218,58 @@ const ElifasAndreatoArteEResistenciaRoute =
     path: '/arte-e-resistencia',
     getParentRoute: () => ElifasAndreatoRoute,
   } as any)
+const AcervoQuadrosEIlustracoesRoute =
+  AcervoQuadrosEIlustracoesRouteImport.update({
+    id: '/quadros-e-ilustracoes',
+    path: '/quadros-e-ilustracoes',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoFotografiasECromosRoute =
+  AcervoFotografiasECromosRouteImport.update({
+    id: '/fotografias-e-cromos',
+    path: '/fotografias-e-cromos',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoExposicoesVirtuaisRoute =
+  AcervoExposicoesVirtuaisRouteImport.update({
+    id: '/exposicoes-virtuais',
+    path: '/exposicoes-virtuais',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoDatasetsEDownloadsRoute =
+  AcervoDatasetsEDownloadsRouteImport.update({
+    id: '/datasets-e-downloads',
+    path: '/datasets-e-downloads',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoConservacaoERestauroRoute =
+  AcervoConservacaoERestauroRouteImport.update({
+    id: '/conservacao-e-restauro',
+    path: '/conservacao-e-restauro',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoComoCitarRoute = AcervoComoCitarRouteImport.update({
+  id: '/como-citar',
+  path: '/como-citar',
+  getParentRoute: () => AcervoRoute,
+} as any)
+const AcervoCapasDeDiscosERevistasRoute =
+  AcervoCapasDeDiscosERevistasRouteImport.update({
+    id: '/capas-de-discos-e-revistas',
+    path: '/capas-de-discos-e-revistas',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoCadernosEManuscritosRoute =
+  AcervoCadernosEManuscritosRouteImport.update({
+    id: '/cadernos-e-manuscritos',
+    path: '/cadernos-e-manuscritos',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoBuscaRoute = AcervoBuscaRouteImport.update({
+  id: '/busca',
+  path: '/busca',
+  getParentRoute: () => AcervoRoute,
+} as any)
 const ApiPublicObraImagemNumRoute = ApiPublicObraImagemNumRouteImport.update({
   id: '/api/public/obra-imagem/$num',
   path: '/api/public/obra-imagem/$num',
@@ -234,6 +295,15 @@ export interface FileRoutesByFullPath {
   '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/acervo/busca': typeof AcervoBuscaRoute
+  '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
+  '/acervo/capas-de-discos-e-revistas': typeof AcervoCapasDeDiscosERevistasRoute
+  '/acervo/como-citar': typeof AcervoComoCitarRoute
+  '/acervo/conservacao-e-restauro': typeof AcervoConservacaoERestauroRoute
+  '/acervo/datasets-e-downloads': typeof AcervoDatasetsEDownloadsRoute
+  '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
+  '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
+  '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
   '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
   '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
@@ -264,6 +334,15 @@ export interface FileRoutesByTo {
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/sobre': typeof SobreRoute
+  '/acervo/busca': typeof AcervoBuscaRoute
+  '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
+  '/acervo/capas-de-discos-e-revistas': typeof AcervoCapasDeDiscosERevistasRoute
+  '/acervo/como-citar': typeof AcervoComoCitarRoute
+  '/acervo/conservacao-e-restauro': typeof AcervoConservacaoERestauroRoute
+  '/acervo/datasets-e-downloads': typeof AcervoDatasetsEDownloadsRoute
+  '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
+  '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
+  '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
   '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
   '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
@@ -301,6 +380,15 @@ export interface FileRoutesById {
   '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/acervo/busca': typeof AcervoBuscaRoute
+  '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
+  '/acervo/capas-de-discos-e-revistas': typeof AcervoCapasDeDiscosERevistasRoute
+  '/acervo/como-citar': typeof AcervoComoCitarRoute
+  '/acervo/conservacao-e-restauro': typeof AcervoConservacaoERestauroRoute
+  '/acervo/datasets-e-downloads': typeof AcervoDatasetsEDownloadsRoute
+  '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
+  '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
+  '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
   '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
   '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
@@ -339,6 +427,15 @@ export interface FileRouteTypes {
     | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/acervo/busca'
+    | '/acervo/cadernos-e-manuscritos'
+    | '/acervo/capas-de-discos-e-revistas'
+    | '/acervo/como-citar'
+    | '/acervo/conservacao-e-restauro'
+    | '/acervo/datasets-e-downloads'
+    | '/acervo/exposicoes-virtuais'
+    | '/acervo/fotografias-e-cromos'
+    | '/acervo/quadros-e-ilustracoes'
     | '/elifas-andreato/arte-e-resistencia'
     | '/elifas-andreato/biografia'
     | '/elifas-andreato/carreira-editorial'
@@ -369,6 +466,15 @@ export interface FileRouteTypes {
     | '/editar'
     | '/linhas-da-vida'
     | '/sobre'
+    | '/acervo/busca'
+    | '/acervo/cadernos-e-manuscritos'
+    | '/acervo/capas-de-discos-e-revistas'
+    | '/acervo/como-citar'
+    | '/acervo/conservacao-e-restauro'
+    | '/acervo/datasets-e-downloads'
+    | '/acervo/exposicoes-virtuais'
+    | '/acervo/fotografias-e-cromos'
+    | '/acervo/quadros-e-ilustracoes'
     | '/elifas-andreato/arte-e-resistencia'
     | '/elifas-andreato/biografia'
     | '/elifas-andreato/carreira-editorial'
@@ -405,6 +511,15 @@ export interface FileRouteTypes {
     | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/acervo/busca'
+    | '/acervo/cadernos-e-manuscritos'
+    | '/acervo/capas-de-discos-e-revistas'
+    | '/acervo/como-citar'
+    | '/acervo/conservacao-e-restauro'
+    | '/acervo/datasets-e-downloads'
+    | '/acervo/exposicoes-virtuais'
+    | '/acervo/fotografias-e-cromos'
+    | '/acervo/quadros-e-ilustracoes'
     | '/elifas-andreato/arte-e-resistencia'
     | '/elifas-andreato/biografia'
     | '/elifas-andreato/carreira-editorial'
@@ -674,6 +789,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ElifasAndreatoArteEResistenciaRouteImport
       parentRoute: typeof ElifasAndreatoRoute
     }
+    '/acervo/quadros-e-ilustracoes': {
+      id: '/acervo/quadros-e-ilustracoes'
+      path: '/quadros-e-ilustracoes'
+      fullPath: '/acervo/quadros-e-ilustracoes'
+      preLoaderRoute: typeof AcervoQuadrosEIlustracoesRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/fotografias-e-cromos': {
+      id: '/acervo/fotografias-e-cromos'
+      path: '/fotografias-e-cromos'
+      fullPath: '/acervo/fotografias-e-cromos'
+      preLoaderRoute: typeof AcervoFotografiasECromosRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/exposicoes-virtuais': {
+      id: '/acervo/exposicoes-virtuais'
+      path: '/exposicoes-virtuais'
+      fullPath: '/acervo/exposicoes-virtuais'
+      preLoaderRoute: typeof AcervoExposicoesVirtuaisRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/datasets-e-downloads': {
+      id: '/acervo/datasets-e-downloads'
+      path: '/datasets-e-downloads'
+      fullPath: '/acervo/datasets-e-downloads'
+      preLoaderRoute: typeof AcervoDatasetsEDownloadsRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/conservacao-e-restauro': {
+      id: '/acervo/conservacao-e-restauro'
+      path: '/conservacao-e-restauro'
+      fullPath: '/acervo/conservacao-e-restauro'
+      preLoaderRoute: typeof AcervoConservacaoERestauroRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/como-citar': {
+      id: '/acervo/como-citar'
+      path: '/como-citar'
+      fullPath: '/acervo/como-citar'
+      preLoaderRoute: typeof AcervoComoCitarRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/capas-de-discos-e-revistas': {
+      id: '/acervo/capas-de-discos-e-revistas'
+      path: '/capas-de-discos-e-revistas'
+      fullPath: '/acervo/capas-de-discos-e-revistas'
+      preLoaderRoute: typeof AcervoCapasDeDiscosERevistasRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/cadernos-e-manuscritos': {
+      id: '/acervo/cadernos-e-manuscritos'
+      path: '/cadernos-e-manuscritos'
+      fullPath: '/acervo/cadernos-e-manuscritos'
+      preLoaderRoute: typeof AcervoCadernosEManuscritosRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/busca': {
+      id: '/acervo/busca'
+      path: '/busca'
+      fullPath: '/acervo/busca'
+      preLoaderRoute: typeof AcervoBuscaRouteImport
+      parentRoute: typeof AcervoRoute
+    }
     '/api/public/obra-imagem/$num': {
       id: '/api/public/obra-imagem/$num'
       path: '/api/public/obra-imagem/$num'
@@ -692,10 +870,28 @@ declare module '@tanstack/react-router' {
 }
 
 interface AcervoRouteChildren {
+  AcervoBuscaRoute: typeof AcervoBuscaRoute
+  AcervoCadernosEManuscritosRoute: typeof AcervoCadernosEManuscritosRoute
+  AcervoCapasDeDiscosERevistasRoute: typeof AcervoCapasDeDiscosERevistasRoute
+  AcervoComoCitarRoute: typeof AcervoComoCitarRoute
+  AcervoConservacaoERestauroRoute: typeof AcervoConservacaoERestauroRoute
+  AcervoDatasetsEDownloadsRoute: typeof AcervoDatasetsEDownloadsRoute
+  AcervoExposicoesVirtuaisRoute: typeof AcervoExposicoesVirtuaisRoute
+  AcervoFotografiasECromosRoute: typeof AcervoFotografiasECromosRoute
+  AcervoQuadrosEIlustracoesRoute: typeof AcervoQuadrosEIlustracoesRoute
   AcervoIndexRoute: typeof AcervoIndexRoute
 }
 
 const AcervoRouteChildren: AcervoRouteChildren = {
+  AcervoBuscaRoute: AcervoBuscaRoute,
+  AcervoCadernosEManuscritosRoute: AcervoCadernosEManuscritosRoute,
+  AcervoCapasDeDiscosERevistasRoute: AcervoCapasDeDiscosERevistasRoute,
+  AcervoComoCitarRoute: AcervoComoCitarRoute,
+  AcervoConservacaoERestauroRoute: AcervoConservacaoERestauroRoute,
+  AcervoDatasetsEDownloadsRoute: AcervoDatasetsEDownloadsRoute,
+  AcervoExposicoesVirtuaisRoute: AcervoExposicoesVirtuaisRoute,
+  AcervoFotografiasECromosRoute: AcervoFotografiasECromosRoute,
+  AcervoQuadrosEIlustracoesRoute: AcervoQuadrosEIlustracoesRoute,
   AcervoIndexRoute: AcervoIndexRoute,
 }
 
