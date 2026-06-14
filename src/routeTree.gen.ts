@@ -11,16 +11,51 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as QrcodesRouteImport } from './routes/qrcodes'
+import { Route as ParticipeRouteImport } from './routes/participe'
 import { Route as LinhasDaVidaRouteImport } from './routes/linhas-da-vida'
+import { Route as InstitutoRouteImport } from './routes/instituto'
+import { Route as EspacosDeMemoriaRouteImport } from './routes/espacos-de-memoria'
+import { Route as ElifasAndreatoRouteImport } from './routes/elifas-andreato'
 import { Route as EditarRouteImport } from './routes/editar'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AcervoRouteImport } from './routes/acervo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QrcodesIndexRouteImport } from './routes/qrcodes.index'
+import { Route as ParticipeIndexRouteImport } from './routes/participe.index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
+import { Route as InstitutoIndexRouteImport } from './routes/instituto.index'
+import { Route as EspacosDeMemoriaIndexRouteImport } from './routes/espacos-de-memoria.index'
+import { Route as ElifasAndreatoIndexRouteImport } from './routes/elifas-andreato.index'
+import { Route as AcervoIndexRouteImport } from './routes/acervo.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
+import { Route as ParticipePatrocineRouteImport } from './routes/participe.patrocine'
+import { Route as ParticipeOficinasRouteImport } from './routes/participe.oficinas'
+import { Route as ParticipeContatoRouteImport } from './routes/participe.contato'
+import { Route as ParticipeBoletimRouteImport } from './routes/participe.boletim'
+import { Route as ParticipeAgendaRouteImport } from './routes/participe.agenda'
 import { Route as ObrasNumRouteImport } from './routes/obras.$num'
+import { Route as InstitutoTransparenciaRouteImport } from './routes/instituto.transparencia'
+import { Route as InstitutoRedeDeParceirosRouteImport } from './routes/instituto.rede-de-parceiros'
+import { Route as InstitutoPilaresRouteImport } from './routes/instituto.pilares'
+import { Route as InstitutoMissaoELegadoRouteImport } from './routes/instituto.missao-e-legado'
+import { Route as InstitutoGovernancaRouteImport } from './routes/instituto.governanca'
+import { Route as EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport } from './routes/espacos-de-memoria.praca-memorial-vladimir-herzog'
+import { Route as ElifasAndreatoReconhecimentosRouteImport } from './routes/elifas-andreato.reconhecimentos'
+import { Route as ElifasAndreatoMusicaPopularBrasileiraRouteImport } from './routes/elifas-andreato.musica-popular-brasileira'
+import { Route as ElifasAndreatoCarreiraEditorialRouteImport } from './routes/elifas-andreato.carreira-editorial'
+import { Route as ElifasAndreatoBiografiaRouteImport } from './routes/elifas-andreato.biografia'
+import { Route as ElifasAndreatoArteEResistenciaRouteImport } from './routes/elifas-andreato.arte-e-resistencia'
+import { Route as AcervoQuadrosEIlustracoesRouteImport } from './routes/acervo.quadros-e-ilustracoes'
+import { Route as AcervoFotografiasECromosRouteImport } from './routes/acervo.fotografias-e-cromos'
+import { Route as AcervoExposicoesVirtuaisRouteImport } from './routes/acervo.exposicoes-virtuais'
+import { Route as AcervoDatasetsEDownloadsRouteImport } from './routes/acervo.datasets-e-downloads'
+import { Route as AcervoConservacaoERestauroRouteImport } from './routes/acervo.conservacao-e-restauro'
+import { Route as AcervoComoCitarRouteImport } from './routes/acervo.como-citar'
+import { Route as AcervoCapasDeDiscosERevistasRouteImport } from './routes/acervo.capas-de-discos-e-revistas'
+import { Route as AcervoCadernosEManuscritosRouteImport } from './routes/acervo.cadernos-e-manuscritos'
+import { Route as AcervoBuscaRouteImport } from './routes/acervo.busca'
 import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
@@ -34,9 +69,29 @@ const QrcodesRoute = QrcodesRouteImport.update({
   path: '/qrcodes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParticipeRoute = ParticipeRouteImport.update({
+  id: '/participe',
+  path: '/participe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LinhasDaVidaRoute = LinhasDaVidaRouteImport.update({
   id: '/linhas-da-vida',
   path: '/linhas-da-vida',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstitutoRoute = InstitutoRouteImport.update({
+  id: '/instituto',
+  path: '/instituto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EspacosDeMemoriaRoute = EspacosDeMemoriaRouteImport.update({
+  id: '/espacos-de-memoria',
+  path: '/espacos-de-memoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ElifasAndreatoRoute = ElifasAndreatoRouteImport.update({
+  id: '/elifas-andreato',
+  path: '/elifas-andreato',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EditarRoute = EditarRouteImport.update({
@@ -59,6 +114,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AcervoRoute = AcervoRouteImport.update({
+  id: '/acervo',
+  path: '/acervo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -69,20 +129,183 @@ const QrcodesIndexRoute = QrcodesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => QrcodesRoute,
 } as any)
+const ParticipeIndexRoute = ParticipeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ParticipeRoute,
+} as any)
 const ObrasIndexRoute = ObrasIndexRouteImport.update({
   id: '/obras/',
   path: '/obras/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const InstitutoIndexRoute = InstitutoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const EspacosDeMemoriaIndexRoute = EspacosDeMemoriaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EspacosDeMemoriaRoute,
+} as any)
+const ElifasAndreatoIndexRoute = ElifasAndreatoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ElifasAndreatoRoute,
+} as any)
+const AcervoIndexRoute = AcervoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AcervoRoute,
 } as any)
 const QrcodesImprimirRoute = QrcodesImprimirRouteImport.update({
   id: '/imprimir',
   path: '/imprimir',
   getParentRoute: () => QrcodesRoute,
 } as any)
+const ParticipePatrocineRoute = ParticipePatrocineRouteImport.update({
+  id: '/patrocine',
+  path: '/patrocine',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeOficinasRoute = ParticipeOficinasRouteImport.update({
+  id: '/oficinas',
+  path: '/oficinas',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeContatoRoute = ParticipeContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeBoletimRoute = ParticipeBoletimRouteImport.update({
+  id: '/boletim',
+  path: '/boletim',
+  getParentRoute: () => ParticipeRoute,
+} as any)
+const ParticipeAgendaRoute = ParticipeAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => ParticipeRoute,
+} as any)
 const ObrasNumRoute = ObrasNumRouteImport.update({
   id: '/obras/$num',
   path: '/obras/$num',
   getParentRoute: () => rootRouteImport,
+} as any)
+const InstitutoTransparenciaRoute = InstitutoTransparenciaRouteImport.update({
+  id: '/transparencia',
+  path: '/transparencia',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const InstitutoRedeDeParceirosRoute =
+  InstitutoRedeDeParceirosRouteImport.update({
+    id: '/rede-de-parceiros',
+    path: '/rede-de-parceiros',
+    getParentRoute: () => InstitutoRoute,
+  } as any)
+const InstitutoPilaresRoute = InstitutoPilaresRouteImport.update({
+  id: '/pilares',
+  path: '/pilares',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const InstitutoMissaoELegadoRoute = InstitutoMissaoELegadoRouteImport.update({
+  id: '/missao-e-legado',
+  path: '/missao-e-legado',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const InstitutoGovernancaRoute = InstitutoGovernancaRouteImport.update({
+  id: '/governanca',
+  path: '/governanca',
+  getParentRoute: () => InstitutoRoute,
+} as any)
+const EspacosDeMemoriaPracaMemorialVladimirHerzogRoute =
+  EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport.update({
+    id: '/praca-memorial-vladimir-herzog',
+    path: '/praca-memorial-vladimir-herzog',
+    getParentRoute: () => EspacosDeMemoriaRoute,
+  } as any)
+const ElifasAndreatoReconhecimentosRoute =
+  ElifasAndreatoReconhecimentosRouteImport.update({
+    id: '/reconhecimentos',
+    path: '/reconhecimentos',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
+const ElifasAndreatoMusicaPopularBrasileiraRoute =
+  ElifasAndreatoMusicaPopularBrasileiraRouteImport.update({
+    id: '/musica-popular-brasileira',
+    path: '/musica-popular-brasileira',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
+const ElifasAndreatoCarreiraEditorialRoute =
+  ElifasAndreatoCarreiraEditorialRouteImport.update({
+    id: '/carreira-editorial',
+    path: '/carreira-editorial',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
+const ElifasAndreatoBiografiaRoute = ElifasAndreatoBiografiaRouteImport.update({
+  id: '/biografia',
+  path: '/biografia',
+  getParentRoute: () => ElifasAndreatoRoute,
+} as any)
+const ElifasAndreatoArteEResistenciaRoute =
+  ElifasAndreatoArteEResistenciaRouteImport.update({
+    id: '/arte-e-resistencia',
+    path: '/arte-e-resistencia',
+    getParentRoute: () => ElifasAndreatoRoute,
+  } as any)
+const AcervoQuadrosEIlustracoesRoute =
+  AcervoQuadrosEIlustracoesRouteImport.update({
+    id: '/quadros-e-ilustracoes',
+    path: '/quadros-e-ilustracoes',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoFotografiasECromosRoute =
+  AcervoFotografiasECromosRouteImport.update({
+    id: '/fotografias-e-cromos',
+    path: '/fotografias-e-cromos',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoExposicoesVirtuaisRoute =
+  AcervoExposicoesVirtuaisRouteImport.update({
+    id: '/exposicoes-virtuais',
+    path: '/exposicoes-virtuais',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoDatasetsEDownloadsRoute =
+  AcervoDatasetsEDownloadsRouteImport.update({
+    id: '/datasets-e-downloads',
+    path: '/datasets-e-downloads',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoConservacaoERestauroRoute =
+  AcervoConservacaoERestauroRouteImport.update({
+    id: '/conservacao-e-restauro',
+    path: '/conservacao-e-restauro',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoComoCitarRoute = AcervoComoCitarRouteImport.update({
+  id: '/como-citar',
+  path: '/como-citar',
+  getParentRoute: () => AcervoRoute,
+} as any)
+const AcervoCapasDeDiscosERevistasRoute =
+  AcervoCapasDeDiscosERevistasRouteImport.update({
+    id: '/capas-de-discos-e-revistas',
+    path: '/capas-de-discos-e-revistas',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoCadernosEManuscritosRoute =
+  AcervoCadernosEManuscritosRouteImport.update({
+    id: '/cadernos-e-manuscritos',
+    path: '/cadernos-e-manuscritos',
+    getParentRoute: () => AcervoRoute,
+  } as any)
+const AcervoBuscaRoute = AcervoBuscaRouteImport.update({
+  id: '/busca',
+  path: '/busca',
+  getParentRoute: () => AcervoRoute,
 } as any)
 const ApiPublicObraImagemNumRoute = ApiPublicObraImagemNumRouteImport.update({
   id: '/api/public/obra-imagem/$num',
@@ -97,16 +320,51 @@ const ApiPublicObraAudioNumRoute = ApiPublicObraAudioNumRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/acervo': typeof AcervoRouteWithChildren
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
+  '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
+  '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
+  '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/acervo/busca': typeof AcervoBuscaRoute
+  '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
+  '/acervo/capas-de-discos-e-revistas': typeof AcervoCapasDeDiscosERevistasRoute
+  '/acervo/como-citar': typeof AcervoComoCitarRoute
+  '/acervo/conservacao-e-restauro': typeof AcervoConservacaoERestauroRoute
+  '/acervo/datasets-e-downloads': typeof AcervoDatasetsEDownloadsRoute
+  '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
+  '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
+  '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
+  '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
+  '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
+  '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
+  '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
+  '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
+  '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
+  '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
+  '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
+  '/participe/agenda': typeof ParticipeAgendaRoute
+  '/participe/boletim': typeof ParticipeBoletimRoute
+  '/participe/contato': typeof ParticipeContatoRoute
+  '/participe/oficinas': typeof ParticipeOficinasRoute
+  '/participe/patrocine': typeof ParticipePatrocineRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/acervo/': typeof AcervoIndexRoute
+  '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
+  '/espacos-de-memoria/': typeof EspacosDeMemoriaIndexRoute
+  '/instituto/': typeof InstitutoIndexRoute
   '/obras/': typeof ObrasIndexRoute
+  '/participe/': typeof ParticipeIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -119,9 +377,39 @@ export interface FileRoutesByTo {
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/sobre': typeof SobreRoute
+  '/acervo/busca': typeof AcervoBuscaRoute
+  '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
+  '/acervo/capas-de-discos-e-revistas': typeof AcervoCapasDeDiscosERevistasRoute
+  '/acervo/como-citar': typeof AcervoComoCitarRoute
+  '/acervo/conservacao-e-restauro': typeof AcervoConservacaoERestauroRoute
+  '/acervo/datasets-e-downloads': typeof AcervoDatasetsEDownloadsRoute
+  '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
+  '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
+  '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
+  '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
+  '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
+  '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
+  '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
+  '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
+  '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
+  '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
+  '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
+  '/participe/agenda': typeof ParticipeAgendaRoute
+  '/participe/boletim': typeof ParticipeBoletimRoute
+  '/participe/contato': typeof ParticipeContatoRoute
+  '/participe/oficinas': typeof ParticipeOficinasRoute
+  '/participe/patrocine': typeof ParticipePatrocineRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/acervo': typeof AcervoIndexRoute
+  '/elifas-andreato': typeof ElifasAndreatoIndexRoute
+  '/espacos-de-memoria': typeof EspacosDeMemoriaIndexRoute
+  '/instituto': typeof InstitutoIndexRoute
   '/obras': typeof ObrasIndexRoute
+  '/participe': typeof ParticipeIndexRoute
   '/qrcodes': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -129,16 +417,51 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/acervo': typeof AcervoRouteWithChildren
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
+  '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
+  '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
+  '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/participe': typeof ParticipeRouteWithChildren
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
+  '/acervo/busca': typeof AcervoBuscaRoute
+  '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
+  '/acervo/capas-de-discos-e-revistas': typeof AcervoCapasDeDiscosERevistasRoute
+  '/acervo/como-citar': typeof AcervoComoCitarRoute
+  '/acervo/conservacao-e-restauro': typeof AcervoConservacaoERestauroRoute
+  '/acervo/datasets-e-downloads': typeof AcervoDatasetsEDownloadsRoute
+  '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
+  '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
+  '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
+  '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
+  '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
+  '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
+  '/elifas-andreato/musica-popular-brasileira': typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  '/elifas-andreato/reconhecimentos': typeof ElifasAndreatoReconhecimentosRoute
+  '/espacos-de-memoria/praca-memorial-vladimir-herzog': typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
+  '/instituto/governanca': typeof InstitutoGovernancaRoute
+  '/instituto/missao-e-legado': typeof InstitutoMissaoELegadoRoute
+  '/instituto/pilares': typeof InstitutoPilaresRoute
+  '/instituto/rede-de-parceiros': typeof InstitutoRedeDeParceirosRoute
+  '/instituto/transparencia': typeof InstitutoTransparenciaRoute
   '/obras/$num': typeof ObrasNumRoute
+  '/participe/agenda': typeof ParticipeAgendaRoute
+  '/participe/boletim': typeof ParticipeBoletimRoute
+  '/participe/contato': typeof ParticipeContatoRoute
+  '/participe/oficinas': typeof ParticipeOficinasRoute
+  '/participe/patrocine': typeof ParticipePatrocineRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/acervo/': typeof AcervoIndexRoute
+  '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
+  '/espacos-de-memoria/': typeof EspacosDeMemoriaIndexRoute
+  '/instituto/': typeof InstitutoIndexRoute
   '/obras/': typeof ObrasIndexRoute
+  '/participe/': typeof ParticipeIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -147,16 +470,51 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/acervo'
     | '/admin'
     | '/auth'
     | '/como-usar'
     | '/editar'
+    | '/elifas-andreato'
+    | '/espacos-de-memoria'
+    | '/instituto'
     | '/linhas-da-vida'
+    | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/acervo/busca'
+    | '/acervo/cadernos-e-manuscritos'
+    | '/acervo/capas-de-discos-e-revistas'
+    | '/acervo/como-citar'
+    | '/acervo/conservacao-e-restauro'
+    | '/acervo/datasets-e-downloads'
+    | '/acervo/exposicoes-virtuais'
+    | '/acervo/fotografias-e-cromos'
+    | '/acervo/quadros-e-ilustracoes'
+    | '/elifas-andreato/arte-e-resistencia'
+    | '/elifas-andreato/biografia'
+    | '/elifas-andreato/carreira-editorial'
+    | '/elifas-andreato/musica-popular-brasileira'
+    | '/elifas-andreato/reconhecimentos'
+    | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+    | '/instituto/governanca'
+    | '/instituto/missao-e-legado'
+    | '/instituto/pilares'
+    | '/instituto/rede-de-parceiros'
+    | '/instituto/transparencia'
     | '/obras/$num'
+    | '/participe/agenda'
+    | '/participe/boletim'
+    | '/participe/contato'
+    | '/participe/oficinas'
+    | '/participe/patrocine'
     | '/qrcodes/imprimir'
+    | '/acervo/'
+    | '/elifas-andreato/'
+    | '/espacos-de-memoria/'
+    | '/instituto/'
     | '/obras/'
+    | '/participe/'
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
@@ -169,25 +527,90 @@ export interface FileRouteTypes {
     | '/editar'
     | '/linhas-da-vida'
     | '/sobre'
+    | '/acervo/busca'
+    | '/acervo/cadernos-e-manuscritos'
+    | '/acervo/capas-de-discos-e-revistas'
+    | '/acervo/como-citar'
+    | '/acervo/conservacao-e-restauro'
+    | '/acervo/datasets-e-downloads'
+    | '/acervo/exposicoes-virtuais'
+    | '/acervo/fotografias-e-cromos'
+    | '/acervo/quadros-e-ilustracoes'
+    | '/elifas-andreato/arte-e-resistencia'
+    | '/elifas-andreato/biografia'
+    | '/elifas-andreato/carreira-editorial'
+    | '/elifas-andreato/musica-popular-brasileira'
+    | '/elifas-andreato/reconhecimentos'
+    | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+    | '/instituto/governanca'
+    | '/instituto/missao-e-legado'
+    | '/instituto/pilares'
+    | '/instituto/rede-de-parceiros'
+    | '/instituto/transparencia'
     | '/obras/$num'
+    | '/participe/agenda'
+    | '/participe/boletim'
+    | '/participe/contato'
+    | '/participe/oficinas'
+    | '/participe/patrocine'
     | '/qrcodes/imprimir'
+    | '/acervo'
+    | '/elifas-andreato'
+    | '/espacos-de-memoria'
+    | '/instituto'
     | '/obras'
+    | '/participe'
     | '/qrcodes'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
   id:
     | '__root__'
     | '/'
+    | '/acervo'
     | '/admin'
     | '/auth'
     | '/como-usar'
     | '/editar'
+    | '/elifas-andreato'
+    | '/espacos-de-memoria'
+    | '/instituto'
     | '/linhas-da-vida'
+    | '/participe'
     | '/qrcodes'
     | '/sobre'
+    | '/acervo/busca'
+    | '/acervo/cadernos-e-manuscritos'
+    | '/acervo/capas-de-discos-e-revistas'
+    | '/acervo/como-citar'
+    | '/acervo/conservacao-e-restauro'
+    | '/acervo/datasets-e-downloads'
+    | '/acervo/exposicoes-virtuais'
+    | '/acervo/fotografias-e-cromos'
+    | '/acervo/quadros-e-ilustracoes'
+    | '/elifas-andreato/arte-e-resistencia'
+    | '/elifas-andreato/biografia'
+    | '/elifas-andreato/carreira-editorial'
+    | '/elifas-andreato/musica-popular-brasileira'
+    | '/elifas-andreato/reconhecimentos'
+    | '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+    | '/instituto/governanca'
+    | '/instituto/missao-e-legado'
+    | '/instituto/pilares'
+    | '/instituto/rede-de-parceiros'
+    | '/instituto/transparencia'
     | '/obras/$num'
+    | '/participe/agenda'
+    | '/participe/boletim'
+    | '/participe/contato'
+    | '/participe/oficinas'
+    | '/participe/patrocine'
     | '/qrcodes/imprimir'
+    | '/acervo/'
+    | '/elifas-andreato/'
+    | '/espacos-de-memoria/'
+    | '/instituto/'
     | '/obras/'
+    | '/participe/'
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
@@ -195,11 +618,16 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AcervoRoute: typeof AcervoRouteWithChildren
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ComoUsarRoute: typeof ComoUsarRoute
   EditarRoute: typeof EditarRoute
+  ElifasAndreatoRoute: typeof ElifasAndreatoRouteWithChildren
+  EspacosDeMemoriaRoute: typeof EspacosDeMemoriaRouteWithChildren
+  InstitutoRoute: typeof InstitutoRouteWithChildren
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
+  ParticipeRoute: typeof ParticipeRouteWithChildren
   QrcodesRoute: typeof QrcodesRouteWithChildren
   SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
@@ -224,11 +652,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QrcodesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/participe': {
+      id: '/participe'
+      path: '/participe'
+      fullPath: '/participe'
+      preLoaderRoute: typeof ParticipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/linhas-da-vida': {
       id: '/linhas-da-vida'
       path: '/linhas-da-vida'
       fullPath: '/linhas-da-vida'
       preLoaderRoute: typeof LinhasDaVidaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instituto': {
+      id: '/instituto'
+      path: '/instituto'
+      fullPath: '/instituto'
+      preLoaderRoute: typeof InstitutoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/espacos-de-memoria': {
+      id: '/espacos-de-memoria'
+      path: '/espacos-de-memoria'
+      fullPath: '/espacos-de-memoria'
+      preLoaderRoute: typeof EspacosDeMemoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/elifas-andreato': {
+      id: '/elifas-andreato'
+      path: '/elifas-andreato'
+      fullPath: '/elifas-andreato'
+      preLoaderRoute: typeof ElifasAndreatoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/editar': {
@@ -259,6 +715,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/acervo': {
+      id: '/acervo'
+      path: '/acervo'
+      fullPath: '/acervo'
+      preLoaderRoute: typeof AcervoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -273,12 +736,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QrcodesIndexRouteImport
       parentRoute: typeof QrcodesRoute
     }
+    '/participe/': {
+      id: '/participe/'
+      path: '/'
+      fullPath: '/participe/'
+      preLoaderRoute: typeof ParticipeIndexRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
     '/obras/': {
       id: '/obras/'
       path: '/obras'
       fullPath: '/obras/'
       preLoaderRoute: typeof ObrasIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/instituto/': {
+      id: '/instituto/'
+      path: '/'
+      fullPath: '/instituto/'
+      preLoaderRoute: typeof InstitutoIndexRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/espacos-de-memoria/': {
+      id: '/espacos-de-memoria/'
+      path: '/'
+      fullPath: '/espacos-de-memoria/'
+      preLoaderRoute: typeof EspacosDeMemoriaIndexRouteImport
+      parentRoute: typeof EspacosDeMemoriaRoute
+    }
+    '/elifas-andreato/': {
+      id: '/elifas-andreato/'
+      path: '/'
+      fullPath: '/elifas-andreato/'
+      preLoaderRoute: typeof ElifasAndreatoIndexRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/acervo/': {
+      id: '/acervo/'
+      path: '/'
+      fullPath: '/acervo/'
+      preLoaderRoute: typeof AcervoIndexRouteImport
+      parentRoute: typeof AcervoRoute
     }
     '/qrcodes/imprimir': {
       id: '/qrcodes/imprimir'
@@ -287,12 +785,187 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QrcodesImprimirRouteImport
       parentRoute: typeof QrcodesRoute
     }
+    '/participe/patrocine': {
+      id: '/participe/patrocine'
+      path: '/patrocine'
+      fullPath: '/participe/patrocine'
+      preLoaderRoute: typeof ParticipePatrocineRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/oficinas': {
+      id: '/participe/oficinas'
+      path: '/oficinas'
+      fullPath: '/participe/oficinas'
+      preLoaderRoute: typeof ParticipeOficinasRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/contato': {
+      id: '/participe/contato'
+      path: '/contato'
+      fullPath: '/participe/contato'
+      preLoaderRoute: typeof ParticipeContatoRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/boletim': {
+      id: '/participe/boletim'
+      path: '/boletim'
+      fullPath: '/participe/boletim'
+      preLoaderRoute: typeof ParticipeBoletimRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
+    '/participe/agenda': {
+      id: '/participe/agenda'
+      path: '/agenda'
+      fullPath: '/participe/agenda'
+      preLoaderRoute: typeof ParticipeAgendaRouteImport
+      parentRoute: typeof ParticipeRoute
+    }
     '/obras/$num': {
       id: '/obras/$num'
       path: '/obras/$num'
       fullPath: '/obras/$num'
       preLoaderRoute: typeof ObrasNumRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/instituto/transparencia': {
+      id: '/instituto/transparencia'
+      path: '/transparencia'
+      fullPath: '/instituto/transparencia'
+      preLoaderRoute: typeof InstitutoTransparenciaRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/rede-de-parceiros': {
+      id: '/instituto/rede-de-parceiros'
+      path: '/rede-de-parceiros'
+      fullPath: '/instituto/rede-de-parceiros'
+      preLoaderRoute: typeof InstitutoRedeDeParceirosRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/pilares': {
+      id: '/instituto/pilares'
+      path: '/pilares'
+      fullPath: '/instituto/pilares'
+      preLoaderRoute: typeof InstitutoPilaresRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/missao-e-legado': {
+      id: '/instituto/missao-e-legado'
+      path: '/missao-e-legado'
+      fullPath: '/instituto/missao-e-legado'
+      preLoaderRoute: typeof InstitutoMissaoELegadoRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/instituto/governanca': {
+      id: '/instituto/governanca'
+      path: '/governanca'
+      fullPath: '/instituto/governanca'
+      preLoaderRoute: typeof InstitutoGovernancaRouteImport
+      parentRoute: typeof InstitutoRoute
+    }
+    '/espacos-de-memoria/praca-memorial-vladimir-herzog': {
+      id: '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+      path: '/praca-memorial-vladimir-herzog'
+      fullPath: '/espacos-de-memoria/praca-memorial-vladimir-herzog'
+      preLoaderRoute: typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRouteImport
+      parentRoute: typeof EspacosDeMemoriaRoute
+    }
+    '/elifas-andreato/reconhecimentos': {
+      id: '/elifas-andreato/reconhecimentos'
+      path: '/reconhecimentos'
+      fullPath: '/elifas-andreato/reconhecimentos'
+      preLoaderRoute: typeof ElifasAndreatoReconhecimentosRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/musica-popular-brasileira': {
+      id: '/elifas-andreato/musica-popular-brasileira'
+      path: '/musica-popular-brasileira'
+      fullPath: '/elifas-andreato/musica-popular-brasileira'
+      preLoaderRoute: typeof ElifasAndreatoMusicaPopularBrasileiraRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/carreira-editorial': {
+      id: '/elifas-andreato/carreira-editorial'
+      path: '/carreira-editorial'
+      fullPath: '/elifas-andreato/carreira-editorial'
+      preLoaderRoute: typeof ElifasAndreatoCarreiraEditorialRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/biografia': {
+      id: '/elifas-andreato/biografia'
+      path: '/biografia'
+      fullPath: '/elifas-andreato/biografia'
+      preLoaderRoute: typeof ElifasAndreatoBiografiaRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/elifas-andreato/arte-e-resistencia': {
+      id: '/elifas-andreato/arte-e-resistencia'
+      path: '/arte-e-resistencia'
+      fullPath: '/elifas-andreato/arte-e-resistencia'
+      preLoaderRoute: typeof ElifasAndreatoArteEResistenciaRouteImport
+      parentRoute: typeof ElifasAndreatoRoute
+    }
+    '/acervo/quadros-e-ilustracoes': {
+      id: '/acervo/quadros-e-ilustracoes'
+      path: '/quadros-e-ilustracoes'
+      fullPath: '/acervo/quadros-e-ilustracoes'
+      preLoaderRoute: typeof AcervoQuadrosEIlustracoesRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/fotografias-e-cromos': {
+      id: '/acervo/fotografias-e-cromos'
+      path: '/fotografias-e-cromos'
+      fullPath: '/acervo/fotografias-e-cromos'
+      preLoaderRoute: typeof AcervoFotografiasECromosRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/exposicoes-virtuais': {
+      id: '/acervo/exposicoes-virtuais'
+      path: '/exposicoes-virtuais'
+      fullPath: '/acervo/exposicoes-virtuais'
+      preLoaderRoute: typeof AcervoExposicoesVirtuaisRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/datasets-e-downloads': {
+      id: '/acervo/datasets-e-downloads'
+      path: '/datasets-e-downloads'
+      fullPath: '/acervo/datasets-e-downloads'
+      preLoaderRoute: typeof AcervoDatasetsEDownloadsRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/conservacao-e-restauro': {
+      id: '/acervo/conservacao-e-restauro'
+      path: '/conservacao-e-restauro'
+      fullPath: '/acervo/conservacao-e-restauro'
+      preLoaderRoute: typeof AcervoConservacaoERestauroRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/como-citar': {
+      id: '/acervo/como-citar'
+      path: '/como-citar'
+      fullPath: '/acervo/como-citar'
+      preLoaderRoute: typeof AcervoComoCitarRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/capas-de-discos-e-revistas': {
+      id: '/acervo/capas-de-discos-e-revistas'
+      path: '/capas-de-discos-e-revistas'
+      fullPath: '/acervo/capas-de-discos-e-revistas'
+      preLoaderRoute: typeof AcervoCapasDeDiscosERevistasRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/cadernos-e-manuscritos': {
+      id: '/acervo/cadernos-e-manuscritos'
+      path: '/cadernos-e-manuscritos'
+      fullPath: '/acervo/cadernos-e-manuscritos'
+      preLoaderRoute: typeof AcervoCadernosEManuscritosRouteImport
+      parentRoute: typeof AcervoRoute
+    }
+    '/acervo/busca': {
+      id: '/acervo/busca'
+      path: '/busca'
+      fullPath: '/acervo/busca'
+      preLoaderRoute: typeof AcervoBuscaRouteImport
+      parentRoute: typeof AcervoRoute
     }
     '/api/public/obra-imagem/$num': {
       id: '/api/public/obra-imagem/$num'
@@ -311,6 +984,116 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AcervoRouteChildren {
+  AcervoBuscaRoute: typeof AcervoBuscaRoute
+  AcervoCadernosEManuscritosRoute: typeof AcervoCadernosEManuscritosRoute
+  AcervoCapasDeDiscosERevistasRoute: typeof AcervoCapasDeDiscosERevistasRoute
+  AcervoComoCitarRoute: typeof AcervoComoCitarRoute
+  AcervoConservacaoERestauroRoute: typeof AcervoConservacaoERestauroRoute
+  AcervoDatasetsEDownloadsRoute: typeof AcervoDatasetsEDownloadsRoute
+  AcervoExposicoesVirtuaisRoute: typeof AcervoExposicoesVirtuaisRoute
+  AcervoFotografiasECromosRoute: typeof AcervoFotografiasECromosRoute
+  AcervoQuadrosEIlustracoesRoute: typeof AcervoQuadrosEIlustracoesRoute
+  AcervoIndexRoute: typeof AcervoIndexRoute
+}
+
+const AcervoRouteChildren: AcervoRouteChildren = {
+  AcervoBuscaRoute: AcervoBuscaRoute,
+  AcervoCadernosEManuscritosRoute: AcervoCadernosEManuscritosRoute,
+  AcervoCapasDeDiscosERevistasRoute: AcervoCapasDeDiscosERevistasRoute,
+  AcervoComoCitarRoute: AcervoComoCitarRoute,
+  AcervoConservacaoERestauroRoute: AcervoConservacaoERestauroRoute,
+  AcervoDatasetsEDownloadsRoute: AcervoDatasetsEDownloadsRoute,
+  AcervoExposicoesVirtuaisRoute: AcervoExposicoesVirtuaisRoute,
+  AcervoFotografiasECromosRoute: AcervoFotografiasECromosRoute,
+  AcervoQuadrosEIlustracoesRoute: AcervoQuadrosEIlustracoesRoute,
+  AcervoIndexRoute: AcervoIndexRoute,
+}
+
+const AcervoRouteWithChildren =
+  AcervoRoute._addFileChildren(AcervoRouteChildren)
+
+interface ElifasAndreatoRouteChildren {
+  ElifasAndreatoArteEResistenciaRoute: typeof ElifasAndreatoArteEResistenciaRoute
+  ElifasAndreatoBiografiaRoute: typeof ElifasAndreatoBiografiaRoute
+  ElifasAndreatoCarreiraEditorialRoute: typeof ElifasAndreatoCarreiraEditorialRoute
+  ElifasAndreatoMusicaPopularBrasileiraRoute: typeof ElifasAndreatoMusicaPopularBrasileiraRoute
+  ElifasAndreatoReconhecimentosRoute: typeof ElifasAndreatoReconhecimentosRoute
+  ElifasAndreatoIndexRoute: typeof ElifasAndreatoIndexRoute
+}
+
+const ElifasAndreatoRouteChildren: ElifasAndreatoRouteChildren = {
+  ElifasAndreatoArteEResistenciaRoute: ElifasAndreatoArteEResistenciaRoute,
+  ElifasAndreatoBiografiaRoute: ElifasAndreatoBiografiaRoute,
+  ElifasAndreatoCarreiraEditorialRoute: ElifasAndreatoCarreiraEditorialRoute,
+  ElifasAndreatoMusicaPopularBrasileiraRoute:
+    ElifasAndreatoMusicaPopularBrasileiraRoute,
+  ElifasAndreatoReconhecimentosRoute: ElifasAndreatoReconhecimentosRoute,
+  ElifasAndreatoIndexRoute: ElifasAndreatoIndexRoute,
+}
+
+const ElifasAndreatoRouteWithChildren = ElifasAndreatoRoute._addFileChildren(
+  ElifasAndreatoRouteChildren,
+)
+
+interface EspacosDeMemoriaRouteChildren {
+  EspacosDeMemoriaPracaMemorialVladimirHerzogRoute: typeof EspacosDeMemoriaPracaMemorialVladimirHerzogRoute
+  EspacosDeMemoriaIndexRoute: typeof EspacosDeMemoriaIndexRoute
+}
+
+const EspacosDeMemoriaRouteChildren: EspacosDeMemoriaRouteChildren = {
+  EspacosDeMemoriaPracaMemorialVladimirHerzogRoute:
+    EspacosDeMemoriaPracaMemorialVladimirHerzogRoute,
+  EspacosDeMemoriaIndexRoute: EspacosDeMemoriaIndexRoute,
+}
+
+const EspacosDeMemoriaRouteWithChildren =
+  EspacosDeMemoriaRoute._addFileChildren(EspacosDeMemoriaRouteChildren)
+
+interface InstitutoRouteChildren {
+  InstitutoGovernancaRoute: typeof InstitutoGovernancaRoute
+  InstitutoMissaoELegadoRoute: typeof InstitutoMissaoELegadoRoute
+  InstitutoPilaresRoute: typeof InstitutoPilaresRoute
+  InstitutoRedeDeParceirosRoute: typeof InstitutoRedeDeParceirosRoute
+  InstitutoTransparenciaRoute: typeof InstitutoTransparenciaRoute
+  InstitutoIndexRoute: typeof InstitutoIndexRoute
+}
+
+const InstitutoRouteChildren: InstitutoRouteChildren = {
+  InstitutoGovernancaRoute: InstitutoGovernancaRoute,
+  InstitutoMissaoELegadoRoute: InstitutoMissaoELegadoRoute,
+  InstitutoPilaresRoute: InstitutoPilaresRoute,
+  InstitutoRedeDeParceirosRoute: InstitutoRedeDeParceirosRoute,
+  InstitutoTransparenciaRoute: InstitutoTransparenciaRoute,
+  InstitutoIndexRoute: InstitutoIndexRoute,
+}
+
+const InstitutoRouteWithChildren = InstitutoRoute._addFileChildren(
+  InstitutoRouteChildren,
+)
+
+interface ParticipeRouteChildren {
+  ParticipeAgendaRoute: typeof ParticipeAgendaRoute
+  ParticipeBoletimRoute: typeof ParticipeBoletimRoute
+  ParticipeContatoRoute: typeof ParticipeContatoRoute
+  ParticipeOficinasRoute: typeof ParticipeOficinasRoute
+  ParticipePatrocineRoute: typeof ParticipePatrocineRoute
+  ParticipeIndexRoute: typeof ParticipeIndexRoute
+}
+
+const ParticipeRouteChildren: ParticipeRouteChildren = {
+  ParticipeAgendaRoute: ParticipeAgendaRoute,
+  ParticipeBoletimRoute: ParticipeBoletimRoute,
+  ParticipeContatoRoute: ParticipeContatoRoute,
+  ParticipeOficinasRoute: ParticipeOficinasRoute,
+  ParticipePatrocineRoute: ParticipePatrocineRoute,
+  ParticipeIndexRoute: ParticipeIndexRoute,
+}
+
+const ParticipeRouteWithChildren = ParticipeRoute._addFileChildren(
+  ParticipeRouteChildren,
+)
+
 interface QrcodesRouteChildren {
   QrcodesImprimirRoute: typeof QrcodesImprimirRoute
   QrcodesIndexRoute: typeof QrcodesIndexRoute
@@ -326,11 +1109,16 @@ const QrcodesRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AcervoRoute: AcervoRouteWithChildren,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ComoUsarRoute: ComoUsarRoute,
   EditarRoute: EditarRoute,
+  ElifasAndreatoRoute: ElifasAndreatoRouteWithChildren,
+  EspacosDeMemoriaRoute: EspacosDeMemoriaRouteWithChildren,
+  InstitutoRoute: InstitutoRouteWithChildren,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
+  ParticipeRoute: ParticipeRouteWithChildren,
   QrcodesRoute: QrcodesRouteWithChildren,
   SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
@@ -341,13 +1129,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
