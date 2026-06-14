@@ -1,31 +1,51 @@
+# Projetos e Iniciativas — Linha do Tempo de Realizações
+
 ## Objetivo
+Publicar a relação histórica de projetos e iniciativas do Instituto/Elifas Andreato (1970 a 2026) numa nova página dentro da seção **O Instituto**.
 
-Publicar uma nova página dedicada a **Laura Andreato** dentro da seção **O Instituto**, usando o texto fornecido sem marcações de revisão, e adicioná-la à navegação.
+## Onde inserir
+Nova rota: `/instituto/projetos-e-iniciativas`, seguindo o mesmo padrão das demais páginas do Instituto (head/SEO, layout central). Será adicionada ao menu suspenso "O Instituto" e ao índice de seções em `instituto.index.tsx`.
 
-## Mudanças
+Título de menu sugerido: **Projetos e Iniciativas**.
 
-### 1. Navegação — `src/data/navegacao.ts`
-Adicionar um novo item ao grupo "O Instituto":
+## Conteúdo e formato
+Os dados serão exibidos em ordem cronológica decrescente (2026 → 1970), usando o componente de tabela já existente (`src/components/ui/table.tsx`). Colunas:
+
+```text
+Ano | Projeto/Iniciativa | Categoria | Descrição | Público-Alvo | Colaboradores | Status/Resultado
 ```
-{ rotulo: "Laura Andreato", para: "/instituto/laura-andreato", descricao: "Curadoria, pesquisa e finalização do legado" }
-```
-Assim a página aparece no índice de `/instituto` (que lista `grupo.itens`) e no menu do site.
 
-### 2. Nova rota — `src/routes/instituto.laura-andreato.tsx`
-Arquivo no padrão das demais páginas da seção, usando o componente `PaginaArtigo` (`titulo` + `paragrafos`), com `createFileRoute("/instituto/laura-andreato")` e bloco `head()` de SEO (title, description, og:* e canonical auto-referente em `https://institutoelifasandreato.org.br/instituto/laura-andreato`).
+A coluna "Fonte" (números 1–5) será convertida em uma **legenda de fontes** no rodapé da página, em vez de uma coluna numérica solta, para ficar legível e profissional.
 
-O conteúdo será organizado em parágrafos a partir do texto fornecido (publicado como está, sem marcações):
+### Registros (16 linhas)
+- 2026 (Planejado) — Plano Anual de Atividades (PRONAC 256514)
+- 2026 (Planejado) — Livro 'Lembramentos' e Web série
+- 2025 (Planejado) — Calçadão do Reconhecimento
+- 2024 — Espaço Cultural a Céu Aberto Elifas Andreato
+- 2022 — Oficinas Formativas
+- 2020 — Aplicativo Almanaque Brasil
+- 2019 — Capas do Brasil
+- 2018 — Sarau do Elifas
+- 2018 — A Arte Negra de Elifas Andreato
+- 2011 — Mobilização Praça Memorial Vladimir Herzog
+- 1999–2017 — Almanaque Brasil
+- 1982 — Volta de Dulcina
+- 1981 — Clara Mestiça
+- 1970–1980 — Imprensa Alternativa (Opinião, Argumento, Movimento)
+- Não especificado — Cursos Digitais e Área do Aluno
 
-- **Apresentação**: Laura Andreato (Laura Huzak Andreato), filha de Elifas Andreato — artista plástica, educadora e pesquisadora, formada em Artes Plásticas pela ECA-USP, com mestrado em Poéticas Visuais e doutorado em andamento; autora de *Pelos Olhos de Minha Mãe*.
-- **Atuação no Instituto**: curadora adjunta, pesquisadora e finalizadora do legado visual da família, garantindo que a obra do pai permaneça viva e em circulação.
-- **Finalização de obras póstumas**: acabamento visual (ilustrações e pinceladas digitais) do livro infantil inédito *Lábaro: O enigma da bandeira brasileira*.
-- **Arqueologia e repatriação do acervo**: busca e negociação de obras dispersas, incluindo o contato com a compradora da ilustração de Geraldo Vandré encontrada por R$ 5 em um bazar, visando disponibilizá-la ao público e a estudantes no Centro Universitário Belas Artes.
-- **Mediação de ações artísticas**: representação do Instituto em eventos e mediação de intervenções como a ação coletiva "Árvore da Vida", na Praça Memorial Vladimir Herzog, que retomou a mão vermelha desenhada por Elifas em sua época de operário para alertar sobre acidentes e mortes no trabalho.
+(Todo o conteúdo textual fornecido será preservado integralmente.)
 
-**Meta description SEO** (até 160 caracteres): "Laura Andreato, filha de Elifas Andreato: curadora adjunta, pesquisadora e finalizadora do legado visual do artista no Instituto Elifas Andreato."
+### Status
+A coluna Status/Resultado usará badges sutis (Concluído, Em construção, Planejado, Inaugurado, Em operação, Aprovado/Captação) com o componente `Badge` existente.
 
-## Observações
+## Responsividade
+Em telas pequenas, a tabela rola horizontalmente (o wrapper de `Table` já tem `overflow-auto`). As descrições longas terão largura mínima de coluna controlada para manter a leitura.
 
-- Nenhuma alteração em backend, dados de obras ou demais seções.
-- O `routeTree.gen.ts` é gerado automaticamente; não será editado manualmente.
-- Texto publicado conforme fornecido, aberto a revisão curatorial posterior.
+## Detalhes técnicos
+- Criar `src/routes/instituto.projetos-e-iniciativas.tsx` com `createFileRoute("/instituto/projetos-e-iniciativas")`, `head()` com title/description/og/canonical próprios.
+- Dados em um array tipado dentro do próprio arquivo (ou em `src/data/`), renderizados na tabela.
+- Adicionar o item em `src/data/navegacao.ts` no grupo "O Instituto".
+- A rota será registrada automaticamente pelo plugin do TanStack (não editar manualmente o routeTree).
+
+Publicação direta, sem marcações de revisão, conforme o critério já adotado.

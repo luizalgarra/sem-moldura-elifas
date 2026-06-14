@@ -31,6 +31,11 @@ export const navegacao: GrupoNav[] = [
         para: "/instituto/pilares",
         descricao: "Preservação, Difusão, Ação Educativa",
       },
+      {
+        rotulo: "Projetos e Iniciativas",
+        para: "/instituto/projetos-e-iniciativas",
+        descricao: "Linha do tempo de realizações (1970–2026)",
+      },
       { rotulo: "Governança", para: "/instituto/governanca" },
       { rotulo: "Rede de Parceiros", para: "/instituto/rede-de-parceiros" },
       { rotulo: "Transparência", para: "/instituto/transparencia" },
