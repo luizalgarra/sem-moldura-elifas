@@ -55,6 +55,16 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-64 gap-1 p-2">
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to={grupo.para}
+                            className="block rounded-md px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                          >
+                            Ver tudo
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
                       {grupo.itens.map((item) => (
                         <li key={item.para}>
                           <NavigationMenuLink asChild>
