@@ -22,6 +22,11 @@ export const navegacao: GrupoNav[] = [
         descricao: "Curadoria, pesquisa e finalização do legado",
       },
       {
+        rotulo: "Bento Andreato",
+        para: "/instituto/bento-andreato",
+        descricao: "Diretor Executivo e produtor cultural",
+      },
+      {
         rotulo: "Pilares",
         para: "/instituto/pilares",
         descricao: "Preservação, Difusão, Ação Educativa",
