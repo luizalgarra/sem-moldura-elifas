@@ -225,7 +225,9 @@ function Conteudo() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {mostrarLayout && <SiteHeader onSair={() => sair()} />}
+      {mostrarLayout && (
+        <SiteHeader onSair={() => sair()} ocultarNavegacao={pathname === "/obras"} />
+      )}
       <main id="conteudo" className="flex-1">
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
