@@ -14,7 +14,13 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 import { navegacao } from "@/data/navegacao";
 import { marca } from "@/assets/marca";
 
-export function SiteHeader({ onSair }: { onSair?: () => void }) {
+export function SiteHeader({
+  onSair,
+  ocultarNavegacao,
+}: {
+  onSair?: () => void;
+  ocultarNavegacao?: boolean;
+}) {
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
@@ -46,6 +52,7 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
 
         <div className="flex items-center gap-3">
           {/* Navegação desktop com menus suspensos */}
+          {!ocultarNavegacao && (
           <NavigationMenu className="hidden lg:flex">
             <NavigationMenuList>
               {navegacao.map((grupo) => (
@@ -89,6 +96,8 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
               ))}
             </NavigationMenuList>
           </NavigationMenu>
+          )}
+
 
           <ControlesAcessibilidade />
 
@@ -105,6 +114,7 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
           )}
 
           {/* Navegação mobile colapsável */}
+          {!ocultarNavegacao && (
           <Sheet open={menuAberto} onOpenChange={setMenuAberto}>
             <SheetTrigger asChild>
               <button
@@ -150,6 +160,7 @@ export function SiteHeader({ onSair }: { onSair?: () => void }) {
               </nav>
             </SheetContent>
           </Sheet>
+          )}
         </div>
       </div>
     </header>
