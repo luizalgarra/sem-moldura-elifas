@@ -21,9 +21,11 @@ export const Route = createFileRoute("/qrcodes/imprimir")({
   component: ImprimirQrCodes,
 });
 
+const obrasComQr = obras.filter((o) => o.parede !== "Vídeos");
+
 function ImprimirQrCodes() {
   const [selecionadas, setSelecionadas] = useState<Set<number>>(
-    () => new Set(obras.map((o) => o.num)),
+    () => new Set(obrasComQr.map((o) => o.num)),
   );
   const [gerando, setGerando] = useState(false);
 
