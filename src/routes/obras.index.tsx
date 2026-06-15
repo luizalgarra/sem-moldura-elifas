@@ -66,6 +66,27 @@ function Acervo() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
+      <Link
+        to="/linhas-da-vida"
+        className="group mb-8 flex items-center gap-4 rounded-lg border border-accent bg-card p-5 transition-colors hover:bg-accent/10"
+      >
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+          <RouteIcon className="size-6" aria-hidden="true" />
+        </span>
+        <span className="flex-1">
+          <span className="block font-serif text-lg font-semibold text-accent">
+            Linhas da Vida
+          </span>
+          <span className="block text-sm text-muted-foreground">
+            Percorra a trajetória de Elifas Andreato e as histórias por trás das obras.
+          </span>
+        </span>
+        <ArrowRight
+          className="size-5 shrink-0 text-accent transition-transform group-hover:translate-x-1"
+          aria-hidden="true"
+        />
+      </Link>
+
       <header className="mb-8">
         <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
           Acervo da exposição
