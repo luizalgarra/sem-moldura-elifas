@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, Route as RouteIcon, Search } from "lucide-react";
 import { paredesOrdem } from "@/data/obras";
 import { listarAcervo, type ObraAcervo } from "@/lib/admin-obras.functions";
 import { ObraCard } from "@/components/ObraCard";
@@ -66,6 +66,27 @@ function Acervo() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
+      <Link
+        to="/linhas-da-vida"
+        className="group mb-8 flex items-center gap-4 rounded-lg border border-accent bg-card p-5 transition-colors hover:bg-accent/10"
+      >
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+          <RouteIcon className="size-6" aria-hidden="true" />
+        </span>
+        <span className="flex-1">
+          <span className="block font-serif text-lg font-semibold text-accent">
+            Linhas da Vida
+          </span>
+          <span className="block text-sm text-muted-foreground">
+            Percorra a trajetória de Elifas Andreato e as histórias por trás das obras.
+          </span>
+        </span>
+        <ArrowRight
+          className="size-5 shrink-0 text-accent transition-transform group-hover:translate-x-1"
+          aria-hidden="true"
+        />
+      </Link>
+
       <header className="mb-8">
         <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
           Acervo da exposição
@@ -94,28 +115,8 @@ function Acervo() {
         )}
       </header>
 
-      {grupos.length > 0 && (
-        <nav
-          aria-label="Saltar para parede"
-          className="mb-8 rounded-lg border border-border bg-card p-4"
-        >
-          <h2 className="mb-3 text-sm font-semibold text-foreground">Paredes</h2>
-          <ul className="flex flex-wrap gap-2">
-            {grupos.map((grupo) => (
-              <li key={grupo.parede}>
-                <a
-                  href={`#parede-${grupo.parede}`}
-                  className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  {grupo.parede}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-
       {gruposFiltrados.length === 0 ? (
+
         <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
           Nenhuma obra encontrada para “{busca}”.
         </p>
