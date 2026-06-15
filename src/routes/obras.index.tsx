@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, Route as RouteIcon, Search } from "lucide-react";
 import { paredesOrdem } from "@/data/obras";
 import { listarAcervo, type ObraAcervo } from "@/lib/admin-obras.functions";
 import { ObraCard } from "@/components/ObraCard";
