@@ -57,13 +57,13 @@ function ImprimirQrCodes() {
       const pageH = doc.internal.pageSize.getHeight();
 
       const cols = 2;
-      const rows = 3;
+      const rows = 4;
       const perPage = cols * rows;
       const marginX = 15;
       const marginY = 15;
       const cellW = (pageW - marginX * 2) / cols;
       const cellH = (pageH - marginY * 2) / rows;
-      const qrSize = 55; // mm
+      const qrSize = 42; // mm
 
       for (let i = 0; i < lista.length; i++) {
         const obra = lista[i];
@@ -109,7 +109,7 @@ function ImprimirQrCodes() {
         </h1>
         <p className="mt-2 text-muted-foreground">
           Selecione as obras desejadas e gere um PDF pronto para impressão, com
-          6 QR Codes por folha A4. Cada código leva à página da obra (com
+          8 QR Codes por folha A4. Cada código leva à página da obra (com
           áudio-descrição).
         </p>
         <Link
