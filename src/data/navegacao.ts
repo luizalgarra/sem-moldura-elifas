@@ -17,11 +17,6 @@ export const navegacao: GrupoNav[] = [
     itens: [
       { rotulo: "Missão e Legado", para: "/instituto/missao-e-legado" },
       {
-        rotulo: "Laura Andreato",
-        para: "/instituto/laura-andreato",
-        descricao: "Curadoria, pesquisa e finalização do legado",
-      },
-      {
         rotulo: "Bento Andreato",
         para: "/instituto/bento-andreato",
         descricao: "Diretor Executivo e produtor cultural",
