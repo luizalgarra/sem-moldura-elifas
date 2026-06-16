@@ -67,7 +67,7 @@ function QrCodes() {
       </section>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {obras.filter((o) => o.parede !== "Vídeos").map((obra) => {
+        {obras.map((obra) => {
           const url = `${SITE_URL}/obras/${obra.num}`;
           return (
             <div

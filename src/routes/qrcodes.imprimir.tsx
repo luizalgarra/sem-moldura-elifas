@@ -21,11 +21,9 @@ export const Route = createFileRoute("/qrcodes/imprimir")({
   component: ImprimirQrCodes,
 });
 
-const obrasComQr = obras.filter((o) => o.parede !== "Vídeos");
-
 function ImprimirQrCodes() {
   const [selecionadas, setSelecionadas] = useState<Set<number>>(
-    () => new Set(obrasComQr.map((o) => o.num)),
+    () => new Set(obras.map((o) => o.num)),
   );
   const [gerando, setGerando] = useState(false);
 
@@ -41,7 +39,7 @@ function ImprimirQrCodes() {
   }
 
   function selecionarTodas() {
-    setSelecionadas(new Set(obrasComQr.map((o) => o.num)));
+    setSelecionadas(new Set(obras.map((o) => o.num)));
   }
 
   function limparSelecao() {
@@ -49,7 +47,7 @@ function ImprimirQrCodes() {
   }
 
   async function gerarPdf() {
-    const lista = obrasComQr.filter((o) => selecionadas.has(o.num));
+    const lista = obras.filter((o) => selecionadas.has(o.num));
     if (lista.length === 0) return;
 
     setGerando(true);
@@ -124,7 +122,7 @@ function ImprimirQrCodes() {
 
       <div className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4">
         <span className="text-sm font-medium text-card-foreground">
-          {total} de {obrasComQr.length} selecionadas
+          {total} de {obras.length} selecionadas
         </span>
         <div className="flex-1" />
         <button
@@ -152,7 +150,7 @@ function ImprimirQrCodes() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {obrasComQr.map((obra) => {
+        {obras.map((obra) => {
           const url = `${SITE_URL}/obras/${obra.num}`;
           const marcada = selecionadas.has(obra.num);
           return (

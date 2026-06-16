@@ -1,25 +1,15 @@
 ## Objetivo
-Vídeos (técnica "Audiovisual" / parede "Vídeos", obras 104–116) não devem ter QR Code em nenhum lugar do site.
+Mudar o PDF de QR Codes de 6 para 8 imagens por página.
 
-## Diagnóstico
-QR Codes de obras só são gerados em duas páginas:
-- `src/routes/qrcodes.index.tsx` (grade de QR Codes)
-- `src/routes/qrcodes.imprimir.tsx` (seleção + geração de PDF)
+## Alteração
+Em `src/routes/qrcodes.imprimir.tsx`, na função `gerarPdf`:
 
-As demais referências (`index.tsx`, `como-usar.tsx`, `SiteFooter.tsx`) usam apenas o ícone de QR, não geram código para vídeos.
+- Trocar `const rows = 3;` por `const rows = 4;` (mantendo `cols = 2`), resultando em 2×4 = 8 por página.
+- Reduzir o tamanho do QR (`qrSize`) de 55mm para ~42mm e ajustar o espaçamento vertical (`qrY` e a posição do texto) para que os 4 itens por coluna caibam sem sobreposição na folha A4.
 
-## Critério de filtro
-Considerar vídeo quando `parede === "Vídeos"` (equivalente à técnica "Audiovisual"). Esses itens serão excluídos das duas páginas.
-
-## Alterações
-1. **`src/routes/qrcodes.index.tsx`**: filtrar a lista de obras na grade, removendo as de parede "Vídeos" (ex.: `const obrasComQr = obras.filter((o) => o.parede !== "Vídeos")`), e usar essa lista no `.map`.
-
-2. **`src/routes/qrcodes.imprimir.tsx`**:
-   - Usar a mesma lista filtrada para o estado inicial de seleção, contagem "X de Y", botão "Selecionar todas", grade de checkboxes e geração do PDF.
-   - Garantir que o PDF nunca inclua vídeos.
+Também atualizar o texto da página (cabeçalho) que menciona "6 QR Codes por folha A4" para "8 QR Codes por folha A4".
 
 ## Verificação
-- Conferir que vídeos (104–116) não aparecem em `/qrcodes` nem em `/qrcodes/imprimir`.
-- Gerar um PDF de teste e confirmar ausência de vídeos.
+Gerar um PDF de teste e conferir visualmente que cada página mostra 8 códigos com títulos legíveis e sem cortes/sobreposição.
 
-Nenhuma alteração nos dados (`obras.ts`) nem na página de acervo.
+Nenhuma outra lógica (seleção, dados, links) será alterada.
