@@ -1,9 +1,21 @@
 ## Objetivo
-Ocultar a página "Laura Andreato" do site, removendo-a da navegação para que não apareça mais nos menus.
+Tornar as páginas de QR Code (`/qrcodes` e `/qrcodes/imprimir`) inacessíveis pela URL, redirecionando qualquer acesso para a página inicial.
 
 ## Alteração
-- **`src/data/navegacao.ts`**: remover o item de menu "Laura Andreato" do grupo "O Instituto" (o bloco com `para: "/instituto/laura-andreato"`).
+- **`src/routes/qrcodes.tsx`** (rota de layout pai de ambas): adicionar um `beforeLoad` que lança um `redirect({ to: "/" })`. Como essa rota é o pai (`Outlet`) de `/qrcodes` e `/qrcodes/imprimir`, o redirecionamento cobre as duas páginas de uma só vez.
+
+```tsx
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/qrcodes")({
+  beforeLoad: () => {
+    throw redirect({ to: "/" });
+  },
+  component: () => <Outlet />,
+});
+```
 
 ## Detalhes técnicos
-- O arquivo de rota `src/routes/instituto.laura-andreato.tsx` será mantido (não será excluído), de modo que a página continua existindo caso seja acessada por link direto, mas deixa de ser exibida em qualquer menu do site.
-- Caso prefira excluir a página por completo (remover também o arquivo de rota e torná-la inacessível pela URL), me avise que ajusto o plano.
+- Os arquivos `qrcodes.index.tsx` e `qrcodes.imprimir.tsx` serão mantidos como estão; o bloqueio acontece no nível do layout pai, então não é preciso editá-los.
+- Não há links para essas páginas na navegação principal (`src/data/navegacao.ts`), apenas links internos entre `/qrcodes` e `/qrcodes/imprimir` — que deixarão de ser acessíveis pelo redirecionamento.
+- Caso no futuro queira reativar, basta remover o `beforeLoad`.
