@@ -277,44 +277,33 @@ function ObraEditor({
           <span>Salvar texto</span>
         </Button>
 
-        {!protegida && (
-          <Button
-            variant="outline"
-            onClick={handleGerarTexto}
-            disabled={gerandoTexto}
-            className="min-h-11"
-          >
-            {gerandoTexto ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <Sparkles aria-hidden="true" />
-            )}
-            <span>Gerar audiodescrição (IA)</span>
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          onClick={handleGerarTexto}
+          disabled={gerandoTexto}
+          className="min-h-11"
+        >
+          {gerandoTexto ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Sparkles aria-hidden="true" />
+          )}
+          <span>Gerar audiodescrição (IA)</span>
+        </Button>
 
-
-
-        {protegida ? (
-          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-            <Lock className="size-4" aria-hidden="true" />
-            Áudio especial preservado
-          </span>
-        ) : (
-          <Button
-            variant="outline"
-            onClick={handleRegenerar}
-            disabled={gerando}
-            className="min-h-11"
-          >
-            {gerando ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <RefreshCw aria-hidden="true" />
-            )}
-            <span>Gerar locução</span>
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          onClick={handleRegenerar}
+          disabled={gerando}
+          className="min-h-11"
+        >
+          {gerando ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <RefreshCw aria-hidden="true" />
+          )}
+          <span>Gerar locução</span>
+        </Button>
 
         {downloadSrc && (
           <Button asChild variant="outline" className="min-h-11">
