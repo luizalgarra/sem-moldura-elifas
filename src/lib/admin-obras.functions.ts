@@ -564,10 +564,12 @@ export const criarObra = createServerFn({ method: "POST" })
 
 /** Remove uma obra (pela identidade interna) e fecha o espaço na sequência. */
 export const removerObra = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { chave } = data;
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
@@ -621,8 +623,10 @@ export const removerObra = createServerFn({ method: "POST" })
 
 /** Salva os campos de dados (título, ano, etc.) e a descrição de uma obra. */
 export const salvarDados = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => dadosEdicaoSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -698,6 +702,7 @@ export const salvarDados = createServerFn({ method: "POST" })
 
 /** Recebe uma imagem (base64) e a guarda no storage, registrando o caminho. */
 export const salvarImagem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
@@ -709,7 +714,8 @@ export const salvarImagem = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -761,6 +767,7 @@ export const salvarImagem = createServerFn({ method: "POST" })
 
 /** Salva o texto (descrição) editado de uma obra. */
 export const salvarTexto = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
@@ -769,7 +776,8 @@ export const salvarTexto = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -846,10 +854,12 @@ async function imagemDataUrl(
  * existente. NÃO grava no banco: o texto volta para revisão antes de salvar.
  */
 export const gerarTextoDescricao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { chave } = data;
     const fixa = ehObraFixa(chave);
 
@@ -991,6 +1001,7 @@ function chunkTexto(texto: string, maxChars = 2500): string[] {
  * pedaços apenas por tamanho e os áudios são concatenados num só arquivo.
  */
 export const regenerarAudio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
@@ -998,7 +1009,8 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { chave } = data;
     const fixa = ehObraFixa(chave);
 
