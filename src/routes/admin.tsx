@@ -67,7 +67,7 @@ function AdminPagina() {
 
 
   const handleLote = async () => {
-    const alvos = obras.filter((o) => o.num !== OBRA_PROTEGIDA);
+    const alvos = obras;
     setLoteRodando(true);
     setLoteFeito(0);
     setLoteMsg(null);
