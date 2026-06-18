@@ -111,7 +111,7 @@ function AdminPagina() {
           ) : (
             <RefreshCw aria-hidden="true" />
           )}
-          <span>Gerar locução alternada de todas as obras</span>
+          <span>Gerar locução de todas as obras</span>
         </Button>
         {loteRodando && (
           <span className="text-sm text-muted-foreground" role="status">
