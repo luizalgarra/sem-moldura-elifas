@@ -9,12 +9,14 @@ import {
   Search,
   Lock,
   Download,
+  Sparkles,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
   listarOverrides,
   salvarTexto,
   regenerarAudio,
+  gerarTextoDescricao,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
@@ -175,10 +177,12 @@ function ObraEditor({
 }) {
   const salvar = useServerFn(salvarTexto);
   const regenerar = useServerFn(regenerarAudio);
+  const gerarTexto = useServerFn(gerarTextoDescricao);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
   const [salvando, setSalvando] = useState(false);
   const [gerando, setGerando] = useState(false);
+  const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
     override?.audioFemPath ? Date.now().toString() : null,
@@ -219,6 +223,26 @@ function ObraEditor({
       setGerando(false);
     }
   };
+
+  const handleGerarTexto = async () => {
+    setGerandoTexto(true);
+    setMsg(null);
+    try {
+      const r = await gerarTexto({ data: { chave: num } });
+      if (r.ok) {
+        setTexto(r.texto);
+        setMsg("Texto gerado — revise e salve.");
+      } else {
+        setMsg(r.erro ?? "Erro ao gerar o texto.");
+      }
+    } catch {
+      setMsg("Erro ao gerar o texto.");
+    } finally {
+      setGerandoTexto(false);
+    }
+  };
+
+
 
   // Áudio protegido (#2): mantém o arquivo único legado para conferência.
   const audioProtegidoSrc = !protegida
@@ -261,6 +285,24 @@ function ObraEditor({
           )}
           <span>Salvar texto</span>
         </Button>
+
+        {!protegida && (
+          <Button
+            variant="outline"
+            onClick={handleGerarTexto}
+            disabled={gerandoTexto}
+            className="min-h-11"
+          >
+            {gerandoTexto ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles aria-hidden="true" />
+            )}
+            <span>Gerar audiodescrição (IA)</span>
+          </Button>
+        )}
+
+
 
         {protegida ? (
           <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
