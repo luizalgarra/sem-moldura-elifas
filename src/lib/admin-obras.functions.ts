@@ -213,17 +213,41 @@ type SupabaseAdmin = Awaited<
   typeof import("@/integrations/supabase/client.server")
 >["supabaseAdmin"];
 
+/** Mensagem de erro padrão quando a verificação de admin falha. */
+const ERRO_NAO_AUTORIZADO =
+  "Sessão expirada ou sem permissão. Saia e entre novamente para continuar.";
+
 /**
- * Garante que o chamador é um administrador. Lança 401 caso contrário.
- * Usado nas funções que escrevem dados ou consomem créditos.
+ * Verifica se o chamador é um administrador.
+ *
+ * IMPORTANTE: NUNCA lance um `Response` aqui. As server functions do TanStack
+ * serializam o resultado (e os erros) com o seroval; um `Response` lançado não
+ * é serializável e vira um "Seroval Error" com HTTP 500 opaco — exatamente o
+ * que fazia a geração de áudio "não persistir" sem mensagem clara. Retornamos
+ * um booleano e deixamos cada handler responder de forma limpa.
  */
-async function garantirAdmin(context: { supabase: unknown }) {
+async function ehAdmin(context: { supabase: unknown }): Promise<boolean> {
   const cliente = context.supabase as {
     rpc: (fn: "is_admin") => Promise<{ data: boolean | null; error: unknown }>;
   };
   const { data, error } = await cliente.rpc("is_admin");
-  if (error || data !== true) {
-    throw new Response("Não autorizado", { status: 401 });
+  if (error) {
+    console.error(
+      "ehAdmin rpc is_admin:",
+      error instanceof Error ? error.message : JSON.stringify(error),
+    );
+    return false;
+  }
+  return data === true;
+}
+
+/**
+ * Garante que o chamador é um administrador. Lança um `Error` (serializável)
+ * caso contrário. Usado nos handlers que não retornam o formato `{ ok }`.
+ */
+async function garantirAdmin(context: { supabase: unknown }) {
+  if (!(await ehAdmin(context))) {
+    throw new Error(ERRO_NAO_AUTORIZADO);
   }
 }
 
@@ -508,7 +532,9 @@ export const criarObra = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => dadosNovaSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await garantirAdmin(context);
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -569,7 +595,9 @@ export const removerObra = createServerFn({ method: "POST" })
     z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await garantirAdmin(context);
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
     const { chave } = data;
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
@@ -626,7 +654,9 @@ export const salvarDados = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => dadosEdicaoSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await garantirAdmin(context);
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -715,7 +745,9 @@ export const salvarImagem = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await garantirAdmin(context);
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -777,7 +809,9 @@ export const salvarTexto = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await garantirAdmin(context);
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -859,7 +893,9 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
     z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await garantirAdmin(context);
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
     const { chave } = data;
     const fixa = ehObraFixa(chave);
 
@@ -1010,7 +1046,9 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await garantirAdmin(context);
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
     const { chave } = data;
     const fixa = ehObraFixa(chave);
 
