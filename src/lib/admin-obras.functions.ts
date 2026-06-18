@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
-import { VOZ_FEMININA_ID, VOZ_MASCULINA_ID, vozValida } from "@/data/vozes";
+import { VOZ_FEMININA_ID, vozValida } from "@/data/vozes";
 
 const OBRA_PROTEGIDA = 2; // áudio especial com duas vozes unidas (chave fixa)
 const PRIMEIRA_CHAVE_EXTRA = 1000; // identidades internas das obras novas começam aqui
