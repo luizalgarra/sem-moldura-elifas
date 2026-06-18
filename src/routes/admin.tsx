@@ -116,7 +116,7 @@ function AdminPagina() {
         </Button>
         {loteRodando && (
           <span className="text-sm text-muted-foreground" role="status">
-            Gerando… {loteFeito}/{obras.filter((o) => o.num !== OBRA_PROTEGIDA).length}
+            Gerando… {loteFeito}/{obras.length}
           </span>
         )}
         {!loteRodando && loteMsg && (
