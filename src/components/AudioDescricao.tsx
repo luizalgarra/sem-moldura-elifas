@@ -13,10 +13,7 @@ interface AudioDescricaoProps {
 
 const VELOCIDADES = [0.75, 1, 1.25] as const;
 
-const ROTULO_VOZ: Record<string, string> = {
-  fem: "voz feminina",
-  masc: "voz masculina",
-};
+
 
 export function AudioDescricao({
   texto,
@@ -114,11 +111,10 @@ function AudioSequencia({ trechos }: { trechos: TrechoPublico[] }) {
       <p className="mt-2 text-xs text-muted-foreground" role="status">
         {tocando ? (
           <>
-            Tocando {idx + 1}/{trechos.length}: {atual?.rotulo} ·{" "}
-            {ROTULO_VOZ[atual?.voz] ?? atual?.voz}
+            Tocando {idx + 1}/{trechos.length}: {atual?.rotulo}
           </>
         ) : (
-          <>Locução alternada · {trechos.length} trechos (vozes se revezam)</>
+          <>Áudio-descrição · {trechos.length} trechos</>
         )}
       </p>
 

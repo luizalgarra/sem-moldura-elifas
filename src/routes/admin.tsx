@@ -83,7 +83,7 @@ function AdminPagina() {
     setLoteRodando(false);
     setLoteMsg(
       falhas === 0
-        ? `Pronto! ${alvos.length} obras com locução alternada gerada.`
+        ? `Pronto! ${alvos.length} obras com locução gerada.`
         : `Concluído com ${falhas} falha(s) de ${alvos.length}.`,
     );
     refetch();
@@ -96,9 +96,7 @@ function AdminPagina() {
           Administração de textos e áudios
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Edite a descrição de cada obra e gere a locução. A leitura alterna as
-          vozes por seção: Audiodescrição (masculina) → Identificação (feminina)
-          → Contexto (masculina) → Análise (feminina).
+          Edite a descrição de cada obra e gere a locução (voz única).
         </p>
       </header>
 
@@ -113,7 +111,7 @@ function AdminPagina() {
           ) : (
             <RefreshCw aria-hidden="true" />
           )}
-          <span>Gerar locução alternada de todas as obras</span>
+          <span>Gerar locução de todas as obras</span>
         </Button>
         {loteRodando && (
           <span className="text-sm text-muted-foreground" role="status">
@@ -213,7 +211,7 @@ function ObraEditor({
       const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
-        setMsg(`Locução alternada gerada (${r.trechos} trechos).`);
+        setMsg(`Locução gerada (${r.trechos} trechos).`);
         onChanged();
       } else {
         setMsg(r.erro ?? "Erro ao gerar.");
@@ -283,7 +281,7 @@ function ObraEditor({
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Gerar locução alternada</span>
+            <span>Gerar locução</span>
           </Button>
         )}
 
@@ -314,8 +312,7 @@ function ObraEditor({
           {trechos.map((t, i) => (
             <div key={i}>
               <p className="text-xs text-muted-foreground">
-                {i + 1} · {t.rotulo} ·{" "}
-                {t.voz === "masc" ? "masculina (Danilo)" : "feminina (Carla)"}
+                {i + 1} · {t.rotulo}
               </p>
               <audio
                 controls
