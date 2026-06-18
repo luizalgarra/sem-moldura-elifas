@@ -287,7 +287,7 @@ function ObraEditor({
           <Button asChild variant="outline" className="min-h-11">
             <a href={downloadSrc} download={`obra-${num}.mp3`}>
               <Download aria-hidden="true" />
-              <span>Baixar 1º trecho</span>
+              <span>Baixar áudio</span>
             </a>
           </Button>
         )}
