@@ -312,8 +312,7 @@ function ObraEditor({
           {trechos.map((t, i) => (
             <div key={i}>
               <p className="text-xs text-muted-foreground">
-                {i + 1} · {t.rotulo} ·{" "}
-                {t.voz === "masc" ? "masculina (Danilo)" : "feminina (Carla)"}
+                {i + 1} · {t.rotulo}
               </p>
               <audio
                 controls
