@@ -321,13 +321,7 @@ function ObraEditor({
         )}
       </div>
 
-      {protegida && audioProtegidoSrc && (
-        <audio controls preload="none" src={audioProtegidoSrc} className="mt-3 w-full">
-          Seu navegador não suporta áudio.
-        </audio>
-      )}
-
-      {!protegida && audioRegenSrc && (
+      {audioRegenSrc && (
         <div className="mt-3">
           <p className="text-xs text-muted-foreground">Locução gerada</p>
           <audio
