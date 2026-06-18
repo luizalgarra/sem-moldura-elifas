@@ -224,6 +224,26 @@ function ObraEditor({
     }
   };
 
+  const handleGerarTexto = async () => {
+    setGerandoTexto(true);
+    setMsg(null);
+    try {
+      const r = await gerarTexto({ data: { chave: num } });
+      if (r.ok) {
+        setTexto(r.texto);
+        setMsg("Texto gerado — revise e salve.");
+      } else {
+        setMsg(r.erro ?? "Erro ao gerar o texto.");
+      }
+    } catch {
+      setMsg("Erro ao gerar o texto.");
+    } finally {
+      setGerandoTexto(false);
+    }
+  };
+
+
+
   // Áudio protegido (#2): mantém o arquivo único legado para conferência.
   const audioProtegidoSrc = !protegida
     ? null
