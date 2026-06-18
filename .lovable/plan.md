@@ -1,36 +1,38 @@
-# Locução em áudio único
+# Gerar audiodescrição com IA (imagem + texto)
 
-Hoje a locução é gerada como vários **trechos** separados (`audio_trechos`), reproduzidos em sequência por um player especial. Esse mecanismo de trechos é a causa do problema de "apareceu e sumiu ao dar play". A correção é gerar **um único arquivo de áudio** por obra e usar um player simples.
+Hoje o botão **Gerar locução** só converte o texto em voz. Esta mudança adiciona uma etapa anterior: a IA **olha a imagem do quadro**, interpreta, funde com a descrição que já existe e cria uma audiodescrição única. Você **revisa o texto** antes de salvar e gerar a voz.
 
-## O que muda para você
+## Como vai funcionar para você
 
-- Ao clicar em **Gerar locução**, a obra terá **um único áudio** (uma voz, do começo ao fim), sem divisão em partes.
-- No card do `/admin` aparece **um player só** (em vez da lista de trechos), e o botão de baixar pega esse áudio completo.
-- Na página pública da obra, o áudio toca normalmente como arquivo único — sem o comportamento de pular/sumir entre trechos.
+Em cada obra no `/admin`:
+
+1. Clica em **Gerar audiodescrição (IA)**.
+2. A IA lê a imagem da obra + o texto atual e escreve uma audiodescrição unificada.
+3. O texto aparece no campo de edição com a mensagem "Texto gerado — revise e salve".
+4. Você ajusta o que quiser, clica em **Salvar texto** e depois em **Gerar locução** (voz).
+
+A IA **nunca salva sozinha** — você sempre revisa antes.
 
 ## Alterações técnicas
 
-### 1. `src/lib/admin-obras.functions.ts` (geração)
-- Em `regenerarAudio`: parar de dividir por seções/trechos. Gerar a locução do texto completo com **uma voz** (feminina, `VOZ_FEMININA_ID`).
-  - Como o texto pode ser longo demais para uma única chamada da API de voz, dividir internamente em pedaços por frases (apenas por limite de tamanho, de forma conservadora), gerar cada pedaço com contexto (`previous_text`/`next_text`) e **concatenar os buffers MP3 em um único arquivo**. Isso é só para respeitar o limite da API — o resultado salvo é um arquivo único.
-  - Fazer **um upload** do arquivo concatenado e salvar em `audio_fem_path`; limpar `audio_trechos`, `audio_masc_path` e `audio_url`.
-  - Retornar `{ ok, versao }` (sem `trechos`).
-- Manter `OBRA_PROTEGIDA` (#2) intocada.
-- Remover/parar de usar a lógica de `SECOES`/`dividirTrechos` no caminho de geração (pode ficar uma função interna só de chunking por tamanho).
+### 1. `src/lib/admin-obras.functions.ts` — nova função `gerarTextoDescricao`
+- `createServerFn({ method: "POST" })`, valida `{ chave }`.
+- Descobre a imagem da obra: se houver `imagem_path` (override), baixa do bucket privado e converte para data URL base64; senão usa a URL pública estática (`obra.imagem`).
+- Lê a descrição atual (override salvo → texto estático).
+- Chama o **Lovable AI Gateway** com `google/gemini-2.5-pro` (multimodal):
+  - **system**: instruções de audiodescrição acessível (descrever o que se vê, integrar com o contexto/descrição, tom adequado para pessoas com deficiência visual, em português).
+  - **user**: texto da descrição atual + bloco de imagem (`image_url`).
+- Retorna `{ ok: true, texto }` ou `{ ok: false, erro }`. **Não grava no banco.**
+- Trata erros 402 (créditos) e 429 (limite) com mensagens claras.
 
-### 2. `src/routes/admin.tsx` (tela)
-- Trocar a renderização da lista de trechos por **um único `<audio controls>`** apontando para `/api/public/obra-audio/{num}?voz=fem&v=...`, exibido quando a obra tiver `audioFemPath`.
-- Ajustar o botão "Baixar" para esse mesmo áudio único.
-- Mensagem após gerar: "Locução gerada." (sem contagem de trechos).
-
-### 3. `src/components/AudioDescricao.tsx` (player público)
-- Nenhuma mudança de lógica necessária: como `audio_trechos` ficará vazio e `audioFem` preenchido, o componente já cai no player de **arquivo único** (`AudioArquivo`). Opcionalmente remover o ramo de `AudioSequencia` se não for mais usado em nenhum lugar.
-
-### 4. `src/routes/api/public/obra-audio.$num.ts` (rota)
-- Já serve o arquivo único via `?voz=fem` (`audio_fem_path`). Sem mudança obrigatória; o ramo de `trecho` pode permanecer para compatibilidade com áudios antigos ou ser removido.
+### 2. `src/routes/admin.tsx` — UI de revisão
+- Em `ObraEditor`: novo estado `gerandoTexto` e `useServerFn(gerarTextoDescricao)`.
+- Botão **"Gerar audiodescrição (IA)"** (oculto na obra protegida #2) que chama a função e, em sucesso, faz `setTexto(textoGerado)` e mostra "Texto gerado — revise e salve."
+- Nenhuma mudança no botão de voz nem no player.
 
 ## O que NÃO muda
-- Edição de textos, geração em lote (passará a gerar áudio único por obra), obra protegida #2, upload/preview de imagens.
+- Geração de voz (locução única já implementada), players, upload/preview de imagem, ordenação, obra protegida #2.
 
-## Observação
-Áudios de trechos já gerados anteriormente continuarão tocando até você regerar a obra (a rota mantém compatibilidade). Ao clicar em **Gerar locução** novamente, a obra passa para o formato de áudio único.
+## Observações
+- Usa Lovable AI (sem chave extra); cada geração consome créditos do workspace.
+- Obras sem imagem cadastrada usarão a imagem estática; se não houver nenhuma, o botão informa que não é possível gerar.
