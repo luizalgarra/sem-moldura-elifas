@@ -986,13 +986,6 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     const { chave } = data;
     const fixa = ehObraFixa(chave);
 
-    if (chave === OBRA_PROTEGIDA) {
-      return {
-        ok: false as const,
-        erro: "Esta obra tem áudio especial e não pode ser regenerada aqui.",
-      };
-    }
-
     const apiKey = process.env.ELEVENLABS_API_KEY;
     if (!apiKey) {
       return { ok: false as const, erro: "Chave de voz não configurada." };
