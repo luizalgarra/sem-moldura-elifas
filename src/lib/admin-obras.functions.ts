@@ -940,7 +940,7 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
     }
   });
 
-
+/**
  * Divide um texto em pedaços que respeitam o limite da API de voz, preferindo
  * quebras em frases. Usado apenas internamente: o áudio final é único.
  */
