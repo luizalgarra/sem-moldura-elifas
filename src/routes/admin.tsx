@@ -96,9 +96,7 @@ function AdminPagina() {
           Administração de textos e áudios
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Edite a descrição de cada obra e gere a locução. A leitura alterna as
-          vozes por seção: Audiodescrição (masculina) → Identificação (feminina)
-          → Contexto (masculina) → Análise (feminina).
+          Edite a descrição de cada obra e gere a locução (voz única).
         </p>
       </header>
 
