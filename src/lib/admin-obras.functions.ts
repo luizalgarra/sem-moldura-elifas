@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
-import { VOZ_FEMININA_ID, VOZ_MASCULINA_ID, vozValida } from "@/data/vozes";
+import { VOZ_FEMININA_ID, vozValida } from "@/data/vozes";
 
 const OBRA_PROTEGIDA = 2; // áudio especial com duas vozes unidas (chave fixa)
 const PRIMEIRA_CHAVE_EXTRA = 1000; // identidades internas das obras novas começam aqui
@@ -772,8 +772,38 @@ export const salvarTexto = createServerFn({ method: "POST" })
   });
 
 /**
- * Gera a locução ALTERNADA de uma obra: divide o texto em seções (na ordem de
- * reprodução) e grava um clipe por trecho, alternando as vozes (masc/fem).
+ * Divide um texto em pedaços que respeitam o limite da API de voz, preferindo
+ * quebras em frases. Usado apenas internamente: o áudio final é único.
+ */
+function chunkTexto(texto: string, maxChars = 2500): string[] {
+  const limpo = texto.trim();
+  if (limpo.length <= maxChars) return limpo ? [limpo] : [];
+  const frases = limpo.match(/[^.!?]+[.!?]*\s*/g) ?? [limpo];
+  const chunks: string[] = [];
+  let atual = "";
+  const flush = () => {
+    if (atual.trim()) chunks.push(atual.trim());
+    atual = "";
+  };
+  for (const frase of frases) {
+    if (frase.length > maxChars) {
+      flush();
+      for (let i = 0; i < frase.length; i += maxChars) {
+        chunks.push(frase.slice(i, i + maxChars).trim());
+      }
+      continue;
+    }
+    if (atual && atual.length + frase.length > maxChars) flush();
+    atual += frase;
+  }
+  flush();
+  return chunks;
+}
+
+/**
+ * Gera a locução de uma obra como UM ÚNICO arquivo de áudio (uma voz, do
+ * começo ao fim). Para respeitar o limite da API, o texto é dividido em
+ * pedaços apenas por tamanho e os áudios são concatenados num só arquivo.
  */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
@@ -819,20 +849,19 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return { ok: false as const, erro: "Esta obra não tem texto." };
     }
 
-    const partes = dividirTrechos(texto);
-    if (partes.length === 0) {
-      return { ok: false as const, erro: "Não foi possível dividir o texto." };
+    const pedacos = chunkTexto(texto);
+    if (pedacos.length === 0) {
+      return { ok: false as const, erro: "Esta obra não tem texto." };
     }
 
-    // Gera o áudio de um trecho (com contexto dos vizinhos) e retorna o buffer.
+    // Gera o áudio de um pedaço (com contexto dos vizinhos) e retorna o buffer.
     async function gerarVoz(
-      vozId: string,
       texto: string,
       prev: string | null,
       next: string | null,
     ): Promise<ArrayBuffer> {
       const resp = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${vozId}?output_format=mp3_44100_128`,
+        `https://api.elevenlabs.io/v1/text-to-speech/${VOZ_FEMININA_ID}?output_format=mp3_44100_128`,
         {
           method: "POST",
           headers: {
@@ -862,12 +891,30 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return resp.arrayBuffer();
     }
 
-    // Faz upload de um buffer e retorna o caminho gravado.
-    async function subir(buffer: ArrayBuffer, sufixo: string): Promise<string> {
-      const path = `obra-${chave}-${sufixo}-${Date.now()}.mp3`;
+    let path: string;
+    try {
+      // Gera os pedaços em ordem e concatena num único buffer MP3.
+      const buffers = await Promise.all(
+        pedacos.map((p, i) =>
+          gerarVoz(
+            p,
+            i > 0 ? pedacos[i - 1] : null,
+            i < pedacos.length - 1 ? pedacos[i + 1] : null,
+          ),
+        ),
+      );
+      const total = buffers.reduce((n, b) => n + b.byteLength, 0);
+      const unico = new Uint8Array(total);
+      let off = 0;
+      for (const b of buffers) {
+        unico.set(new Uint8Array(b), off);
+        off += b.byteLength;
+      }
+
+      path = `obra-${chave}-fem-${Date.now()}.mp3`;
       const { error: upErr } = await supabaseAdmin.storage
         .from("audios-obras")
-        .upload(path, new Uint8Array(buffer), {
+        .upload(path, unico, {
           contentType: "audio/mpeg",
           upsert: true,
         });
@@ -875,30 +922,6 @@ export const regenerarAudio = createServerFn({ method: "POST" })
         console.error("upload:", upErr.message);
         throw new Error("Não foi possível salvar o áudio.");
       }
-      return path;
-    }
-
-    let trechos: Trecho[];
-    try {
-      const buffers = await Promise.all(
-        partes.map((p, i) =>
-          gerarVoz(
-            p.voz === "masc" ? VOZ_MASCULINA_ID : VOZ_FEMININA_ID,
-            p.texto,
-            i > 0 ? partes[i - 1].texto : null,
-            i < partes.length - 1 ? partes[i + 1].texto : null,
-          ),
-        ),
-      );
-      const paths = await Promise.all(
-        buffers.map((buf, i) => subir(buf, `t${i}-${partes[i].voz}`)),
-      );
-      trechos = partes.map((p, i) => ({
-        ordem: i,
-        rotulo: p.rotulo,
-        voz: p.voz,
-        path: paths[i],
-      }));
     } catch (e) {
       console.error("regenerarAudio:", e);
       const erro =
@@ -906,15 +929,15 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return { ok: false as const, erro };
     }
 
-    // Grava as referências no banco. Limpa os campos legados de voz única.
+    // Grava o caminho do áudio único. Limpa trechos e a voz masculina legados.
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
       .upsert(
         {
           num: chave,
-          audio_trechos: trechos as unknown as import("@/integrations/supabase/types").Json,
+          audio_fem_path: path,
+          audio_trechos: null,
           audio_url: null,
-          audio_fem_path: null,
           audio_masc_path: null,
         },
         { onConflict: "num" },
@@ -930,7 +953,6 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     return {
       ok: true as const,
       versao: versaoDe(salvo?.updated_at),
-      trechos: trechos.length,
     };
   });
 

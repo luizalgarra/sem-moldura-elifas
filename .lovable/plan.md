@@ -1,27 +1,36 @@
-## Objetivo
-Você removeu a voz masculina, mas vários textos da interface ainda dizem que a locução "alterna" entre voz masculina e feminina por seção. Vou corrigir esses textos para refletir o comportamento real: **apenas uma voz (feminina)**.
+# Locução em áudio único
 
-## O que muda
+Hoje a locução é gerada como vários **trechos** separados (`audio_trechos`), reproduzidos em sequência por um player especial. Esse mecanismo de trechos é a causa do problema de "apareceu e sumiu ao dar play". A correção é gerar **um único arquivo de áudio** por obra e usar um player simples.
 
-### 1. `src/routes/admin.tsx` (página /admin)
-- **Cabeçalho:** o parágrafo atual diz "A leitura alterna as vozes por seção: Audiodescrição (masculina) → Identificação (feminina) → Contexto (masculina) → Análise (feminina)." Será trocado por um texto simples: editar a descrição e gerar a locução (voz única).
-- **Botão de lote:** "Gerar locução alternada de todas as obras" → "Gerar locução de todas as obras".
-- **Mensagem de conclusão do lote:** "…obras com locução alternada gerada." → "…obras com locução gerada."
-- **Botão de cada card:** "Gerar locução alternada" → "Gerar locução".
-- **Mensagem do card:** "Locução alternada gerada (x trechos)." → "Locução gerada (x trechos)."
-- **Rótulo dos trechos:** hoje mostra "masculina (Danilo)" / "feminina (Carla)". Como tudo é voz feminina, passará a mostrar apenas o rótulo do trecho (sem indicação de voz masculina/feminina).
+## O que muda para você
 
-### 2. `src/components/AudioDescricao.tsx` (player público)
-- Texto "Locução alternada · N trechos (vozes se revezam)" → "Áudio-descrição · N trechos".
-- Ao tocar, remover o sufixo de voz ("voz feminina/masculina") já que é sempre a mesma voz — manter apenas "Tocando x/y: rótulo".
+- Ao clicar em **Gerar locução**, a obra terá **um único áudio** (uma voz, do começo ao fim), sem divisão em partes.
+- No card do `/admin` aparece **um player só** (em vez da lista de trechos), e o botão de baixar pega esse áudio completo.
+- Na página pública da obra, o áudio toca normalmente como arquivo único — sem o comportamento de pular/sumir entre trechos.
+
+## Alterações técnicas
+
+### 1. `src/lib/admin-obras.functions.ts` (geração)
+- Em `regenerarAudio`: parar de dividir por seções/trechos. Gerar a locução do texto completo com **uma voz** (feminina, `VOZ_FEMININA_ID`).
+  - Como o texto pode ser longo demais para uma única chamada da API de voz, dividir internamente em pedaços por frases (apenas por limite de tamanho, de forma conservadora), gerar cada pedaço com contexto (`previous_text`/`next_text`) e **concatenar os buffers MP3 em um único arquivo**. Isso é só para respeitar o limite da API — o resultado salvo é um arquivo único.
+  - Fazer **um upload** do arquivo concatenado e salvar em `audio_fem_path`; limpar `audio_trechos`, `audio_masc_path` e `audio_url`.
+  - Retornar `{ ok, versao }` (sem `trechos`).
+- Manter `OBRA_PROTEGIDA` (#2) intocada.
+- Remover/parar de usar a lógica de `SECOES`/`dividirTrechos` no caminho de geração (pode ficar uma função interna só de chunking por tamanho).
+
+### 2. `src/routes/admin.tsx` (tela)
+- Trocar a renderização da lista de trechos por **um único `<audio controls>`** apontando para `/api/public/obra-audio/{num}?voz=fem&v=...`, exibido quando a obra tiver `audioFemPath`.
+- Ajustar o botão "Baixar" para esse mesmo áudio único.
+- Mensagem após gerar: "Locução gerada." (sem contagem de trechos).
+
+### 3. `src/components/AudioDescricao.tsx` (player público)
+- Nenhuma mudança de lógica necessária: como `audio_trechos` ficará vazio e `audioFem` preenchido, o componente já cai no player de **arquivo único** (`AudioArquivo`). Opcionalmente remover o ramo de `AudioSequencia` se não for mais usado em nenhum lugar.
+
+### 4. `src/routes/api/public/obra-audio.$num.ts` (rota)
+- Já serve o arquivo único via `?voz=fem` (`audio_fem_path`). Sem mudança obrigatória; o ramo de `trecho` pode permanecer para compatibilidade com áudios antigos ou ser removido.
 
 ## O que NÃO muda
-- A lógica de geração de áudio, divisão em trechos e reprodução continua igual.
-- O botão de geração em lote permanece (apenas o texto muda).
-- A obra protegida (#2) continua preservada.
+- Edição de textos, geração em lote (passará a gerar áudio único por obra), obra protegida #2, upload/preview de imagens.
 
-## Verificação
-- Build passa sem variáveis/imports não usados.
-- `/admin` e a página pública de obra não mencionam mais alternância de vozes nem voz masculina.
-
-Confirme que prefere **apenas ajustar os textos** (sem reativar a voz masculina). Se preferir reativar a alternância de vozes, me avise que faço outro plano.
+## Observação
+Áudios de trechos já gerados anteriormente continuarão tocando até você regerar a obra (a rota mantém compatibilidade). Ao clicar em **Gerar locução** novamente, a obra passa para o formato de áudio único.

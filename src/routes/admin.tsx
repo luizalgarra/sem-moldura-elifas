@@ -181,14 +181,11 @@ function ObraEditor({
   const [gerando, setGerando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioTrechos && override.audioTrechos.length > 0
-      ? Date.now().toString()
-      : null,
+    override?.audioFemPath ? Date.now().toString() : null,
   );
 
   const protegida = num === OBRA_PROTEGIDA;
-  const trechos = override?.audioTrechos ?? [];
-  const temAudioRegen = versaoAudio !== null && trechos.length > 0;
+  const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
 
   const handleSalvar = async () => {
     setSalvando(true);
@@ -211,7 +208,7 @@ function ObraEditor({
       const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
-        setMsg(`Locução gerada (${r.trechos} trechos).`);
+        setMsg("Locução gerada.");
         onChanged();
       } else {
         setMsg(r.erro ?? "Erro ao gerar.");
@@ -230,10 +227,11 @@ function ObraEditor({
       ? `/api/public/obra-audio/${num}?v=${versaoAudio ?? Date.now()}`
       : audioEstatico;
 
-  const downloadSrc =
-    (temAudioRegen ? `/api/public/obra-audio/${num}?trecho=0&v=${versaoAudio}` : null) ??
-    audioProtegidoSrc ??
-    audioEstatico;
+  const audioRegenSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
+    : null;
+
+  const downloadSrc = audioRegenSrc ?? audioProtegidoSrc ?? audioEstatico;
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
@@ -289,7 +287,7 @@ function ObraEditor({
           <Button asChild variant="outline" className="min-h-11">
             <a href={downloadSrc} download={`obra-${num}.mp3`}>
               <Download aria-hidden="true" />
-              <span>Baixar 1º trecho</span>
+              <span>Baixar áudio</span>
             </a>
           </Button>
         )}
@@ -307,23 +305,17 @@ function ObraEditor({
         </audio>
       )}
 
-      {!protegida && temAudioRegen && (
-        <div className="mt-3 space-y-2">
-          {trechos.map((t, i) => (
-            <div key={i}>
-              <p className="text-xs text-muted-foreground">
-                {i + 1} · {t.rotulo}
-              </p>
-              <audio
-                controls
-                preload="none"
-                src={`/api/public/obra-audio/${num}?trecho=${i}&v=${versaoAudio}`}
-                className="mt-1 w-full"
-              >
-                Seu navegador não suporta áudio.
-              </audio>
-            </div>
-          ))}
+      {!protegida && audioRegenSrc && (
+        <div className="mt-3">
+          <p className="text-xs text-muted-foreground">Locução gerada</p>
+          <audio
+            controls
+            preload="none"
+            src={audioRegenSrc}
+            className="mt-1 w-full"
+          >
+            Seu navegador não suporta áudio.
+          </audio>
         </div>
       )}
     </li>
