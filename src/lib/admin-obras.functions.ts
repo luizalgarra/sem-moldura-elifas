@@ -507,8 +507,10 @@ const dadosEdicaoSchema = z.object({
  * A obra recebe uma identidade interna (chave) automática (>= 1000).
  */
 export const criarObra = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => dadosNovaSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
