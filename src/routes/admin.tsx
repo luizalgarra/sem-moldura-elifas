@@ -83,7 +83,7 @@ function AdminPagina() {
     setLoteRodando(false);
     setLoteMsg(
       falhas === 0
-        ? `Pronto! ${alvos.length} obras com locução alternada gerada.`
+        ? `Pronto! ${alvos.length} obras com locução gerada.`
         : `Concluído com ${falhas} falha(s) de ${alvos.length}.`,
     );
     refetch();
