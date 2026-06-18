@@ -305,23 +305,17 @@ function ObraEditor({
         </audio>
       )}
 
-      {!protegida && temAudioRegen && (
-        <div className="mt-3 space-y-2">
-          {trechos.map((t, i) => (
-            <div key={i}>
-              <p className="text-xs text-muted-foreground">
-                {i + 1} · {t.rotulo}
-              </p>
-              <audio
-                controls
-                preload="none"
-                src={`/api/public/obra-audio/${num}?trecho=${i}&v=${versaoAudio}`}
-                className="mt-1 w-full"
-              >
-                Seu navegador não suporta áudio.
-              </audio>
-            </div>
-          ))}
+      {!protegida && audioRegenSrc && (
+        <div className="mt-3">
+          <p className="text-xs text-muted-foreground">Locução gerada</p>
+          <audio
+            controls
+            preload="none"
+            src={audioRegenSrc}
+            className="mt-1 w-full"
+          >
+            Seu navegador não suporta áudio.
+          </audio>
         </div>
       )}
     </li>
