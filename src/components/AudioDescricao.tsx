@@ -114,11 +114,10 @@ function AudioSequencia({ trechos }: { trechos: TrechoPublico[] }) {
       <p className="mt-2 text-xs text-muted-foreground" role="status">
         {tocando ? (
           <>
-            Tocando {idx + 1}/{trechos.length}: {atual?.rotulo} ·{" "}
-            {ROTULO_VOZ[atual?.voz] ?? atual?.voz}
+            Tocando {idx + 1}/{trechos.length}: {atual?.rotulo}
           </>
         ) : (
-          <>Locução alternada · {trechos.length} trechos (vozes se revezam)</>
+          <>Áudio-descrição · {trechos.length} trechos</>
         )}
       </p>
 
