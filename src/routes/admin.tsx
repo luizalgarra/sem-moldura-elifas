@@ -242,18 +242,11 @@ function ObraEditor({
 
 
 
-  // Áudio protegido (#2): mantém o arquivo único legado para conferência.
-  const audioProtegidoSrc = !protegida
-    ? null
-    : override?.audioPath
-      ? `/api/public/obra-audio/${num}?v=${versaoAudio ?? Date.now()}`
-      : audioEstatico;
-
   const audioRegenSrc = temAudioRegen
     ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
     : null;
 
-  const downloadSrc = audioRegenSrc ?? audioProtegidoSrc ?? audioEstatico;
+  const downloadSrc = audioRegenSrc ?? audioEstatico;
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
