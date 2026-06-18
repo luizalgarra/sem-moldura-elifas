@@ -9,12 +9,14 @@ import {
   Search,
   Lock,
   Download,
+  Sparkles,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
   listarOverrides,
   salvarTexto,
   regenerarAudio,
+  gerarTextoDescricao,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
