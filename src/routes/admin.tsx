@@ -281,7 +281,7 @@ function ObraEditor({
             ) : (
               <RefreshCw aria-hidden="true" />
             )}
-            <span>Gerar locução alternada</span>
+            <span>Gerar locução</span>
           </Button>
         )}
 
