@@ -1,38 +1,30 @@
-# Gerar audiodescrição com IA (imagem + texto)
+# Liberar regeneração da obra protegida (#2)
 
-Hoje o botão **Gerar locução** só converte o texto em voz. Esta mudança adiciona uma etapa anterior: a IA **olha a imagem do quadro**, interpreta, funde com a descrição que já existe e cria uma audiodescrição única. Você **revisa o texto** antes de salvar e gerar a voz.
+Hoje a obra #2 é tratada como "áudio especial preservado": no `/admin` ela não tem botões de gerar audiodescrição (IA) nem gerar locução, mostra apenas o cadeado "Áudio especial preservado", e o servidor recusa regenerar. Esta mudança remove essa proteção, deixando a obra #2 igual às demais.
 
-## Como vai funcionar para você
+## Como vai ficar para você
 
-Em cada obra no `/admin`:
+A obra #2 passa a exibir os mesmos botões das outras:
+- **Gerar audiodescrição (IA)**
+- **Gerar locução**
+- **Salvar texto** e **Baixar áudio**
 
-1. Clica em **Gerar audiodescrição (IA)**.
-2. A IA lê a imagem da obra + o texto atual e escreve uma audiodescrição unificada.
-3. O texto aparece no campo de edição com a mensagem "Texto gerado — revise e salve".
-4. Você ajusta o que quiser, clica em **Salvar texto** e depois em **Gerar locução** (voz).
-
-A IA **nunca salva sozinha** — você sempre revisa antes.
+O cadeado "Áudio especial preservado" deixa de aparecer.
 
 ## Alterações técnicas
 
-### 1. `src/lib/admin-obras.functions.ts` — nova função `gerarTextoDescricao`
-- `createServerFn({ method: "POST" })`, valida `{ chave }`.
-- Descobre a imagem da obra: se houver `imagem_path` (override), baixa do bucket privado e converte para data URL base64; senão usa a URL pública estática (`obra.imagem`).
-- Lê a descrição atual (override salvo → texto estático).
-- Chama o **Lovable AI Gateway** com `google/gemini-2.5-pro` (multimodal):
-  - **system**: instruções de audiodescrição acessível (descrever o que se vê, integrar com o contexto/descrição, tom adequado para pessoas com deficiência visual, em português).
-  - **user**: texto da descrição atual + bloco de imagem (`image_url`).
-- Retorna `{ ok: true, texto }` ou `{ ok: false, erro }`. **Não grava no banco.**
-- Trata erros 402 (créditos) e 429 (limite) com mensagens claras.
+### 1. `src/lib/admin-obras.functions.ts`
+- Em `regenerarAudio`, remover o bloqueio que retorna "Esta obra tem áudio especial e não pode ser regenerada aqui." (linhas 989–994), permitindo que a #2 gere voz normalmente.
+- A constante `OBRA_PROTEGIDA` deixa de ser usada nessa função (pode ser mantida ou removida — não há outro uso no servidor).
 
-### 2. `src/routes/admin.tsx` — UI de revisão
-- Em `ObraEditor`: novo estado `gerandoTexto` e `useServerFn(gerarTextoDescricao)`.
-- Botão **"Gerar audiodescrição (IA)"** (oculto na obra protegida #2) que chama a função e, em sucesso, faz `setTexto(textoGerado)` e mostra "Texto gerado — revise e salve."
-- Nenhuma mudança no botão de voz nem no player.
+### 2. `src/routes/admin.tsx`
+- Remover a constante/uso `OBRA_PROTEGIDA` para que `protegida` nunca seja verdadeiro:
+  - Botão **"Gerar audiodescrição (IA)"** passa a aparecer também na #2.
+  - Substituir o ramo do cadeado "Áudio especial preservado" pelo botão **"Gerar locução"** (igual às demais obras).
+  - O contador da geração em lote (`Gerar locução de todas as obras`) passará a incluir a #2.
 
 ## O que NÃO muda
-- Geração de voz (locução única já implementada), players, upload/preview de imagem, ordenação, obra protegida #2.
+- Geração de voz (ElevenLabs, locução única), IA de audiodescrição, players, upload de imagem, ordenação e todas as outras obras seguem iguais.
 
-## Observações
-- Usa Lovable AI (sem chave extra); cada geração consome créditos do workspace.
-- Obras sem imagem cadastrada usarão a imagem estática; se não houver nenhuma, o botão informa que não é possível gerar.
+## Observação
+- O áudio atual da #2 (de duas vozes unidas) será substituído assim que você clicar em gerar locução. Antes disso, nada é alterado — a regeneração só ocorre quando você acionar.

@@ -4,7 +4,6 @@ import { z } from "zod";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
 import { VOZ_FEMININA_ID, vozValida } from "@/data/vozes";
 
-const OBRA_PROTEGIDA = 2; // áudio especial com duas vozes unidas (chave fixa)
 const PRIMEIRA_CHAVE_EXTRA = 1000; // identidades internas das obras novas começam aqui
 const MAX_CHAVE = 999999; // limite das identidades internas
 
@@ -985,13 +984,6 @@ export const regenerarAudio = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { chave } = data;
     const fixa = ehObraFixa(chave);
-
-    if (chave === OBRA_PROTEGIDA) {
-      return {
-        ok: false as const,
-        erro: "Esta obra tem áudio especial e não pode ser regenerada aqui.",
-      };
-    }
 
     const apiKey = process.env.ELEVENLABS_API_KEY;
     if (!apiKey) {

@@ -7,7 +7,6 @@ import {
   Save,
   RefreshCw,
   Search,
-  Lock,
   Download,
   Sparkles,
 } from "lucide-react";
@@ -23,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const OBRA_PROTEGIDA = 2;
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -68,7 +67,7 @@ function AdminPagina() {
 
 
   const handleLote = async () => {
-    const alvos = obras.filter((o) => o.num !== OBRA_PROTEGIDA);
+    const alvos = obras;
     setLoteRodando(true);
     setLoteFeito(0);
     setLoteMsg(null);
@@ -117,7 +116,7 @@ function AdminPagina() {
         </Button>
         {loteRodando && (
           <span className="text-sm text-muted-foreground" role="status">
-            Gerando… {loteFeito}/{obras.filter((o) => o.num !== OBRA_PROTEGIDA).length}
+            Gerando… {loteFeito}/{obras.length}
           </span>
         )}
         {!loteRodando && loteMsg && (
@@ -188,7 +187,6 @@ function ObraEditor({
     override?.audioFemPath ? Date.now().toString() : null,
   );
 
-  const protegida = num === OBRA_PROTEGIDA;
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
 
   const handleSalvar = async () => {
@@ -244,18 +242,11 @@ function ObraEditor({
 
 
 
-  // Áudio protegido (#2): mantém o arquivo único legado para conferência.
-  const audioProtegidoSrc = !protegida
-    ? null
-    : override?.audioPath
-      ? `/api/public/obra-audio/${num}?v=${versaoAudio ?? Date.now()}`
-      : audioEstatico;
-
   const audioRegenSrc = temAudioRegen
     ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
     : null;
 
-  const downloadSrc = audioRegenSrc ?? audioProtegidoSrc ?? audioEstatico;
+  const downloadSrc = audioRegenSrc ?? audioEstatico;
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
@@ -286,44 +277,33 @@ function ObraEditor({
           <span>Salvar texto</span>
         </Button>
 
-        {!protegida && (
-          <Button
-            variant="outline"
-            onClick={handleGerarTexto}
-            disabled={gerandoTexto}
-            className="min-h-11"
-          >
-            {gerandoTexto ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <Sparkles aria-hidden="true" />
-            )}
-            <span>Gerar audiodescrição (IA)</span>
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          onClick={handleGerarTexto}
+          disabled={gerandoTexto}
+          className="min-h-11"
+        >
+          {gerandoTexto ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Sparkles aria-hidden="true" />
+          )}
+          <span>Gerar audiodescrição (IA)</span>
+        </Button>
 
-
-
-        {protegida ? (
-          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-            <Lock className="size-4" aria-hidden="true" />
-            Áudio especial preservado
-          </span>
-        ) : (
-          <Button
-            variant="outline"
-            onClick={handleRegenerar}
-            disabled={gerando}
-            className="min-h-11"
-          >
-            {gerando ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <RefreshCw aria-hidden="true" />
-            )}
-            <span>Gerar locução</span>
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          onClick={handleRegenerar}
+          disabled={gerando}
+          className="min-h-11"
+        >
+          {gerando ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <RefreshCw aria-hidden="true" />
+          )}
+          <span>Gerar locução</span>
+        </Button>
 
         {downloadSrc && (
           <Button asChild variant="outline" className="min-h-11">
@@ -341,13 +321,7 @@ function ObraEditor({
         )}
       </div>
 
-      {protegida && audioProtegidoSrc && (
-        <audio controls preload="none" src={audioProtegidoSrc} className="mt-3 w-full">
-          Seu navegador não suporta áudio.
-        </audio>
-      )}
-
-      {!protegida && audioRegenSrc && (
+      {audioRegenSrc && (
         <div className="mt-3">
           <p className="text-xs text-muted-foreground">Locução gerada</p>
           <audio
