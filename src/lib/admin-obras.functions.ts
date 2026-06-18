@@ -1,4 +1,5 @@
-import { createServerFn, getRequest } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
 import { VOZ_FEMININA_ID, vozValida } from "@/data/vozes";
