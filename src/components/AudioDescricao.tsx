@@ -13,10 +13,7 @@ interface AudioDescricaoProps {
 
 const VELOCIDADES = [0.75, 1, 1.25] as const;
 
-const ROTULO_VOZ: Record<string, string> = {
-  fem: "voz feminina",
-  masc: "voz masculina",
-};
+
 
 export function AudioDescricao({
   texto,
