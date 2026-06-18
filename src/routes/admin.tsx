@@ -227,10 +227,11 @@ function ObraEditor({
       ? `/api/public/obra-audio/${num}?v=${versaoAudio ?? Date.now()}`
       : audioEstatico;
 
-  const downloadSrc =
-    (temAudioRegen ? `/api/public/obra-audio/${num}?trecho=0&v=${versaoAudio}` : null) ??
-    audioProtegidoSrc ??
-    audioEstatico;
+  const audioRegenSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
+    : null;
+
+  const downloadSrc = audioRegenSrc ?? audioProtegidoSrc ?? audioEstatico;
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
