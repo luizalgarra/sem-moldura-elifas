@@ -211,7 +211,7 @@ function ObraEditor({
       const r = await regenerar({ data: { chave: num } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
-        setMsg(`Locução alternada gerada (${r.trechos} trechos).`);
+        setMsg(`Locução gerada (${r.trechos} trechos).`);
         onChanged();
       } else {
         setMsg(r.erro ?? "Erro ao gerar.");
