@@ -35,7 +35,6 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPagina() {
   const fetchOverrides = useServerFn(listarOverrides);
-  const buscarAmostra = useServerFn(amostraVoz);
   const { data: overrides, refetch } = useQuery({
     queryKey: ["overrides"],
     queryFn: () => fetchOverrides(),
@@ -48,8 +47,6 @@ function AdminPagina() {
   }, [overrides]);
 
   const [busca, setBusca] = useState("");
-  const [amostraCarregando, setAmostraCarregando] = useState<string | null>(null);
-  const [amostraMsg, setAmostraMsg] = useState<string | null>(null);
 
   // Geração em lote (todas as obras).
   const regenerar = useServerFn(regenerarAudio);
