@@ -1148,10 +1148,12 @@ export const regenerarAudio = createServerFn({ method: "POST" })
 
 /** Retorna a URL de prévia (amostra) de uma voz da ElevenLabs. */
 export const amostraVoz = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({ vozId: z.string().min(1).max(100) }).parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     if (!vozValida(data.vozId)) {
       return { ok: false as const, erro: "Voz inválida." };
     }
