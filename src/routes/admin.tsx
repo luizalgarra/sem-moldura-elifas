@@ -187,7 +187,6 @@ function ObraEditor({
     override?.audioFemPath ? Date.now().toString() : null,
   );
 
-  const protegida = num === OBRA_PROTEGIDA;
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
 
   const handleSalvar = async () => {
