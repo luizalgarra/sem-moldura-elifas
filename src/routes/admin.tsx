@@ -9,14 +9,12 @@ import {
   Search,
   Lock,
   Download,
-  Volume2,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
   listarOverrides,
   salvarTexto,
   regenerarAudio,
-  amostraVoz,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
@@ -24,17 +22,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const OBRA_PROTEGIDA = 2;
-
-// Vozes padrão oferecidas no admin (uma feminina, uma masculina).
-const VOZ_FEMININA_ID = "7eUAxNOneHxqfyRS77mW"; // Carla (Conversacional)
-const VOZ_MASCULINA_ID = "rVRk0uJAtO8T38Gm03mf"; // Danilo Tenfen
-const VOZES_PADRAO = [
-  { id: VOZ_FEMININA_ID, rotulo: "Carla (feminina)" },
-  { id: VOZ_MASCULINA_ID, rotulo: "Danilo Tenfen (masculina)" },
-];
-
-// Cache de URLs de amostra por voz, compartilhado entre os itens.
-const cacheAmostras = new Map<string, string>();
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
