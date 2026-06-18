@@ -773,6 +773,174 @@ export const salvarTexto = createServerFn({ method: "POST" })
   });
 
 /**
+ * Obtém a imagem da obra como data URL (base64), para enviar à IA multimodal.
+ * Usa a imagem enviada (override no bucket privado) ou a imagem estática.
+ */
+async function imagemDataUrl(
+  chave: number,
+  fixa: boolean,
+  supabaseAdmin: SupabaseAdmin,
+): Promise<string | null> {
+  const tabela = fixa ? "obra_overrides" : "obras_extras";
+  const { data: row } = await supabaseAdmin
+    .from(tabela)
+    .select("imagem_path")
+    .eq("num", chave)
+    .maybeSingle();
+
+  // 1) Imagem enviada pelo admin (bucket privado).
+  if (row?.imagem_path) {
+    const { data: file, error } = await supabaseAdmin.storage
+      .from("imagens-obras")
+      .download(row.imagem_path);
+    if (!error && file) {
+      const ext = row.imagem_path.split(".").pop()?.toLowerCase() ?? "jpg";
+      const mime =
+        ext === "png"
+          ? "image/png"
+          : ext === "webp"
+            ? "image/webp"
+            : "image/jpeg";
+      const buf = Buffer.from(await file.arrayBuffer());
+      return `data:${mime};base64,${buf.toString("base64")}`;
+    }
+  }
+
+  // 2) Imagem estática (URL servida pela plataforma; pode ser relativa).
+  const estatica = fixa ? getObra(chave) : undefined;
+  const url = estatica?.imagem;
+  if (!url) return null;
+  try {
+    const absoluta = url.startsWith("http")
+      ? url
+      : new URL(url, new URL(getRequest().url).origin).toString();
+    const resp = await fetch(absoluta);
+    if (!resp.ok) return null;
+    const mime = resp.headers.get("content-type") ?? "image/jpeg";
+    const buf = Buffer.from(await resp.arrayBuffer());
+    return `data:${mime};base64,${buf.toString("base64")}`;
+  } catch (e) {
+    console.error("imagemDataUrl:", e);
+    return null;
+  }
+}
+
+/**
+ * Gera uma audiodescrição unificada a partir da IMAGEM da obra + a descrição
+ * existente. NÃO grava no banco: o texto volta para revisão antes de salvar.
+ */
+export const gerarTextoDescricao = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { chave } = data;
+    const fixa = ehObraFixa(chave);
+
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) {
+      return { ok: false as const, erro: "IA não configurada." };
+    }
+
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const tabela = fixa ? "obra_overrides" : "obras_extras";
+    const { data: existente } = await supabaseAdmin
+      .from(tabela)
+      .select("descricao, titulo")
+      .eq("num", chave)
+      .maybeSingle();
+
+    const estatica = fixa ? getObra(chave) : undefined;
+    const descricaoAtual =
+      existente?.descricao ?? estatica?.descricao ?? "";
+    const titulo = existente?.titulo ?? estatica?.titulo ?? "";
+
+    const dataUrl = await imagemDataUrl(chave, fixa, supabaseAdmin);
+    if (!dataUrl) {
+      return {
+        ok: false as const,
+        erro: "Esta obra não tem imagem cadastrada para a IA analisar.",
+      };
+    }
+
+    const system = [
+      "Você é especialista em audiodescrição de obras de arte para pessoas com deficiência visual.",
+      "Analise a imagem do quadro fornecida e una o que você vê com as informações de catálogo já existentes.",
+      "Produza UMA audiodescrição única, fluida e contínua, em português do Brasil.",
+      "Descreva objetivamente: composição, figuras, cores, formas, expressões, ambiente, técnica e atmosfera, do geral para o detalhe.",
+      "Integre os dados de catálogo (título, autor, ano, técnica, dimensão) de forma natural ao texto.",
+      "Tom claro e acolhedor, sem interpretações subjetivas excessivas e sem listar itens com marcadores.",
+      "Não use títulos, cabeçalhos, markdown ou rótulos de seção. Devolva apenas o texto corrido da audiodescrição.",
+    ].join(" ");
+
+    const userText = [
+      titulo ? `Título: ${titulo}.` : "",
+      "Informações e descrição já existentes:",
+      descricaoAtual || "(sem descrição prévia)",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      const resp = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Lovable-API-Key": apiKey,
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-pro",
+            messages: [
+              { role: "system", content: system },
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: userText },
+                  { type: "image_url", image_url: { url: dataUrl } },
+                ],
+              },
+            ],
+          }),
+        },
+      );
+
+      if (resp.status === 402) {
+        return {
+          ok: false as const,
+          erro: "Créditos de IA esgotados. Adicione créditos ao workspace.",
+        };
+      }
+      if (resp.status === 429) {
+        return {
+          ok: false as const,
+          erro: "Muitas solicitações à IA. Tente novamente em instantes.",
+        };
+      }
+      if (!resp.ok) {
+        console.error("gerarTextoDescricao IA:", resp.status, await resp.text());
+        return { ok: false as const, erro: "Falha ao gerar o texto com a IA." };
+      }
+
+      const json = (await resp.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      const texto = json.choices?.[0]?.message?.content?.trim() ?? "";
+      if (!texto) {
+        return { ok: false as const, erro: "A IA não retornou texto." };
+      }
+      return { ok: true as const, texto };
+    } catch (e) {
+      console.error("gerarTextoDescricao:", e);
+      return { ok: false as const, erro: "Serviço de IA indisponível." };
+    }
+  });
+
+
  * Divide um texto em pedaços que respeitam o limite da API de voz, preferindo
  * quebras em frases. Usado apenas internamente: o áudio final é único.
  */
