@@ -181,14 +181,11 @@ function ObraEditor({
   const [gerando, setGerando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioTrechos && override.audioTrechos.length > 0
-      ? Date.now().toString()
-      : null,
+    override?.audioFemPath ? Date.now().toString() : null,
   );
 
   const protegida = num === OBRA_PROTEGIDA;
-  const trechos = override?.audioTrechos ?? [];
-  const temAudioRegen = versaoAudio !== null && trechos.length > 0;
+  const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
 
   const handleSalvar = async () => {
     setSalvando(true);
