@@ -83,22 +83,12 @@ const SECOES: SecaoDef[] = [
       "descricao da imagem",
     ],
     rotulo: "Audiodescrição",
-    voz: "masc",
+    voz: "fem",
   },
   {
     chaves: ["identificacao da obra", "identificacao"],
     rotulo: "Identificação",
     voz: "fem",
-  },
-  {
-    chaves: [
-      "contexto historico e cultural",
-      "contexto historico",
-      "contexto cultural",
-      "contexto",
-    ],
-    rotulo: "Contexto",
-    voz: "masc",
   },
   {
     chaves: ["analise interpretativa", "analise"],
@@ -107,8 +97,8 @@ const SECOES: SecaoDef[] = [
   },
 ];
 
-const VOZES_FALLBACK: VozTipo[] = ["masc", "fem", "masc", "fem"];
-const ROTULOS_FALLBACK = ["Parte 1", "Parte 2", "Parte 3", "Parte 4"];
+const VOZES_FALLBACK: VozTipo[] = ["fem", "fem", "fem"];
+const ROTULOS_FALLBACK = ["Parte 1", "Parte 2", "Parte 3"];
 
 function normalizar(s: string): string {
   return s
