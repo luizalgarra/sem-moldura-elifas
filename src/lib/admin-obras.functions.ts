@@ -213,6 +213,22 @@ type SupabaseAdmin = Awaited<
   typeof import("@/integrations/supabase/client.server")
 >["supabaseAdmin"];
 
+/** Cliente Supabase autenticado injetado pelo middleware requireSupabaseAuth. */
+type SupabaseUsuario = {
+  rpc: (fn: "is_admin") => Promise<{ data: boolean | null; error: unknown }>;
+};
+
+/**
+ * Garante que o chamador é um administrador. Lança 401 caso contrário.
+ * Usado nas funções que escrevem dados ou consomem créditos.
+ */
+async function garantirAdmin(context: { supabase: SupabaseUsuario }) {
+  const { data, error } = await context.supabase.rpc("is_admin");
+  if (error || data !== true) {
+    throw new Response("Não autorizado", { status: 401 });
+  }
+}
+
 /** Converte os trechos salvos no banco em URLs públicas (ou null). */
 function trechosPublicos(
   raw: unknown,
