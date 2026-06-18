@@ -102,62 +102,29 @@ function AdminPagina() {
         </p>
       </header>
 
-      <div className="mt-6 rounded-lg border border-border bg-card p-4">
-        <h2 className="text-sm font-medium text-foreground">Vozes padrão</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          As duas vozes usadas no revezamento. Ouça as amostras abaixo.
-        </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {VOZES_PADRAO.map((v) => (
-            <div key={v.id} className="flex items-center gap-2">
-              <span className="flex-1 text-sm text-foreground">{v.rotulo}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleAmostra(v.id)}
-                disabled={amostraCarregando === v.id}
-                className="min-h-11 min-w-11"
-                aria-label={`Ouvir amostra de ${v.rotulo}`}
-              >
-                {amostraCarregando === v.id ? (
-                  <Loader2 className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <Volume2 aria-hidden="true" />
-                )}
-              </Button>
-            </div>
-          ))}
-        </div>
-        {amostraMsg && (
-          <p className="mt-2 text-sm text-muted-foreground" role="status">
-            {amostraMsg}
-          </p>
+      <div className="mt-6 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-4">
+        <Button
+          onClick={handleLote}
+          disabled={loteRodando}
+          className="min-h-11"
+        >
+          {loteRodando ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <RefreshCw aria-hidden="true" />
+          )}
+          <span>Gerar locução alternada de todas as obras</span>
+        </Button>
+        {loteRodando && (
+          <span className="text-sm text-muted-foreground" role="status">
+            Gerando… {loteFeito}/{obras.filter((o) => o.num !== OBRA_PROTEGIDA).length}
+          </span>
         )}
-
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
-          <Button
-            onClick={handleLote}
-            disabled={loteRodando}
-            className="min-h-11"
-          >
-            {loteRodando ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <RefreshCw aria-hidden="true" />
-            )}
-            <span>Gerar locução alternada de todas as obras</span>
-          </Button>
-          {loteRodando && (
-            <span className="text-sm text-muted-foreground" role="status">
-              Gerando… {loteFeito}/{obras.filter((o) => o.num !== OBRA_PROTEGIDA).length}
-            </span>
-          )}
-          {!loteRodando && loteMsg && (
-            <span className="text-sm text-muted-foreground" role="status">
-              {loteMsg}
-            </span>
-          )}
-        </div>
+        {!loteRodando && loteMsg && (
+          <span className="text-sm text-muted-foreground" role="status">
+            {loteMsg}
+          </span>
+        )}
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
