@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
 import { VOZ_FEMININA_ID, vozValida } from "@/data/vozes";
 
@@ -211,6 +212,20 @@ export function dividirTrechos(texto: string): TrechoTexto[] {
 type SupabaseAdmin = Awaited<
   typeof import("@/integrations/supabase/client.server")
 >["supabaseAdmin"];
+
+/**
+ * Garante que o chamador é um administrador. Lança 401 caso contrário.
+ * Usado nas funções que escrevem dados ou consomem créditos.
+ */
+async function garantirAdmin(context: { supabase: unknown }) {
+  const cliente = context.supabase as {
+    rpc: (fn: "is_admin") => Promise<{ data: boolean | null; error: unknown }>;
+  };
+  const { data, error } = await cliente.rpc("is_admin");
+  if (error || data !== true) {
+    throw new Response("Não autorizado", { status: 401 });
+  }
+}
 
 /** Converte os trechos salvos no banco em URLs públicas (ou null). */
 function trechosPublicos(
@@ -490,8 +505,10 @@ const dadosEdicaoSchema = z.object({
  * A obra recebe uma identidade interna (chave) automática (>= 1000).
  */
 export const criarObra = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => dadosNovaSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -547,10 +564,12 @@ export const criarObra = createServerFn({ method: "POST" })
 
 /** Remove uma obra (pela identidade interna) e fecha o espaço na sequência. */
 export const removerObra = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { chave } = data;
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
@@ -604,8 +623,10 @@ export const removerObra = createServerFn({ method: "POST" })
 
 /** Salva os campos de dados (título, ano, etc.) e a descrição de uma obra. */
 export const salvarDados = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => dadosEdicaoSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -681,6 +702,7 @@ export const salvarDados = createServerFn({ method: "POST" })
 
 /** Recebe uma imagem (base64) e a guarda no storage, registrando o caminho. */
 export const salvarImagem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
@@ -692,7 +714,8 @@ export const salvarImagem = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -744,6 +767,7 @@ export const salvarImagem = createServerFn({ method: "POST" })
 
 /** Salva o texto (descrição) editado de uma obra. */
 export const salvarTexto = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
@@ -752,7 +776,8 @@ export const salvarTexto = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
@@ -829,10 +854,12 @@ async function imagemDataUrl(
  * existente. NÃO grava no banco: o texto volta para revisão antes de salvar.
  */
 export const gerarTextoDescricao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { chave } = data;
     const fixa = ehObraFixa(chave);
 
@@ -974,6 +1001,7 @@ function chunkTexto(texto: string, maxChars = 2500): string[] {
  * pedaços apenas por tamanho e os áudios são concatenados num só arquivo.
  */
 export const regenerarAudio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
       .object({
@@ -981,7 +1009,8 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     const { chave } = data;
     const fixa = ehObraFixa(chave);
 
@@ -1119,10 +1148,12 @@ export const regenerarAudio = createServerFn({ method: "POST" })
 
 /** Retorna a URL de prévia (amostra) de uma voz da ElevenLabs. */
 export const amostraVoz = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z.object({ vozId: z.string().min(1).max(100) }).parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await garantirAdmin(context);
     if (!vozValida(data.vozId)) {
       return { ok: false as const, erro: "Voz inválida." };
     }

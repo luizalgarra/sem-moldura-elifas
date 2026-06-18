@@ -1,30 +1,38 @@
-# Liberar regeneração da obra protegida (#2)
+# Site 100% público + admin protegido de verdade
 
-Hoje a obra #2 é tratada como "áudio especial preservado": no `/admin` ela não tem botões de gerar audiodescrição (IA) nem gerar locução, mostra apenas o cadeado "Áudio especial preservado", e o servidor recusa regenerar. Esta mudança remove essa proteção, deixando a obra #2 igual às demais.
+## Situação atual
 
-## Como vai ficar para você
+O site **já é público** para visitantes: o portão de login em `src/routes/__root.tsx` só protege as rotas `/admin`, `/editar` e `/qrcodes`. Todas as páginas de conteúdo (obras, acervo, biografia, etc.) abrem sem login, e o site publicado está com visibilidade pública.
 
-A obra #2 passa a exibir os mesmos botões das outras:
-- **Gerar audiodescrição (IA)**
-- **Gerar locução**
-- **Salvar texto** e **Baixar áudio**
+Porém há uma falha importante: as funções de servidor que **criam, editam, removem e geram áudio/texto** (em `src/lib/admin-obras.functions.ts`) usam a chave de serviço e **não verificam se quem chamou é admin**. O portão de `__root.tsx` apenas esconde a tela — qualquer pessoa poderia chamar esses endpoints diretamente no site publicado e alterar o acervo ou gastar créditos de geração de voz/IA.
 
-O cadeado "Áudio especial preservado" deixa de aparecer.
+O objetivo é deixar isso correto nos dois sentidos: **visitantes nunca veem login** e **as ações de admin só funcionam para admin de verdade**.
 
-## Alterações técnicas
+## O que será feito
 
-### 1. `src/lib/admin-obras.functions.ts`
-- Em `regenerarAudio`, remover o bloqueio que retorna "Esta obra tem áudio especial e não pode ser regenerada aqui." (linhas 989–994), permitindo que a #2 gere voz normalmente.
-- A constante `OBRA_PROTEGIDA` deixa de ser usada nessa função (pode ser mantida ou removida — não há outro uso no servidor).
+### 1. Confirmar acesso público dos visitantes (sem mudança de comportamento)
+- Manter o portão de login restrito apenas a `/admin`, `/editar` e `/qrcodes`.
+- Confirmar que as funções de leitura pública (`listarAcervo`, `getObraPublica`) e as rotas de mídia pública continuam abertas, sem exigir sessão.
 
-### 2. `src/routes/admin.tsx`
-- Remover a constante/uso `OBRA_PROTEGIDA` para que `protegida` nunca seja verdadeiro:
-  - Botão **"Gerar audiodescrição (IA)"** passa a aparecer também na #2.
-  - Substituir o ramo do cadeado "Áudio especial preservado" pelo botão **"Gerar locução"** (igual às demais obras).
-  - O contador da geração em lote (`Gerar locução de todas as obras`) passará a incluir a #2.
+### 2. Blindar as funções de administração
+Adicionar verificação de papel admin nas funções que escrevem ou custam créditos, para que o papel de admin realmente proteja essas áreas (e não só a interface):
+- `criarObra`, `removerObra`
+- `salvarDados`, `salvarImagem`, `salvarTexto`
+- `gerarTextoDescricao`, `regenerarAudio`
 
-## O que NÃO muda
-- Geração de voz (ElevenLabs, locução única), IA de audiodescrição, players, upload de imagem, ordenação e todas as outras obras seguem iguais.
+Cada uma passará a exigir um usuário autenticado e com permissão de admin antes de executar. Sem isso, retornam "não autorizado".
 
-## Observação
-- O áudio atual da #2 (de duas vozes unidas) será substituído assim que você clicar em gerar locução. Antes disso, nada é alterado — a regeneração só ocorre quando você acionar.
+### 3. Manter o que já funciona
+- Páginas públicas, players de áudio, QR Codes para visitantes, navegação e a home continuam iguais.
+- As telas de admin (`/admin`, `/editar`, `/qrcodes`) seguem exigindo login + papel admin.
+
+## Detalhes técnicos
+
+- Em `src/lib/admin-obras.functions.ts`, aplicar o middleware `requireSupabaseAuth` (de `@/integrations/supabase/auth-middleware`) nas funções de escrita e, dentro do handler, validar o papel admin via `context.supabase.rpc("is_admin")`, lançando `Response("Não autorizado", { status: 401 })` quando falso.
+- O `attachSupabaseAuth` já está registrado em `src/start.ts` como `functionMiddleware`, então o token do admin é anexado automaticamente nas chamadas — nenhuma mudança extra de wiring é necessária.
+- Como `/admin`, `/editar` e `/qrcodes` só são acessíveis a admin logado, essas chamadas continuarão funcionando normalmente para o admin; apenas chamadas não autenticadas passam a ser barradas.
+- Funções de leitura pública (`listarAcervo`, `getObraPublica`) permanecem sem middleware para não afetar visitantes.
+
+## Fora de escopo
+- Não altera a home "Em construção" nem o conteúdo das páginas.
+- Não muda regras de RLS nem o esquema do banco.
