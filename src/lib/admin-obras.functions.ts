@@ -83,7 +83,7 @@ const SECOES: SecaoDef[] = [
       "descricao da imagem",
     ],
     rotulo: "Audiodescrição",
-    voz: "masc",
+    voz: "fem",
   },
   {
     chaves: ["identificacao da obra", "identificacao"],
