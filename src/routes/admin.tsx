@@ -63,29 +63,7 @@ function AdminPagina() {
     );
   }, [busca]);
 
-  const handleAmostra = async (vozId: string) => {
-    setAmostraCarregando(vozId);
-    setAmostraMsg(null);
-    try {
-      let url = cacheAmostras.get(vozId);
-      if (!url) {
-        const r = await buscarAmostra({ data: { vozId } });
-        if (!r.ok || !r.url) {
-          setAmostraMsg(
-            r.ok ? "Esta voz não tem amostra." : (r.erro ?? "Erro na amostra."),
-          );
-          return;
-        }
-        url = r.url;
-        cacheAmostras.set(vozId, url);
-      }
-      await new Audio(url).play();
-    } catch {
-      setAmostraMsg("Não foi possível tocar a amostra.");
-    } finally {
-      setAmostraCarregando(null);
-    }
-  };
+
 
   const handleLote = async () => {
     const alvos = obras.filter((o) => o.num !== OBRA_PROTEGIDA);
