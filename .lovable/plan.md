@@ -1,55 +1,21 @@
 ## Objetivo
-Atualizar a configuração de seções em `src/lib/admin-obras.functions.ts` para:
-1. **Remover a voz masculina** — todas as seções passam a usar a voz feminina (Carla).
-2. **Remover a seção "Contexto"** (com as chaves `contexto historico e cultural`, `contexto historico`, `contexto cultural`, `contexto`).
+Na página `/admin`, remover a "caixa de vozes padrão" (amostras de Carla e Danilo), **mantendo** o botão de geração em lote ("Gerar locução alternada de todas as obras").
 
-## Como fica o `SECOES`
-Passa de 4 para 3 seções, todas com voz feminina:
+## O que muda em `src/routes/admin.tsx`
+1. **Remover o bloco de amostras de voz**: o cabeçalho "Vozes padrão", o texto explicativo e a grade com os botões de "ouvir" (Carla / Danilo).
+2. **Mover o botão "Gerar locução alternada de todas as obras"** para fora da caixa removida, deixando-o como um bloco próprio (mantendo o indicador de progresso "Gerando… x/y" e a mensagem de conclusão).
+3. **Limpar o código órfão** que só servia às amostras:
+   - constantes `VOZ_FEMININA_ID`, `VOZ_MASCULINA_ID`, `VOZES_PADRAO`, `cacheAmostras`
+   - estados `amostraCarregando`, `amostraMsg`
+   - função `handleAmostra`
+   - import `amostraVoz` e `useServerFn(amostraVoz)`
+   - ícone `Volume2` (se não usado em outro lugar)
 
-| # | Rótulo | Voz |
-|---|---|---|
-| 1 | Audiodescrição | fem |
-| 2 | Identificação | fem |
-| 3 | Análise | fem |
-
-```ts
-const SECOES: SecaoDef[] = [
-  {
-    chaves: [
-      "audiodescricao",
-      "audio descricao",
-      "audiodescricao da obra",
-      "descricao da imagem",
-    ],
-    rotulo: "Audiodescrição",
-    voz: "fem",
-  },
-  {
-    chaves: ["identificacao da obra", "identificacao"],
-    rotulo: "Identificação",
-    voz: "fem",
-  },
-  {
-    chaves: ["analise interpretativa", "analise"],
-    rotulo: "Análise",
-    voz: "fem",
-  },
-];
-```
-
-## Fallback
-Ajustar para refletir 3 seções, todas femininas:
-
-```ts
-const VOZES_FALLBACK: VozTipo[] = ["fem", "fem", "fem"];
-const ROTULOS_FALLBACK = ["Parte 1", "Parte 2", "Parte 3"];
-```
-
-## Detalhes técnicos
-- Arquivo único alterado: `src/lib/admin-obras.functions.ts`.
-- Apenas a configuração de seções/fallback muda; a lógica de divisão de texto e geração de áudio permanece igual.
-- Após a mudança, novas locuções geradas usarão somente a voz feminina e não terão mais a seção de Contexto. Áudios já gerados anteriormente não são afetados até serem regerados (obra #2 permanece protegida).
+A lógica de geração de áudio e a lista de obras permanecem iguais.
 
 ## Verificação
-- Conferir que o build passa (sem referências quebradas a 4 seções).
-- Abrir `/admin`, gerar locução de uma obra de teste e confirmar 3 trechos, todos em voz feminina, sem "Contexto".
+- Build passa sem variáveis/imports não usados.
+- `/admin` abre sem a caixa de amostras, mas com o botão de gerar todas as obras funcionando e a busca + lista logo abaixo.
+
+## Sobre a imagem que você enviou
+A imagem é um print de **um card de obra** da própria página `/admin` — a obra **#8 "Capa nº1 Almanaque Brasil"**. Ela mostra a parte inferior da página (a lista de obras), com a caixa de texto da descrição e os três botões do card: **Salvar texto**, **Gerar locução alternada** e **Baixar 1º trecho**. Não é a "caixa de vozes padrão" — esta fica no topo da página, antes do campo de busca, e é o bloco que será removido.

@@ -9,14 +9,12 @@ import {
   Search,
   Lock,
   Download,
-  Volume2,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
   listarOverrides,
   salvarTexto,
   regenerarAudio,
-  amostraVoz,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
@@ -24,17 +22,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const OBRA_PROTEGIDA = 2;
-
-// Vozes padrão oferecidas no admin (uma feminina, uma masculina).
-const VOZ_FEMININA_ID = "7eUAxNOneHxqfyRS77mW"; // Carla (Conversacional)
-const VOZ_MASCULINA_ID = "rVRk0uJAtO8T38Gm03mf"; // Danilo Tenfen
-const VOZES_PADRAO = [
-  { id: VOZ_FEMININA_ID, rotulo: "Carla (feminina)" },
-  { id: VOZ_MASCULINA_ID, rotulo: "Danilo Tenfen (masculina)" },
-];
-
-// Cache de URLs de amostra por voz, compartilhado entre os itens.
-const cacheAmostras = new Map<string, string>();
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -48,7 +35,6 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPagina() {
   const fetchOverrides = useServerFn(listarOverrides);
-  const buscarAmostra = useServerFn(amostraVoz);
   const { data: overrides, refetch } = useQuery({
     queryKey: ["overrides"],
     queryFn: () => fetchOverrides(),
@@ -61,8 +47,6 @@ function AdminPagina() {
   }, [overrides]);
 
   const [busca, setBusca] = useState("");
-  const [amostraCarregando, setAmostraCarregando] = useState<string | null>(null);
-  const [amostraMsg, setAmostraMsg] = useState<string | null>(null);
 
   // Geração em lote (todas as obras).
   const regenerar = useServerFn(regenerarAudio);
@@ -79,29 +63,7 @@ function AdminPagina() {
     );
   }, [busca]);
 
-  const handleAmostra = async (vozId: string) => {
-    setAmostraCarregando(vozId);
-    setAmostraMsg(null);
-    try {
-      let url = cacheAmostras.get(vozId);
-      if (!url) {
-        const r = await buscarAmostra({ data: { vozId } });
-        if (!r.ok || !r.url) {
-          setAmostraMsg(
-            r.ok ? "Esta voz não tem amostra." : (r.erro ?? "Erro na amostra."),
-          );
-          return;
-        }
-        url = r.url;
-        cacheAmostras.set(vozId, url);
-      }
-      await new Audio(url).play();
-    } catch {
-      setAmostraMsg("Não foi possível tocar a amostra.");
-    } finally {
-      setAmostraCarregando(null);
-    }
-  };
+
 
   const handleLote = async () => {
     const alvos = obras.filter((o) => o.num !== OBRA_PROTEGIDA);
@@ -140,62 +102,29 @@ function AdminPagina() {
         </p>
       </header>
 
-      <div className="mt-6 rounded-lg border border-border bg-card p-4">
-        <h2 className="text-sm font-medium text-foreground">Vozes padrão</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          As duas vozes usadas no revezamento. Ouça as amostras abaixo.
-        </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {VOZES_PADRAO.map((v) => (
-            <div key={v.id} className="flex items-center gap-2">
-              <span className="flex-1 text-sm text-foreground">{v.rotulo}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleAmostra(v.id)}
-                disabled={amostraCarregando === v.id}
-                className="min-h-11 min-w-11"
-                aria-label={`Ouvir amostra de ${v.rotulo}`}
-              >
-                {amostraCarregando === v.id ? (
-                  <Loader2 className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <Volume2 aria-hidden="true" />
-                )}
-              </Button>
-            </div>
-          ))}
-        </div>
-        {amostraMsg && (
-          <p className="mt-2 text-sm text-muted-foreground" role="status">
-            {amostraMsg}
-          </p>
+      <div className="mt-6 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-4">
+        <Button
+          onClick={handleLote}
+          disabled={loteRodando}
+          className="min-h-11"
+        >
+          {loteRodando ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <RefreshCw aria-hidden="true" />
+          )}
+          <span>Gerar locução alternada de todas as obras</span>
+        </Button>
+        {loteRodando && (
+          <span className="text-sm text-muted-foreground" role="status">
+            Gerando… {loteFeito}/{obras.filter((o) => o.num !== OBRA_PROTEGIDA).length}
+          </span>
         )}
-
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
-          <Button
-            onClick={handleLote}
-            disabled={loteRodando}
-            className="min-h-11"
-          >
-            {loteRodando ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : (
-              <RefreshCw aria-hidden="true" />
-            )}
-            <span>Gerar locução alternada de todas as obras</span>
-          </Button>
-          {loteRodando && (
-            <span className="text-sm text-muted-foreground" role="status">
-              Gerando… {loteFeito}/{obras.filter((o) => o.num !== OBRA_PROTEGIDA).length}
-            </span>
-          )}
-          {!loteRodando && loteMsg && (
-            <span className="text-sm text-muted-foreground" role="status">
-              {loteMsg}
-            </span>
-          )}
-        </div>
+        {!loteRodando && loteMsg && (
+          <span className="text-sm text-muted-foreground" role="status">
+            {loteMsg}
+          </span>
+        )}
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
