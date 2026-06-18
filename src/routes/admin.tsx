@@ -7,7 +7,6 @@ import {
   Save,
   RefreshCw,
   Search,
-  Lock,
   Download,
   Sparkles,
 } from "lucide-react";
