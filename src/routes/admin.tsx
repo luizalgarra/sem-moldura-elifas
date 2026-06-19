@@ -77,12 +77,16 @@ function AdminPagina() {
 
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
-    if (!q) return obras;
-    return obras.filter(
-      (o) =>
-        String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
-    );
-  }, [busca]);
+    return obras.filter((o) => {
+      const correspondeBusca =
+        !q ||
+        String(o.num).includes(q) ||
+        o.titulo.toLowerCase().includes(q);
+      if (!correspondeBusca) return false;
+      if (filtroStatus === "todas") return true;
+      return statusDaObra(mapa.get(o.num)) === filtroStatus;
+    });
+  }, [busca, filtroStatus, mapa]);
 
 
 
