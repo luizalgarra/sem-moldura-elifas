@@ -234,11 +234,16 @@ function ObraEditor({
   onChanged: () => void;
 }) {
   const salvar = useServerFn(salvarTexto);
+  const salvarAudio = useServerFn(salvarAudiodescricao);
   const regenerar = useServerFn(regenerarAudio);
   const gerarTexto = useServerFn(gerarTextoDescricao);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
+  const [audiodescricao, setAudiodescricao] = useState(
+    override?.audiodescricao ?? override?.descricao ?? textoEstatico,
+  );
   const [salvando, setSalvando] = useState(false);
+  const [salvandoAudio, setSalvandoAudio] = useState(false);
   const [gerando, setGerando] = useState(false);
   const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -255,7 +260,25 @@ function ObraEditor({
     setMsg(null);
     try {
       const r = await salvar({ data: { chave: num, descricao: texto } });
-      setMsg(r.ok ? "Texto salvo." : (r.erro ?? "Erro ao salvar."));
+      setMsg(r.ok ? "Descrição salva." : (r.erro ?? "Erro ao salvar."));
+      if (r.ok) {
+        onChanged();
+      }
+    } catch {
+      setMsg("Erro ao salvar.");
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleSalvarAudio = async () => {
+    setSalvandoAudio(true);
+    setMsg(null);
+    try {
+      const r = await salvarAudio({
+        data: { chave: num, audiodescricao },
+      });
+      setMsg(r.ok ? "Audiodescrição salva." : (r.erro ?? "Erro ao salvar."));
       if (r.ok) {
         onChanged();
         recarregarHist();
@@ -263,7 +286,7 @@ function ObraEditor({
     } catch {
       setMsg("Erro ao salvar.");
     } finally {
-      setSalvando(false);
+      setSalvandoAudio(false);
     }
   };
 
@@ -293,8 +316,8 @@ function ObraEditor({
     try {
       const r = await gerarTexto({ data: { chave: num } });
       if (r.ok) {
-        setTexto(r.texto);
-        setMsg("Texto gerado — revise e salve.");
+        setAudiodescricao(r.texto);
+        setMsg("Audiodescrição gerada — revise e salve.");
         recarregarHist();
       } else {
         setMsg(r.erro ?? "Erro ao gerar o texto.");
@@ -305,6 +328,7 @@ function ObraEditor({
       setGerandoTexto(false);
     }
   };
+
 
 
 
