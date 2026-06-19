@@ -70,7 +70,7 @@ const FILTROS: { valor: StatusObra | "todas"; rotulo: string }[] = [
   { valor: "aprovada", rotulo: "Aprovada" },
 ];
 
-
+function AdminPagina() {
   const fetchOverrides = useServerFn(listarOverrides);
   const { data: overrides, refetch } = useQuery({
     queryKey: ["overrides"],
