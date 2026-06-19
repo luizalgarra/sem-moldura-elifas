@@ -294,6 +294,7 @@ function ObraEditor({
       if (r.ok) {
         setTexto(r.texto);
         setMsg("Texto gerado — revise e salve.");
+        recarregarHist();
       } else {
         setMsg(r.erro ?? "Erro ao gerar o texto.");
       }
