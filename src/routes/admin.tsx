@@ -314,8 +314,8 @@ function ObraEditor({
     try {
       const r = await regenerar({ data: { chave: num, audiodescricao } });
       if (r.ok) {
-        setVersaoAudio(Date.now().toString());
-        setMsg("Locução gerada.");
+        setVersaoAudio(r.versao);
+        setMsg("Locução gerada e salva.");
         onChanged();
         recarregarHist();
       } else {
