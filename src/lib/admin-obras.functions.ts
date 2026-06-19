@@ -25,6 +25,7 @@ export interface OverrideObra {
   audioMascPath: string | null;
   audioTrechos: Trecho[] | null;
   vozId: string;
+  aprovada: boolean;
   updatedAt: string | null;
 }
 
