@@ -98,6 +98,31 @@ function AdminPagina() {
     refetch();
   };
 
+  const handleCadastrarImagens = async () => {
+    setImgRodando(true);
+    setImgMsg(null);
+    try {
+      const r = await cadastrarImagens();
+      if (r.ok) {
+        setImgMsg(
+          r.total === 0
+            ? "Todas as obras com imagem já estão cadastradas para a IA."
+            : `Pronto! ${r.gravadas} de ${r.total} imagem(ns) cadastrada(s)` +
+                (r.falhas > 0 ? `, ${r.falhas} falha(s).` : "."),
+        );
+        refetch();
+      } else {
+        setImgMsg(r.erro ?? "Erro ao cadastrar as imagens.");
+      }
+    } catch {
+      setImgMsg("Erro ao cadastrar as imagens.");
+    } finally {
+      setImgRodando(false);
+    }
+  };
+
+
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <header>
