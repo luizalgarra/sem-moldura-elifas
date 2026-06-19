@@ -1245,7 +1245,15 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
       return { ok: true as const, texto };
     } catch (e) {
       console.error("gerarTextoDescricao:", e);
+      if (e instanceof Error && e.name === "AbortError") {
+        return {
+          ok: false as const,
+          erro: "A geração demorou mais que o esperado. Tente novamente.",
+        };
+      }
       return { ok: false as const, erro: "Serviço de IA indisponível." };
+    } finally {
+      clearTimeout(timeoutId);
     }
   });
 
