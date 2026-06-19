@@ -454,6 +454,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
       dimensao: row.dimensao,
       parede: row.parede,
       descricao: row.descricao,
+      audiodescricao: row.audiodescricao,
       imagemPath: row.imagem_path,
       audioPath: row.audio_url,
       audioFemPath: row.audio_fem_path,
