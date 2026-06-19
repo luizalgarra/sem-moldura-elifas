@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getObra, ehObraFixa, obras, type Obra } from "@/data/obras";
 import { VOZ_FEMININA_ID, vozValida } from "@/data/vozes";
+import { SITE_URL } from "@/lib/site";
 
 const PRIMEIRA_CHAVE_EXTRA = 1000; // identidades internas das obras novas começam aqui
 const MAX_CHAVE = 999999; // limite das identidades internas
