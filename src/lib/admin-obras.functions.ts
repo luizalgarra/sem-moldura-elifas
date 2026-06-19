@@ -1167,21 +1167,22 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
     const system = [
       "Você é especialista em audiodescrição de obras de arte para pessoas com deficiência visual.",
       "Analise a imagem do quadro fornecida e escreva a audiodescrição do zero, com palavras próprias, a partir do que você vê.",
-      "Use a descrição de referência APENAS como contexto de fatos (título, autor, ano, técnica, dimensão e elementos já citados). NÃO reproduza o texto de referência na íntegra nem copie trechos literais dele.",
+      "A descrição de referência traz fatos sobre a obra (título, autor, ano, técnica, dimensão, contexto e elementos). INTEGRE essas informações de forma NATURAL, COLOQUIAL e fluida à narrativa da audiodescrição, como se conversasse com a pessoa, sem copiar trechos literais nem soar como uma ficha de catálogo.",
       "Produza UMA audiodescrição única, fluida e contínua, em português do Brasil.",
-      "Descreva objetivamente: composição, figuras, cores, formas, expressões, ambiente, técnica e atmosfera, do geral para o detalhe.",
-      "Integre os dados de catálogo (título, autor, ano, técnica, dimensão) de forma natural ao texto.",
-      "Tom claro e acolhedor, sem interpretações subjetivas excessivas e sem listar itens com marcadores.",
+      "Descreva objetivamente: composição, figuras, cores, formas, expressões, ambiente, técnica e atmosfera, do geral para o detalhe, costurando os fatos da referência ao longo do texto de maneira orgânica.",
+      "Tom claro, acolhedor e conversacional, sem interpretações subjetivas excessivas e sem listar itens com marcadores.",
+      "Lembre-se: este texto será lido em voz alta (locução). Escreva pensando na escuta, com ritmo natural de fala.",
       "Não use títulos, cabeçalhos, markdown ou rótulos de seção. Devolva apenas o texto corrido da audiodescrição.",
     ].join(" ");
 
     const userText = [
       titulo ? `Título: ${titulo}.` : "",
-      "Texto de referência (não copie; use apenas como contexto):",
+      "Descrição de referência (use os fatos; integre de forma coloquial, não copie):",
       descricaoAtual || "(sem descrição prévia)",
     ]
       .filter(Boolean)
       .join("\n");
+
 
     try {
       const resp = await fetch(
