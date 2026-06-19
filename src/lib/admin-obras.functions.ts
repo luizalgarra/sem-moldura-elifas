@@ -464,6 +464,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
         ? (row.audio_trechos as unknown as Trecho[])
         : null,
       vozId: row.voz_id,
+      aprovada: row.aprovada ?? false,
       updatedAt: row.updated_at,
     }));
   },
