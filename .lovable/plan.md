@@ -1,56 +1,69 @@
 ## Objetivo
 
-Criar um arquivo `documento.md` na raiz do projeto registrando, em ordem, todas as tentativas e diagnósticos feitos até agora para resolver os problemas de **audiodescrição** e **geração de locução**. Nenhuma mudança de funcionalidade ou código de app — apenas o documento.
+Corrigir o download do MP3 no iOS Safari, que hoje navega o documento para fora e zera o estado do componente (sintoma "gerou a locução mas voltou ao estado anterior"). A correção troca o download por link direto por um download em memória (blob) + compartilhamento nativo, com fallback para desktop.
 
-## Conteúdo que o documento terá
+## Mudança (arquivo: `src/routes/admin.tsx`)
 
-```text
-# Histórico — Audiodescrição + Geração de Locução
-
-## 1. Sintoma relatado
-- Geração de audiodescrição "ficava girando e parou".
-- Locução era gerada mas "não salvava e voltava ao estado anterior".
-
-## 2. Dúvida sobre interferência
-- Pergunta: salvar a audiodescrição recém-gerada interfere na geração da locução?
-- Conclusão: NÃO interfere. Ambas as ações usam o mesmo texto do campo no
-  momento da ação, sem cópia intermediária. A geração de locução salva o texto
-  no banco ANTES de gerar o áudio. Salvar é opcional e seguro.
-
-## 3. Investigação aprofundada (locução não salva)
-Arquivos analisados: admin-obras.functions.ts, admin.tsx, AudioDescricao.tsx,
-obras.$num.tsx. Logs verificados: regenerarAudio, upload, ElevenLabs.
-Banco consultado: obra_overrides, obra_versoes, storage.objects.
-
-Achados:
-- O áudio era realmente gerado e salvo no armazenamento (obra-1-fem-...mp3),
-  mas havia arquivos órfãos no storage sem referência no banco.
-- Causa raiz da percepção de "voltou ao estado": após refetch(), o ObraEditor
-  mantinha estados locais (versaoAudio, audiodescricao) derivados do override
-  antigo e não sincronizava com os dados novos.
-- Risco de órfãos: o áudio era enviado ao storage ANTES do registro final no
-  banco. Falha nesse intervalo deixava MP3 órfão e tela sem áudio salvo.
-
-## 4. Correções implementadas
-src/lib/admin-obras.functions.ts
-- Preservação do áudio anterior em caso de falha no registro final: se o upsert
-  falhar, o novo arquivo é removido do storage e a função retorna erro claro.
-- Adicionado audioPath ao retorno de sucesso.
-
-src/routes/admin.tsx
-- versaoAudio passa a ser inicializado por versaoDeOverride(override).
-- useEffect sincroniza versaoAudio com o banco quando override.audioFemPath /
-  override.updatedAt mudam.
-- handleRegenerar usa r.versao (versão salva pelo backend) e exibe
-  "Locução gerada e salva."
-
-## 5. Estado atual
-- Locução persiste no banco e a tela reflete o áudio salvo após refetch().
-- Pendente: confirmar com o usuário se o problema foi resolvido na prática.
+### 1. Novo estado
+Adicionar junto aos demais `useState` do componente da obra:
+```ts
+const [baixando, setBaixando] = useState(false);
 ```
 
-## Detalhes técnicos
+### 2. Reescrever `handleBaixar` (linhas 361–375)
+```ts
+const handleBaixar = async () => {
+  if (!downloadSrc || baixando) return;
+  setMsg(null);
+  setBaixando(true);
+  try {
+    // iOS Safari ignora o atributo `download` em URLs de servidor e navega
+    // para fora (zerando o estado). Baixar como blob evita qualquer navegação.
+    const resp = await fetch(downloadSrc);
+    if (!resp.ok) throw new Error("falha no download");
+    const blob = await resp.blob();
+    const nome = `obra-${num}.mp3`;
 
-- Local do arquivo: `documento.md` na raiz do projeto.
-- Apenas criação de texto/markdown; nenhum arquivo de código será alterado.
-- O conteúdo acima é o rascunho final; pode ser ajustado conforme o histórico exato registrado no `.lovable/plan.md`.
+    // iOS/mobile: compartilhamento nativo (inclui "Salvar em Arquivos").
+    const file = new File([blob], nome, { type: "audio/mpeg" });
+    const nav = navigator as Navigator & {
+      canShare?: (data?: ShareData) => boolean;
+    };
+    if (nav.canShare && nav.canShare({ files: [file] })) {
+      try {
+        await nav.share({ files: [file], title: nome });
+        return;
+      } catch (err) {
+        if ((err as Error)?.name === "AbortError") return; // usuário cancelou
+        // share indisponível: segue para o fallback por link
+      }
+    }
+
+    // Fallback (desktop/navegadores sem Web Share): link com object URL.
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = nome;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch {
+    setMsg("Não foi possível baixar o áudio.");
+  } finally {
+    setBaixando(false);
+  }
+};
+```
+
+### 3. Botão de download (≈ linha 476–479)
+Refletir o estado assíncrono: `disabled={baixando}` e label "Baixando…" enquanto `baixando` for `true`.
+
+## Validação
+- Build/typecheck (automático).
+- Verificar no preview que o botão de download funciona no desktop (fallback por link).
+- Confirmar com o usuário no iPhone que: baixar o MP3 abre o menu nativo de compartilhamento/"Salvar em Arquivos" e **não** reseta a tela.
+
+## Observações
+- Não altera a lógica de geração/persistência (`handleRegenerar`, server functions) — essas já foram corrigidas antes. Esta mudança ataca a causa mobile remanescente: a navegação disparada pelo clique de download.
