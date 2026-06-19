@@ -1187,6 +1187,12 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
       if (!texto) {
         return { ok: false as const, erro: "A IA não retornou texto." };
       }
+      await registrarVersao(supabaseAdmin, {
+        num: chave,
+        tipo: "texto",
+        origem: "ia",
+        descricao: texto,
+      });
       return { ok: true as const, texto };
     } catch (e) {
       console.error("gerarTextoDescricao:", e);
