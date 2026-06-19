@@ -1059,7 +1059,8 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
 
     const system = [
       "Você é especialista em audiodescrição de obras de arte para pessoas com deficiência visual.",
-      "Analise a imagem do quadro fornecida e una o que você vê com as informações de catálogo já existentes.",
+      "Analise a imagem do quadro fornecida e escreva a audiodescrição do zero, com palavras próprias, a partir do que você vê.",
+      "Use a descrição de referência APENAS como contexto de fatos (título, autor, ano, técnica, dimensão e elementos já citados). NÃO reproduza o texto de referência na íntegra nem copie trechos literais dele.",
       "Produza UMA audiodescrição única, fluida e contínua, em português do Brasil.",
       "Descreva objetivamente: composição, figuras, cores, formas, expressões, ambiente, técnica e atmosfera, do geral para o detalhe.",
       "Integre os dados de catálogo (título, autor, ano, técnica, dimensão) de forma natural ao texto.",
@@ -1069,7 +1070,7 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
 
     const userText = [
       titulo ? `Título: ${titulo}.` : "",
-      "Informações e descrição já existentes:",
+      "Texto de referência (não copie; use apenas como contexto):",
       descricaoAtual || "(sem descrição prévia)",
     ]
       .filter(Boolean)
