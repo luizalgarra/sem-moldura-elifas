@@ -16,6 +16,7 @@ import {
   salvarTexto,
   regenerarAudio,
   gerarTextoDescricao,
+  cadastrarImagensEstaticas,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
