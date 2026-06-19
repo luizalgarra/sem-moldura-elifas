@@ -472,7 +472,7 @@ function ObraEditor({
       <Historico
         num={num}
         refreshKey={histKey}
-        onRestaurarTexto={(t) => setTexto(t)}
+        onRestaurarTexto={(t) => setAudiodescricao(t)}
         onRestaurarAudio={(v) => setVersaoAudio(v)}
       />
     </li>
