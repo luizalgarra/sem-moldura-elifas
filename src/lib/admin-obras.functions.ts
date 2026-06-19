@@ -18,6 +18,7 @@ export interface OverrideObra {
   dimensao: string | null;
   parede: string | null;
   descricao: string | null;
+  audiodescricao: string | null;
   imagemPath: string | null;
   audioPath: string | null;
   audioFemPath: string | null;
