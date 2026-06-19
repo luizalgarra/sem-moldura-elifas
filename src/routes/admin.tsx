@@ -345,71 +345,115 @@ function ObraEditor({
           <span className="text-accent">#{num}</span> {titulo}
         </h2>
         {override?.descricao && (
-          <span className="text-xs text-muted-foreground">texto editado</span>
+          <span className="text-xs text-muted-foreground">editado</span>
         )}
       </div>
 
-      <Textarea
-        value={texto}
-        onChange={(e) => setTexto(e.target.value)}
-        rows={6}
-        className="mt-3"
-        aria-label={`Texto da obra ${num}`}
-      />
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Button onClick={handleSalvar} disabled={salvando} className="min-h-11">
-          {salvando ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Save aria-hidden="true" />
-          )}
-          <span>Salvar texto</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleGerarTexto}
-          disabled={gerandoTexto}
-          className="min-h-11"
+      <div className="mt-3">
+        <label
+          htmlFor={`descricao-${num}`}
+          className="text-xs font-semibold uppercase text-muted-foreground"
         >
-          {gerandoTexto ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Sparkles aria-hidden="true" />
-          )}
-          <span>Gerar audiodescrição (IA)</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleRegenerar}
-          disabled={gerando}
-          className="min-h-11"
-        >
-          {gerando ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <RefreshCw aria-hidden="true" />
-          )}
-          <span>Gerar locução</span>
-        </Button>
-
-        {downloadSrc && (
-          <Button asChild variant="outline" className="min-h-11">
-            <a href={downloadSrc} download={`obra-${num}.mp3`}>
-              <Download aria-hidden="true" />
-              <span>Baixar áudio</span>
-            </a>
+          Descrição (referência)
+        </label>
+        <Textarea
+          id={`descricao-${num}`}
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          rows={5}
+          className="mt-1"
+          aria-label={`Descrição de referência da obra ${num}`}
+        />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Button
+            onClick={handleSalvar}
+            disabled={salvando}
+            className="min-h-11"
+          >
+            {salvando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Save aria-hidden="true" />
+            )}
+            <span>Salvar descrição</span>
           </Button>
-        )}
 
-        {msg && (
-          <span className="text-sm text-muted-foreground" role="status">
-            {msg}
-          </span>
-        )}
+          <Button
+            variant="outline"
+            onClick={handleGerarTexto}
+            disabled={gerandoTexto}
+            className="min-h-11"
+          >
+            {gerandoTexto ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles aria-hidden="true" />
+            )}
+            <span>Gerar audiodescrição (IA)</span>
+          </Button>
+        </div>
       </div>
+
+      <div className="mt-4">
+        <label
+          htmlFor={`audiodescricao-${num}`}
+          className="text-xs font-semibold uppercase text-muted-foreground"
+        >
+          Texto da audiodescrição (locução)
+        </label>
+        <Textarea
+          id={`audiodescricao-${num}`}
+          value={audiodescricao}
+          onChange={(e) => setAudiodescricao(e.target.value)}
+          rows={6}
+          className="mt-1"
+          aria-label={`Texto da audiodescrição da obra ${num}`}
+        />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Button
+            onClick={handleSalvarAudio}
+            disabled={salvandoAudio}
+            className="min-h-11"
+          >
+            {salvandoAudio ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Save aria-hidden="true" />
+            )}
+            <span>Salvar audiodescrição</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleRegenerar}
+            disabled={gerando}
+            className="min-h-11"
+          >
+            {gerando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <RefreshCw aria-hidden="true" />
+            )}
+            <span>Gerar locução</span>
+          </Button>
+
+          {downloadSrc && (
+            <Button asChild variant="outline" className="min-h-11">
+              <a href={downloadSrc} download={`obra-${num}.mp3`}>
+                <Download aria-hidden="true" />
+                <span>Baixar áudio</span>
+              </a>
+            </Button>
+          )}
+
+          {msg && (
+            <span className="text-sm text-muted-foreground" role="status">
+              {msg}
+            </span>
+          )}
+        </div>
+      </div>
+
 
       {audioRegenSrc && (
         <div className="mt-3">
