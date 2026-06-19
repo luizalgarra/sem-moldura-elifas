@@ -924,7 +924,7 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
     if (!dataUrl) {
       return {
         ok: false as const,
-        erro: "Esta obra ainda não tem imagem disponível para a IA analisar. Envie a imagem da obra pela tela de edição (campo de imagem) e tente novamente.",
+        erro: "Esta obra não tem imagem cadastrada para a IA analisar.",
       };
     }
 
