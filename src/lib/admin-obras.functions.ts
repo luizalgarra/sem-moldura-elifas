@@ -831,6 +831,88 @@ export const salvarTexto = createServerFn({ method: "POST" })
   });
 
 /**
+ * Cadastra de uma só vez, no storage (`imagens-obras`), as imagens estáticas
+ * de todas as obras fixas que ainda não têm `imagem_path`. Assim a IA passa a
+ * encontrar a imagem pelo caminho rápido, sem upload manual obra a obra.
+ */
+export const cadastrarImagensEstaticas = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    // Quais obras fixas já têm imagem registrada.
+    const { data: existentes } = await supabaseAdmin
+      .from("obra_overrides")
+      .select("num, imagem_path");
+    const jaTem = new Set(
+      (existentes ?? [])
+        .filter((r) => r.imagem_path)
+        .map((r) => r.num),
+    );
+
+    const alvos = obras.filter((o) => o.imagem && !jaTem.has(o.num));
+
+    let gravadas = 0;
+    let falhas = 0;
+
+    for (const obra of alvos) {
+      try {
+        const baixada = await baixarImagemEstatica(obra.imagem!);
+        if (!baixada) {
+          falhas++;
+          continue;
+        }
+        const ext =
+          baixada.mime === "image/png"
+            ? "png"
+            : baixada.mime === "image/webp"
+              ? "webp"
+              : "jpg";
+        const path = `obra-${obra.num}-estatica.${ext}`;
+
+        const { error: upErr } = await supabaseAdmin.storage
+          .from("imagens-obras")
+          .upload(path, baixada.bytes, {
+            contentType: baixada.mime,
+            upsert: true,
+          });
+        if (upErr) {
+          console.error("cadastrarImagensEstaticas upload:", obra.num, upErr.message);
+          falhas++;
+          continue;
+        }
+
+        const { error: dbErr } = await supabaseAdmin
+          .from("obra_overrides")
+          .upsert({ num: obra.num, imagem_path: path }, { onConflict: "num" });
+        if (dbErr) {
+          console.error("cadastrarImagensEstaticas db:", obra.num, dbErr.message);
+          falhas++;
+          continue;
+        }
+        gravadas++;
+      } catch (e) {
+        console.error("cadastrarImagensEstaticas:", obra.num, e);
+        falhas++;
+      }
+    }
+
+    return {
+      ok: true as const,
+      total: alvos.length,
+      gravadas,
+      falhas,
+    };
+  });
+
+
+
+/**
  * Obtém a imagem da obra como data URL (base64), para enviar à IA multimodal.
  * Usa a imagem enviada (override no bucket privado) ou a imagem estática.
  */
