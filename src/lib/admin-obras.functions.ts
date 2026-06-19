@@ -860,6 +860,7 @@ async function registrarVersao(
   await supabaseAdmin.from("obra_versoes").delete().in("id", ids);
 }
 
+/** Salva a DESCRIÇÃO de referência (texto factual/curatorial) da obra. */
 export const salvarTexto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -889,11 +890,50 @@ export const salvarTexto = createServerFn({ method: "POST" })
       console.error("salvarTexto:", error.message);
       return { ok: false as const, erro: "Não foi possível salvar o texto." };
     }
+    return { ok: true as const };
+  });
+
+/**
+ * Salva o TEXTO DA AUDIODESCRIÇÃO (narrativa que vira a locução) e registra
+ * uma versão de texto no histórico.
+ */
+export const salvarAudiodescricao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        chave: z.number().int().min(1).max(MAX_CHAVE),
+        audiodescricao: z.string().min(1).max(20000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const tabela = ehObraFixa(data.chave) ? "obra_overrides" : "obras_extras";
+    const { error } = await supabaseAdmin
+      .from(tabela)
+      .upsert(
+        { num: data.chave, audiodescricao: data.audiodescricao },
+        { onConflict: "num" },
+      );
+
+    if (error) {
+      console.error("salvarAudiodescricao:", error.message);
+      return {
+        ok: false as const,
+        erro: "Não foi possível salvar a audiodescrição.",
+      };
+    }
     await registrarVersao(supabaseAdmin, {
       num: data.chave,
       tipo: "texto",
       origem: "manual",
-      descricao: data.descricao,
+      descricao: data.audiodescricao,
     });
     return { ok: true as const };
   });
