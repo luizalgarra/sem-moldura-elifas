@@ -1,23 +1,21 @@
-## Plano
+## Problema
 
-Corrigir o botão **Baixar áudio** para que o arquivo seja baixado pelo próprio backend da aplicação, sem depender de `fetch` no navegador nem de URL temporária que pode falhar e provocar perda do estado visual.
+Ao clicar em **"Gerar audiodescrição (IA)"**, o botão fica girando e para sem gerar texto. A geração usa o modelo `google/gemini-2.5-pro` analisando a imagem da obra. Esse é o modelo mais lento e, somado à análise de imagem, a chamada frequentemente ultrapassa o tempo limite do servidor — a requisição é interrompida e o texto nunca volta. Verifiquei que o gateway de IA e a autenticação estão funcionando normalmente; o gargalo é o tempo da chamada.
 
-### 1. Ajustar o endpoint de áudio
-No endpoint `/api/public/obra-audio/$num`:
-- adicionar suporte a um parâmetro `download=1`;
-- quando esse parâmetro existir, retornar o áudio com cabeçalho `Content-Disposition: attachment; filename="obra-N.mp3"`;
-- manter o comportamento atual do player de áudio quando `download=1` não existir.
+## Correção
 
-### 2. Ajustar o botão no admin
-Em `src/routes/admin.tsx`:
-- trocar o download via `fetch(...).blob()` por um clique programático em um link oculto apontando para `/api/public/obra-audio/${num}?voz=fem&download=1&v=...` quando houver áudio gerado;
-- para áudio estático antigo, manter fallback seguro abrindo em nova aba se necessário;
-- não chamar `onChanged()` nem `refetch()` no download, para não recarregar a lista de obras.
+Em `src/lib/admin-obras.functions.ts`, dentro de `gerarTextoDescricao`:
 
-### 3. Proteger o texto recém-gerado contra refetch
-Ainda em `src/routes/admin.tsx`:
-- impedir que uma atualização da lista sobrescreva o texto em edição enquanto o usuário está com audiodescrição/locução recém-gerada na tela;
-- manter o conteúdo local até o usuário salvar, gerar novamente ou restaurar uma versão.
+1. **Trocar o modelo por um mais rápido com visão**: usar `google/gemini-3-flash-preview` no lugar de `google/gemini-2.5-pro`. Ele analisa imagem e texto com qualidade boa e responde muito mais rápido, eliminando o estouro de tempo. A mesma instrução (prompt) é mantida, então a qualidade do texto continua alta.
 
-### Resultado esperado
-Clicar em **Baixar áudio** deve baixar o arquivo sem recarregar a página, sem limpar o texto gerado e sem voltar ao estado anterior.
+2. **Adicionar um tempo limite explícito com mensagem clara**: envolver o `fetch` num `AbortController` (por exemplo, ~90s). Se mesmo assim demorar demais, retornar uma mensagem amigável ("A geração demorou mais que o esperado. Tente novamente.") em vez de o botão simplesmente parar de girar sem explicação.
+
+3. **Mensagem de erro mais explícita no admin**: garantir que, quando a geração falhar ou expirar, a mensagem apareça de forma visível ao lado do botão (já existe o `msg`, apenas confirmar que o caso de timeout cai nele).
+
+## Resultado esperado
+
+Clicar em "Gerar audiodescrição (IA)" passa a retornar o texto em poucos segundos. Caso ocorra qualquer falha, uma mensagem clara é exibida em vez de o botão girar e parar silenciosamente.
+
+## Observação
+
+Se você preferir manter a maior capacidade de análise do `gemini-2.5-pro` mesmo correndo risco de lentidão, posso, em vez de trocar o modelo, converter a geração para um processo em segundo plano (gera e avisa quando ficar pronto). Isso é mais robusto, porém mais trabalhoso. Me diga se prefere essa abordagem.

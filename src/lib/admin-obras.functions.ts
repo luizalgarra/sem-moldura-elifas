@@ -1184,6 +1184,8 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
       .join("\n");
 
 
+    const controlador = new AbortController();
+    const timeoutId = setTimeout(() => controlador.abort(), 90000);
     try {
       const resp = await fetch(
         "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -1193,8 +1195,9 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
             "Content-Type": "application/json",
             "Lovable-API-Key": apiKey,
           },
+          signal: controlador.signal,
           body: JSON.stringify({
-            model: "google/gemini-2.5-pro",
+            model: "google/gemini-3-flash-preview",
             messages: [
               { role: "system", content: system },
               {
