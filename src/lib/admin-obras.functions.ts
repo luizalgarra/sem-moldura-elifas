@@ -1445,6 +1445,8 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     }
 
     // Grava o caminho do áudio único. Limpa trechos e a voz masculina legados.
+    // Só substitui o áudio anterior DEPOIS que o registro no banco der certo:
+    // se o update falhar, removemos o novo arquivo órfão e preservamos o atual.
     const { data: salvo, error: dbErr } = await supabaseAdmin
       .from(tabela)
       .upsert(
@@ -1462,7 +1464,13 @@ export const regenerarAudio = createServerFn({ method: "POST" })
 
     if (dbErr) {
       console.error("regenerarAudio db:", dbErr.message);
-      return { ok: false as const, erro: "Áudio gerado, mas não registrado." };
+      // Remove o arquivo recém-enviado para não deixar lixo no storage; o áudio
+      // anterior (ainda registrado no banco) permanece intacto.
+      await supabaseAdmin.storage.from("audios-obras").remove([path]);
+      return {
+        ok: false as const,
+        erro: "Áudio gerado, mas não registrado. O áudio anterior foi mantido.",
+      };
     }
 
     await registrarVersao(supabaseAdmin, {
@@ -1475,6 +1483,7 @@ export const regenerarAudio = createServerFn({ method: "POST" })
     return {
       ok: true as const,
       versao: versaoDe(salvo?.updated_at),
+      audioPath: path,
     };
   });
 
