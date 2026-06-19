@@ -1,34 +1,33 @@
-## Contexto
+## Causa raiz
 
-As imagens das obras já aparecem no site porque vêm dos **assets estáticos** do projeto (`src/assets/obras/obra-{num}.jpg.asset.json`), mapeados por número em `src/data/obras.ts`. A IA de audiodescrição, porém, prioriza a imagem em `imagem_path` (storage) e só cai num *fallback* que baixa o asset estático. Quando esse fallback falha, surge "Esta obra não tem imagem cadastrada para a IA analisar".
+A IA não consegue analisar a imagem porque a função que baixa o asset estático falha em silêncio. O log do servidor confirma:
 
-Subir imagem por obra na tela de admin é inviável (são muitas). A solução é popular `imagem_path` de todas as obras de uma vez, reaproveitando os assets estáticos que já existem.
+```text
+baixarImagemEstatica erro: https://localhost:8080/__l5e/assets-v1/.../obra-115.jpg
+TypeError: fetch failed
+```
 
-## Objetivo
+A função `baixarImagemEstatica` (em `src/lib/admin-obras.functions.ts`) resolve a URL relativa do asset (`/__l5e/...`) contra a **origem do request**, que em execução é `localhost:8080`. Esse host não serve os assets da plataforma, então o `fetch` falha. Existe um fallback para `process.env.SITE_URL`, mas essa variável de ambiente **não existe** — o domínio público do site está apenas na constante `SITE_URL` de `src/lib/site.ts`. Sem nenhuma origem válida, o download falha e tanto o "Cadastrar imagens das obras (IA)" quanto o "Gerar audiodescrição (IA)" por obra exibem o aviso.
 
-Permitir que a IA gere audiodescrição de qualquer obra que já tenha imagem estática, sem upload manual.
+Os assets `/__l5e/...` são imutáveis e ficam disponíveis em qualquer origem onde o site está publicado (ex.: o domínio público `institutoelifasandreato.org.br`).
 
 ## O que será feito
 
-1. **Tornar o fallback da IA mais robusto** (`src/lib/admin-obras.functions.ts`, `imagemDataUrl`)
-   - Garantir que a busca da imagem estática funcione mesmo quando a origem do request não resolve o caminho `/__l5e/...` (tentar a URL absoluta do asset e logar o motivo da falha em caso de erro), para o fallback deixar de falhar silenciosamente.
+1. **Usar o domínio público como origem confiável** (`src/lib/admin-obras.functions.ts`, função `baixarImagemEstatica`)
+   - Importar a constante `SITE_URL` de `@/lib/site` (código server-only, import seguro).
+   - Acrescentar a origem dessa constante à lista de `candidatas`, além da origem do request e de `process.env.SITE_URL`/`VITE_SITE_URL` (que continuam como tentativas extras).
+   - Ordenar para que origens públicas conhecidas (que realmente servem `/__l5e/...`) sejam tentadas antes de `localhost`.
 
-2. **Nova server function de backfill em lote** (`admin-obras.functions.ts`)
-   - Protegida por `requireSupabaseAuth` + verificação de admin (`ehAdmin`), seguindo o padrão das demais funções.
-   - Para cada obra fixa com imagem estática e **sem** `imagem_path`: baixar os bytes do asset estático e enviar ao bucket `imagens-obras`, gravando o `imagem_path` em `obra_overrides` (upsert por `num`).
-   - Retornar contagem de sucessos/falhas (`{ ok, total, gravadas, falhas }`).
-
-3. **Botão na área de admin** (`src/routes/admin.tsx`)
-   - Adicionar, ao lado de "Gerar locução de todas as obras", um botão **"Cadastrar imagens das obras (IA)"** que chama a função de backfill e mostra progresso/resultado, com `refetch()` ao final.
+2. **Manter os logs de diagnóstico** já existentes, para que qualquer falha futura (status != 200, host inválido) continue registrada com a URL tentada.
 
 ## Resultado esperado
 
-- Um clique cadastra `imagem_path` para todas as obras que já têm imagem estática.
-- A partir daí, "Gerar audiodescrição (IA)" funciona para essas obras (caminho rápido via storage), e o fallback estático cobre eventuais lacunas.
+- Com o domínio público nas origens candidatas, o asset `/__l5e/...` é baixado com sucesso a partir de `https://institutoelifasandreato.org.br/__l5e/...`.
+- "Cadastrar imagens das obras (IA)" passa a gravar `imagem_path` para as obras com imagem estática.
+- "Gerar audiodescrição (IA)" por obra deixa de mostrar "Esta obra não tem imagem cadastrada para a IA analisar" (caminho rápido via storage, e o fallback estático passa a funcionar).
 
 ## Detalhes técnicos
 
-- O backfill não altera o site público (apenas grava `imagem_path`; o front continua exibindo o asset estático).
-- Reutiliza o bucket privado existente `imagens-obras` e a tabela `obra_overrides`.
-- A leitura dos bytes do asset usa `fetch` da URL do asset (`obra.imagem`) dentro do handler server-only; nenhuma credencial nova é necessária.
-- Sem mudanças de schema, RLS ou migrações.
+- Nenhuma mudança de schema, RLS, migração ou novo segredo.
+- A constante `SITE_URL` já existe e aponta para o domínio público; reutilizá-la evita depender de variável de ambiente inexistente.
+- Sem alterações no site público nem no fluxo de UI; apenas a resolução de origem do download é corrigida.
