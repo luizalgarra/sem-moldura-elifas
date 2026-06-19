@@ -337,28 +337,23 @@ function ObraEditor({
     ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
     : null;
 
-  const downloadSrc = audioRegenSrc ?? audioEstatico;
+  const downloadSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=fem&download=1&v=${versaoAudio}`
+    : audioEstatico;
 
-  const handleBaixar = async () => {
+  const handleBaixar = () => {
     if (!downloadSrc) return;
-    setBaixando(true);
     setMsg(null);
     try {
-      const resp = await fetch(downloadSrc);
-      if (!resp.ok) throw new Error("download");
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = downloadSrc;
       a.download = `obra-${num}.mp3`;
+      a.rel = "noopener";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
     } catch {
       setMsg("Não foi possível baixar o áudio.");
-    } finally {
-      setBaixando(false);
     }
   };
 
