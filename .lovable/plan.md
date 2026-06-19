@@ -1,38 +1,55 @@
-# Site 100% público + admin protegido de verdade
+# Imagens das obras para a IA — diagnóstico e correções
 
-## Situação atual
+## O que foi descoberto
 
-O site **já é público** para visitantes: o portão de login em `src/routes/__root.tsx` só protege as rotas `/admin`, `/editar` e `/qrcodes`. Todas as páginas de conteúdo (obras, acervo, biografia, etc.) abrem sem login, e o site publicado está com visibilidade pública.
+1. **Duas fontes de imagem independentes.** As obras fixas (1–117) mostram a imagem
+   empacotada em `src/assets/obras/`, que nunca grava no banco. A coluna `imagem_path`
+   só é preenchida quando o admin faz upload manual. Logo, "imagem visível" não
+   significa `imagem_path` cadastrado — isso é esperado.
 
-Porém há uma falha importante: as funções de servidor que **criam, editam, removem e geram áudio/texto** (em `src/lib/admin-obras.functions.ts`) usam a chave de serviço e **não verificam se quem chamou é admin**. O portão de `__root.tsx` apenas esconde a tela — qualquer pessoa poderia chamar esses endpoints diretamente no site publicado e alterar o acervo ou gastar créditos de geração de voz/IA.
+2. **A IA já usa a imagem estática.** A função `imagemDataUrl` já tem fallback: se não
+   há `imagem_path`, ela busca a imagem estática da obra fixa. Funciona para quase tudo.
 
-O objetivo é deixar isso correto nos dois sentidos: **visitantes nunca veem login** e **as ações de admin só funcionam para admin de verdade**.
+3. **O aviso só aparece quando as duas fontes falham.** Hoje, entre as obras fixas,
+   isso ocorre apenas na **obra 30** (não existe `obra-30.jpg` nem `imagem_path`).
+
+4. **Achado adicional:** os arquivos `.asset.json` das obras estão **desalinhados** —
+   `obra-1.jpg.asset.json` aponta para `obra-115.jpg`, `obra-2`→`obra-1.jpg`, etc.
+   Isso faz várias obras exibirem/enviarem para a IA a imagem de outra obra.
 
 ## O que será feito
 
-### 1. Confirmar acesso público dos visitantes (sem mudança de comportamento)
-- Manter o portão de login restrito apenas a `/admin`, `/editar` e `/qrcodes`.
-- Confirmar que as funções de leitura pública (`listarAcervo`, `getObraPublica`) e as rotas de mídia pública continuam abertas, sem exigir sessão.
+### 1. Resolver a obra 30
+- Opção A (preferida): o usuário fornece o arquivo da imagem da obra 30; subimos como
+  asset estático (`src/assets/obras/obra-30.jpg`) — passa a aparecer no site e a IA
+  consegue analisá-la.
+- Opção B (provisória): se não houver a imagem, manter o aviso, mas deixá-lo mais
+  claro (ver item 2).
 
-### 2. Blindar as funções de administração
-Adicionar verificação de papel admin nas funções que escrevem ou custam créditos, para que o papel de admin realmente proteja essas áreas (e não só a interface):
-- `criarObra`, `removerObra`
-- `salvarDados`, `salvarImagem`, `salvarTexto`
-- `gerarTextoDescricao`, `regenerarAudio`
+### 2. Mensagem de aviso mais clara
+Trocar "Esta obra não tem imagem cadastrada para a IA analisar." por algo que explique
+o caminho: indicar que é preciso enviar a imagem da obra pela tela de edição (ou que a
+obra ainda não tem arquivo de imagem disponível).
 
-Cada uma passará a exigir um usuário autenticado e com permissão de admin antes de executar. Sem isso, retornam "não autorizado".
-
-### 3. Manter o que já funciona
-- Páginas públicas, players de áudio, QR Codes para visitantes, navegação e a home continuam iguais.
-- As telas de admin (`/admin`, `/editar`, `/qrcodes`) seguem exigindo login + papel admin.
+### 3. Corrigir o desalinhamento dos ponteiros de imagem
+Investigar e corrigir os `.asset.json` em `src/assets/obras/` para que
+`obra-N.jpg.asset.json` aponte de fato para a imagem da obra N. Isso conserta tanto a
+exibição pública quanto o que a IA recebe. Requer confirmar a correspondência correta
+(provavelmente recriar os ponteiros a partir das imagens originais).
 
 ## Detalhes técnicos
 
-- Em `src/lib/admin-obras.functions.ts`, aplicar o middleware `requireSupabaseAuth` (de `@/integrations/supabase/auth-middleware`) nas funções de escrita e, dentro do handler, validar o papel admin via `context.supabase.rpc("is_admin")`, lançando `Response("Não autorizado", { status: 401 })` quando falso.
-- O `attachSupabaseAuth` já está registrado em `src/start.ts` como `functionMiddleware`, então o token do admin é anexado automaticamente nas chamadas — nenhuma mudança extra de wiring é necessária.
-- Como `/admin`, `/editar` e `/qrcodes` só são acessíveis a admin logado, essas chamadas continuarão funcionando normalmente para o admin; apenas chamadas não autenticadas passam a ser barradas.
-- Funções de leitura pública (`listarAcervo`, `getObraPublica`) permanecem sem middleware para não afetar visitantes.
+- Fallback da IA: `src/lib/admin-obras.functions.ts`, função `imagemDataUrl`
+  (passo 2 já busca a imagem estática para obras fixas).
+- Texto do aviso: `gerarTextoDescricao` na mesma file (linha ~927).
+- Imagens estáticas: `src/data/obras.ts` lê `src/assets/obras/obra-N.jpg.asset.json`
+  via `import.meta.glob`. A correção do item 3 mexe apenas nesses ponteiros.
 
 ## Fora de escopo
-- Não altera a home "Em construção" nem o conteúdo das páginas.
-- Não muda regras de RLS nem o esquema do banco.
+- Não muda o esquema do banco nem as regras de RLS.
+- Não altera o pipeline de áudio.
+
+## Decisão necessária do usuário
+- Você tem a imagem da **obra 30** para enviarmos? E quer que eu corrija também o
+  desalinhamento dos ponteiros (item 3), que é a causa mais provável de obras exibindo
+  a imagem errada?
