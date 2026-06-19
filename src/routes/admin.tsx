@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -255,7 +255,10 @@ function ObraEditor({
     try {
       const r = await salvar({ data: { chave: num, descricao: texto } });
       setMsg(r.ok ? "Texto salvo." : (r.erro ?? "Erro ao salvar."));
-      if (r.ok) onChanged();
+      if (r.ok) {
+        onChanged();
+        recarregarHist();
+      }
     } catch {
       setMsg("Erro ao salvar.");
     } finally {
@@ -272,6 +275,7 @@ function ObraEditor({
         setVersaoAudio(Date.now().toString());
         setMsg("Locução gerada.");
         onChanged();
+        recarregarHist();
       } else {
         setMsg(r.erro ?? "Erro ao gerar.");
       }
@@ -290,6 +294,7 @@ function ObraEditor({
       if (r.ok) {
         setTexto(r.texto);
         setMsg("Texto gerado — revise e salve.");
+        recarregarHist();
       } else {
         setMsg(r.erro ?? "Erro ao gerar o texto.");
       }
@@ -394,6 +399,238 @@ function ObraEditor({
           </audio>
         </div>
       )}
+
+      <Historico
+        num={num}
+        refreshKey={histKey}
+        onRestaurarTexto={(t) => setTexto(t)}
+        onRestaurarAudio={(v) => setVersaoAudio(v)}
+      />
     </li>
+  );
+}
+
+function dataHora(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function Historico({
+  num,
+  refreshKey,
+  onRestaurarTexto,
+  onRestaurarAudio,
+}: {
+  num: number;
+  refreshKey: number;
+  onRestaurarTexto: (texto: string) => void;
+  onRestaurarAudio: (versao: string) => void;
+}) {
+  const listar = useServerFn(listarVersoes);
+  const restTexto = useServerFn(restaurarVersaoTexto);
+  const restAudio = useServerFn(restaurarVersaoAudio);
+
+  const [aberto, setAberto] = useState(false);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [textos, setTextos] = useState<
+    { id: string; origem: "ia" | "manual"; descricao: string; createdAt: string }[]
+  >([]);
+  const [audios, setAudios] = useState<
+    { id: string; origem: "ia" | "manual"; createdAt: string }[]
+  >([]);
+  const [restaurandoId, setRestaurandoId] = useState<string | null>(null);
+  const [audioPreview, setAudioPreview] = useState<string | null>(null);
+
+  const carregar = async () => {
+    setCarregando(true);
+    setErro(null);
+    try {
+      const r = await listar({ data: { chave: num } });
+      if (r.ok) {
+        setTextos(r.textos);
+        setAudios(r.audios);
+      } else {
+        setErro(r.erro ?? "Erro ao carregar.");
+      }
+    } catch {
+      setErro("Erro ao carregar.");
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  useEffect(() => {
+    if (aberto) void carregar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aberto, refreshKey]);
+
+  const handleRestTexto = async (id: string) => {
+    setRestaurandoId(id);
+    try {
+      const r = await restTexto({ data: { id } });
+      if (r.ok) onRestaurarTexto(r.texto);
+      else setErro(r.erro ?? "Erro ao restaurar.");
+    } catch {
+      setErro("Erro ao restaurar.");
+    } finally {
+      setRestaurandoId(null);
+    }
+  };
+
+  const handleRestAudio = async (id: string) => {
+    setRestaurandoId(id);
+    try {
+      const r = await restAudio({ data: { id } });
+      if (r.ok) {
+        onRestaurarAudio(r.versao);
+        setAudioPreview(`/api/public/obra-audio/${num}?voz=fem&v=${r.versao}`);
+      } else {
+        setErro(r.erro ?? "Erro ao restaurar.");
+      }
+    } catch {
+      setErro("Erro ao restaurar.");
+    } finally {
+      setRestaurandoId(null);
+    }
+  };
+
+  return (
+    <div className="mt-4 border-t border-border pt-3">
+      <button
+        type="button"
+        onClick={() => setAberto((a) => !a)}
+        className="inline-flex items-center gap-2 text-sm font-medium text-foreground"
+        aria-expanded={aberto}
+      >
+        <History className="h-4 w-4" aria-hidden="true" />
+        <span>Histórico {aberto ? "▲" : "▼"}</span>
+      </button>
+
+      {aberto && (
+        <div className="mt-3 space-y-4">
+          {carregando && (
+            <p className="text-sm text-muted-foreground" role="status">
+              Carregando…
+            </p>
+          )}
+          {erro && (
+            <p className="text-sm text-destructive" role="alert">
+              {erro}
+            </p>
+          )}
+
+          {!carregando && (
+            <>
+              <div>
+                <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+                  Texto (últimas 3)
+                </h3>
+                {textos.length === 0 ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Sem versões ainda.
+                  </p>
+                ) : (
+                  <ul className="mt-2 space-y-2">
+                    {textos.map((v) => (
+                      <li
+                        key={v.id}
+                        className="rounded-md border border-border bg-background p-2"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {dataHora(v.createdAt)} ·{" "}
+                            {v.origem === "ia" ? "IA" : "manual"}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRestTexto(v.id)}
+                            disabled={restaurandoId === v.id}
+                          >
+                            {restaurandoId === v.id ? (
+                              <Loader2
+                                className="h-3 w-3 animate-spin"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                            )}
+                            <span>Restaurar</span>
+                          </Button>
+                        </div>
+                        <p className="mt-1 line-clamp-2 text-sm text-foreground">
+                          {v.descricao}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+                  Áudio (últimas 3)
+                </h3>
+                {audios.length === 0 ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Sem versões ainda.
+                  </p>
+                ) : (
+                  <ul className="mt-2 space-y-2">
+                    {audios.map((v) => (
+                      <li
+                        key={v.id}
+                        className="flex items-center justify-between gap-2 rounded-md border border-border bg-background p-2"
+                      >
+                        <span className="text-xs text-muted-foreground">
+                          {dataHora(v.createdAt)} ·{" "}
+                          {v.origem === "ia" ? "IA" : "manual"}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRestAudio(v.id)}
+                          disabled={restaurandoId === v.id}
+                        >
+                          {restaurandoId === v.id ? (
+                            <Loader2
+                              className="h-3 w-3 animate-spin"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                          )}
+                          <span>Restaurar</span>
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {audioPreview && (
+                  <audio
+                    controls
+                    preload="none"
+                    src={audioPreview}
+                    className="mt-2 w-full"
+                  >
+                    Seu navegador não suporta áudio.
+                  </audio>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
