@@ -255,7 +255,10 @@ function ObraEditor({
     try {
       const r = await salvar({ data: { chave: num, descricao: texto } });
       setMsg(r.ok ? "Texto salvo." : (r.erro ?? "Erro ao salvar."));
-      if (r.ok) onChanged();
+      if (r.ok) {
+        onChanged();
+        recarregarHist();
+      }
     } catch {
       setMsg("Erro ao salvar.");
     } finally {
