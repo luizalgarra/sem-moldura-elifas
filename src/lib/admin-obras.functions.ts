@@ -355,6 +355,7 @@ async function construirAcervo(
       dimensao: ex.dimensao ?? "",
       parede: ex.parede ?? "Parede 4",
       descricao: ex.descricao ?? "",
+      audiodescricao: ex.audiodescricao ?? ex.descricao ?? "",
       imagem: ex.imagem_path
         ? `/api/public/obra-imagem/${ex.num}?v=${v}`
         : null,
