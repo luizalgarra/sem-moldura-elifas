@@ -218,7 +218,15 @@ function AdminPagina() {
   );
 }
 
+/** Versão (cache-buster) derivada do `updatedAt` do override salvo no banco. */
+function versaoDeOverride(override: OverrideObra | undefined): string {
+  return override?.updatedAt
+    ? new Date(override.updatedAt).getTime().toString()
+    : Date.now().toString();
+}
+
 function ObraEditor({
+
   num,
   titulo,
   textoEstatico,
