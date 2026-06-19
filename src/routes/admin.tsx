@@ -604,6 +604,24 @@ function ObraEditor({
             </Button>
           )}
 
+          <Button
+            variant={aprovada ? "default" : "outline"}
+            onClick={handleAprovar}
+            disabled={aprovando}
+            className="min-h-11"
+          >
+            {aprovando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : aprovada ? (
+              <CheckCircle2 aria-hidden="true" />
+            ) : (
+              <Circle aria-hidden="true" />
+            )}
+            <span>{aprovada ? "Desaprovar" : "Aprovar"}</span>
+          </Button>
+
+
+
           {msg && (
             <span className="text-sm text-muted-foreground" role="status">
               {msg}
