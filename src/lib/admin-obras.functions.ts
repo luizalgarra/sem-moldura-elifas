@@ -290,7 +290,7 @@ async function construirAcervo(
     supabaseAdmin
       .from("obras_extras")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
       ),
     supabaseAdmin.from("acervo_ordem").select("chave, posicao"),
   ]);
