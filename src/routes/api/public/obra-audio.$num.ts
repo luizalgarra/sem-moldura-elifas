@@ -60,12 +60,19 @@ export const Route = createFileRoute("/api/public/obra-audio/$num")({
           return new Response("Not found", { status: 404 });
         }
 
+        const baixar = params2.get("download");
+        const headers: Record<string, string> = {
+          "Content-Type": "audio/mpeg",
+          "Cache-Control": "public, max-age=86400",
+        };
+        if (baixar) {
+          headers["Content-Disposition"] =
+            `attachment; filename="obra-${num}.mp3"`;
+        }
+
         return new Response(file, {
           status: 200,
-          headers: {
-            "Content-Type": "audio/mpeg",
-            "Cache-Control": "public, max-age=86400",
-          },
+          headers,
         });
       },
     },

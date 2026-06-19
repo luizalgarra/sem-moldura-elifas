@@ -1,21 +1,23 @@
-# Corrigir o botão "Baixar áudio"
+## Plano
 
-## Problema
-No editor de obras (`src/routes/admin.tsx`), o botão **Baixar áudio** é um link `<a href={downloadSrc} download>`. Quando `downloadSrc` aponta para uma URL de outra origem (o áudio estático vem da CDN de assets), o navegador ignora o atributo `download` e **navega** o navegador até o arquivo. Isso descarta a página `/admin` e todo o estado em memória do componente (texto da audiodescrição gerado, locução recém-criada, mensagens). Ao voltar, a query recarrega do banco e parece que "sumiu tudo e voltou ao que estava".
+Corrigir o botão **Baixar áudio** para que o arquivo seja baixado pelo próprio backend da aplicação, sem depender de `fetch` no navegador nem de URL temporária que pode falhar e provocar perda do estado visual.
 
-## Solução
-Trocar o link de download por um download programático via `fetch` + Blob, que nunca navega nem recarrega a página.
+### 1. Ajustar o endpoint de áudio
+No endpoint `/api/public/obra-audio/$num`:
+- adicionar suporte a um parâmetro `download=1`;
+- quando esse parâmetro existir, retornar o áudio com cabeçalho `Content-Disposition: attachment; filename="obra-N.mp3"`;
+- manter o comportamento atual do player de áudio quando `download=1` não existir.
 
-### Mudanças em `src/routes/admin.tsx` (componente `ObraEditor`)
-- Adicionar um handler `handleBaixar` que:
-  - Faz `fetch(downloadSrc)` e obtém o `blob()`.
-  - Cria uma URL temporária com `URL.createObjectURL(blob)`.
-  - Cria um elemento `<a>` em memória com `download="obra-${num}.mp3"`, dispara o clique e revoga a URL com `URL.revokeObjectURL`.
-  - Em caso de erro, mostra mensagem em `msg` (ex.: "Não foi possível baixar o áudio.").
-  - Usa um estado `baixando` para desabilitar o botão e mostrar o spinner durante o download.
-- Substituir o `<Button asChild><a href=... download></a></Button>` por um `<Button onClick={handleBaixar} disabled={baixando}>` comum, mantendo o ícone `Download` e o texto "Baixar áudio".
+### 2. Ajustar o botão no admin
+Em `src/routes/admin.tsx`:
+- trocar o download via `fetch(...).blob()` por um clique programático em um link oculto apontando para `/api/public/obra-audio/${num}?voz=fem&download=1&v=...` quando houver áudio gerado;
+- para áudio estático antigo, manter fallback seguro abrindo em nova aba se necessário;
+- não chamar `onChanged()` nem `refetch()` no download, para não recarregar a lista de obras.
 
-Nenhuma outra lógica (geração de texto, locução, histórico, banco) é alterada — apenas o mecanismo de download deixa de recarregar a página.
+### 3. Proteger o texto recém-gerado contra refetch
+Ainda em `src/routes/admin.tsx`:
+- impedir que uma atualização da lista sobrescreva o texto em edição enquanto o usuário está com audiodescrição/locução recém-gerada na tela;
+- manter o conteúdo local até o usuário salvar, gerar novamente ou restaurar uma versão.
 
-## Resultado
-Clicar em **Baixar áudio** baixa o arquivo sem navegar, preservando o texto gerado, a locução e o estado da tela.
+### Resultado esperado
+Clicar em **Baixar áudio** deve baixar o arquivo sem recarregar a página, sem limpar o texto gerado e sem voltar ao estado anterior.
