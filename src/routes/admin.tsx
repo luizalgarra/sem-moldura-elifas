@@ -333,6 +333,28 @@ function ObraEditor({
   }, [override?.audioFemPath, override?.updatedAt]);
 
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
+  const status = statusDaObra(override);
+  const aprovada = status === "aprovada";
+
+  const handleAprovar = async () => {
+    setAprovando(true);
+    setMsg(null);
+    try {
+      const r = await aprovar({ data: { chave: num, aprovada: !aprovada } });
+      if (r.ok) {
+        setMsg(aprovada ? "Aprovação removida." : "Obra aprovada.");
+        onChanged();
+      } else {
+        setMsg(r.erro ?? "Erro ao atualizar a aprovação.");
+      }
+    } catch {
+      setMsg("Erro ao atualizar a aprovação.");
+    } finally {
+      setAprovando(false);
+    }
+  };
+
+
 
 
   const handleSalvar = async () => {
