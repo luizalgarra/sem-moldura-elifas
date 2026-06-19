@@ -54,6 +54,7 @@ export interface TrechoPublico {
 export interface ObraAcervo extends Obra {
   chave: number;
   extra: boolean;
+  audiodescricao: string;
   audioFem: string | null;
   audioMasc: string | null;
   audioTrechos: TrechoPublico[] | null;
