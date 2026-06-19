@@ -59,6 +59,9 @@ function AdminPagina() {
   }, [overrides]);
 
   const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<StatusObra | "todas">(
+    "todas",
+  );
 
   // Geração em lote (todas as obras).
   const regenerar = useServerFn(regenerarAudio);
