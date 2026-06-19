@@ -323,6 +323,7 @@ async function construirAcervo(
       dimensao: ov?.dimensao ?? obra.dimensao,
       parede: ov?.parede ?? obra.parede,
       descricao: ov?.descricao ?? obra.descricao,
+      audiodescricao: ov?.audiodescricao ?? ov?.descricao ?? obra.descricao,
       imagem: ov?.imagem_path
         ? `/api/public/obra-imagem/${obra.num}?v=${v}`
         : obra.imagem,
