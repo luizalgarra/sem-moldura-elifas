@@ -245,7 +245,7 @@ function ObraEditor({
   const [salvando, setSalvando] = useState(false);
   const [salvandoAudio, setSalvandoAudio] = useState(false);
   const [gerando, setGerando] = useState(false);
-  const [baixando, setBaixando] = useState(false);
+  
   const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
