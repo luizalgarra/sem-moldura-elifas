@@ -234,7 +234,31 @@ function AdminPagina() {
             aria-label="Buscar obra"
           />
         </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {FILTROS.map((f) => {
+            const ativo = filtroStatus === f.valor;
+            const total =
+              f.valor === "todas"
+                ? obras.length
+                : obras.filter(
+                    (o) => statusDaObra(mapa.get(o.num)) === f.valor,
+                  ).length;
+            return (
+              <Button
+                key={f.valor}
+                size="sm"
+                variant={ativo ? "default" : "outline"}
+                onClick={() => setFiltroStatus(f.valor)}
+                aria-pressed={ativo}
+              >
+                {f.rotulo}
+                <span className="ml-1 opacity-70">({total})</span>
+              </Button>
+            );
+          })}
+        </div>
       </div>
+
 
       <ul className="mt-4 space-y-4">
         {filtradas.map((obra) => (
