@@ -968,20 +968,28 @@ async function baixarImagemEstatica(
   if (url.startsWith("http")) {
     candidatas.push(url);
   } else {
-    const origens = new Set<string>();
-    try {
-      origens.add(new URL(getRequest().url).origin);
-    } catch {
-      // sem request disponível (ex.: prerender) — ignora
-    }
-    const publica = process.env.SITE_URL || process.env.VITE_SITE_URL;
-    if (publica) {
+    // Origens públicas confiáveis primeiro (servem os assets /__l5e/...),
+    // depois a origem do request (pode ser localhost, que não serve assets).
+    const origens: string[] = [];
+    const adicionar = (valor: string | undefined) => {
+      if (!valor) return;
       try {
-        origens.add(new URL(publica).origin);
+        const origem = new URL(valor).origin;
+        if (!origens.includes(origem)) origens.push(origem);
       } catch {
         // ignora valor inválido
       }
+    };
+
+    adicionar(SITE_URL);
+    adicionar(process.env.SITE_URL);
+    adicionar(process.env.VITE_SITE_URL);
+    try {
+      adicionar(getRequest().url);
+    } catch {
+      // sem request disponível (ex.: prerender) — ignora
     }
+
     for (const origem of origens) {
       candidatas.push(new URL(url, origem).toString());
     }
