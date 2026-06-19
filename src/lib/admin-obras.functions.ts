@@ -1376,6 +1376,13 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       return { ok: false as const, erro: "Áudio gerado, mas não registrado." };
     }
 
+    await registrarVersao(supabaseAdmin, {
+      num: chave,
+      tipo: "audio",
+      origem: "ia",
+      audioPath: path,
+    });
+
     return {
       ok: true as const,
       versao: versaoDe(salvo?.updated_at),
