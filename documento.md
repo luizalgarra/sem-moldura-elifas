@@ -1,10 +1,3 @@
-## Objetivo
-
-Criar um arquivo `documento.md` na raiz do projeto registrando, em ordem, todas as tentativas e diagnósticos feitos até agora para resolver os problemas de **audiodescrição** e **geração de locução**. Nenhuma mudança de funcionalidade ou código de app — apenas o documento.
-
-## Conteúdo que o documento terá
-
-```text
 # Histórico — Audiodescrição + Geração de Locução
 
 ## 1. Sintoma relatado
@@ -47,10 +40,3 @@ src/routes/admin.tsx
 ## 5. Estado atual
 - Locução persiste no banco e a tela reflete o áudio salvo após refetch().
 - Pendente: confirmar com o usuário se o problema foi resolvido na prática.
-```
-
-## Detalhes técnicos
-
-- Local do arquivo: `documento.md` na raiz do projeto.
-- Apenas criação de texto/markdown; nenhum arquivo de código será alterado.
-- O conteúdo acima é o rascunho final; pode ser ajustado conforme o histórico exato registrado no `.lovable/plan.md`.
