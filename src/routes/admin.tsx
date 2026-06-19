@@ -9,6 +9,7 @@ import {
   Search,
   Download,
   Sparkles,
+  Images,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
