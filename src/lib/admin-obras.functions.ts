@@ -1428,3 +1428,138 @@ export const amostraVoz = createServerFn({ method: "GET" })
       return { ok: false as const, erro: "Serviço de voz indisponível." };
     }
   });
+
+/**
+ * Lista as últimas 3 versões de texto e as últimas 3 de áudio de uma obra.
+ */
+export const listarVersoes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ chave: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data: linhas, error } = await supabaseAdmin
+      .from("obra_versoes")
+      .select("id, tipo, origem, descricao, audio_path, created_at")
+      .eq("num", data.chave)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("listarVersoes:", error.message);
+      return { ok: false as const, erro: "Não foi possível carregar o histórico." };
+    }
+
+    const todas = linhas ?? [];
+    const textos = todas
+      .filter((r) => r.tipo === "texto")
+      .slice(0, 3)
+      .map((r) => ({
+        id: r.id,
+        origem: r.origem as "ia" | "manual",
+        descricao: r.descricao ?? "",
+        createdAt: r.created_at,
+      }));
+    const audios = todas
+      .filter((r) => r.tipo === "audio")
+      .slice(0, 3)
+      .map((r) => ({
+        id: r.id,
+        origem: r.origem as "ia" | "manual",
+        createdAt: r.created_at,
+      }));
+
+    return { ok: true as const, textos, audios };
+  });
+
+/** Restaura uma versão de texto: regrava a descrição da obra. */
+export const restaurarVersaoTexto = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data: versao } = await supabaseAdmin
+      .from("obra_versoes")
+      .select("num, tipo, descricao")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    if (!versao || versao.tipo !== "texto" || versao.descricao == null) {
+      return { ok: false as const, erro: "Versão de texto não encontrada." };
+    }
+
+    const tabela = ehObraFixa(versao.num) ? "obra_overrides" : "obras_extras";
+    const { error } = await supabaseAdmin
+      .from(tabela)
+      .upsert(
+        { num: versao.num, descricao: versao.descricao },
+        { onConflict: "num" },
+      );
+
+    if (error) {
+      console.error("restaurarVersaoTexto:", error.message);
+      return { ok: false as const, erro: "Não foi possível restaurar o texto." };
+    }
+    return { ok: true as const, texto: versao.descricao };
+  });
+
+/** Restaura uma versão de áudio: reaponta o áudio atual para o arquivo salvo. */
+export const restaurarVersaoAudio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data: versao } = await supabaseAdmin
+      .from("obra_versoes")
+      .select("num, tipo, audio_path")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    if (!versao || versao.tipo !== "audio" || !versao.audio_path) {
+      return { ok: false as const, erro: "Versão de áudio não encontrada." };
+    }
+
+    const tabela = ehObraFixa(versao.num) ? "obra_overrides" : "obras_extras";
+    const { data: salvo, error } = await supabaseAdmin
+      .from(tabela)
+      .upsert(
+        {
+          num: versao.num,
+          audio_fem_path: versao.audio_path,
+          audio_trechos: null,
+          audio_url: null,
+          audio_masc_path: null,
+        },
+        { onConflict: "num" },
+      )
+      .select("updated_at")
+      .single();
+
+    if (error) {
+      console.error("restaurarVersaoAudio:", error.message);
+      return { ok: false as const, erro: "Não foi possível restaurar o áudio." };
+    }
+    return { ok: true as const, versao: versaoDe(salvo?.updated_at) };
+  });
