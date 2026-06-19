@@ -294,7 +294,7 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { chave: num } });
+      const r = await regenerar({ data: { chave: num, audiodescricao } });
       if (r.ok) {
         setVersaoAudio(Date.now().toString());
         setMsg("Locução gerada.");
