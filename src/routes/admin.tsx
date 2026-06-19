@@ -339,6 +339,29 @@ function ObraEditor({
 
   const downloadSrc = audioRegenSrc ?? audioEstatico;
 
+  const handleBaixar = async () => {
+    if (!downloadSrc) return;
+    setBaixando(true);
+    setMsg(null);
+    try {
+      const resp = await fetch(downloadSrc);
+      if (!resp.ok) throw new Error("download");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `obra-${num}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setMsg("Não foi possível baixar o áudio.");
+    } finally {
+      setBaixando(false);
+    }
+  };
+
   return (
     <li className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-baseline justify-between gap-2">
