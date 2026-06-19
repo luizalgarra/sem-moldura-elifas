@@ -101,6 +101,36 @@ export type Database = {
         }
         Relationships: []
       }
+      obra_versoes: {
+        Row: {
+          audio_path: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          num: number
+          origem: string
+          tipo: string
+        }
+        Insert: {
+          audio_path?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          num: number
+          origem: string
+          tipo: string
+        }
+        Update: {
+          audio_path?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          num?: number
+          origem?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       obras_extras: {
         Row: {
           ano: string | null
