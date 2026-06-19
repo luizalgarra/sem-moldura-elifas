@@ -17,6 +17,7 @@ import { obras } from "@/data/obras";
 import {
   listarOverrides,
   salvarTexto,
+  salvarAudiodescricao,
   regenerarAudio,
   gerarTextoDescricao,
   cadastrarImagensEstaticas,
