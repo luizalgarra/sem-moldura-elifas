@@ -1307,23 +1307,34 @@ export const regenerarAudio = createServerFn({ method: "POST" })
 
     const tabela = fixa ? "obra_overrides" : "obras_extras";
 
-    // Texto: usa o registro salvo se existir, senão o texto estático (fixas).
+    // Locução: usa o TEXTO DA AUDIODESCRIÇÃO (narrativa gerada), com fallback
+    // para a descrição salva e, por fim, para o texto estático (obras fixas).
     const { data: existente } = await supabaseAdmin
       .from(tabela)
-      .select("descricao")
+      .select("audiodescricao, descricao")
       .eq("num", chave)
       .maybeSingle();
 
     const estatica = fixa ? getObra(chave) : undefined;
-    const texto = existente?.descricao ?? estatica?.descricao ?? "";
+    const texto =
+      existente?.audiodescricao ??
+      existente?.descricao ??
+      estatica?.descricao ??
+      "";
 
     if (!texto.trim()) {
-      return { ok: false as const, erro: "Esta obra não tem texto." };
+      return {
+        ok: false as const,
+        erro: "Gere o texto da audiodescrição antes de gerar a locução.",
+      };
     }
 
     const pedacos = chunkTexto(texto);
     if (pedacos.length === 0) {
-      return { ok: false as const, erro: "Esta obra não tem texto." };
+      return {
+        ok: false as const,
+        erro: "Gere o texto da audiodescrição antes de gerar a locução.",
+      };
     }
 
     // Gera o áudio de um pedaço (com contexto dos vizinhos) e retorna o buffer.
