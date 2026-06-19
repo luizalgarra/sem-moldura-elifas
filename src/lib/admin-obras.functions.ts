@@ -884,6 +884,12 @@ export const salvarTexto = createServerFn({ method: "POST" })
       console.error("salvarTexto:", error.message);
       return { ok: false as const, erro: "Não foi possível salvar o texto." };
     }
+    await registrarVersao(supabaseAdmin, {
+      num: data.chave,
+      tipo: "texto",
+      origem: "manual",
+      descricao: data.descricao,
+    });
     return { ok: true as const };
   });
 
