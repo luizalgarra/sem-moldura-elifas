@@ -12,6 +12,8 @@ import {
   Images,
   History,
   RotateCcw,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
