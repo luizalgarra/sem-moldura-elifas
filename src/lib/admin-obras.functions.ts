@@ -1282,19 +1282,20 @@ function chunkTexto(texto: string, maxChars = 2500): string[] {
  */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        chave: z.number().int().min(1).max(MAX_CHAVE),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    if (!(await ehAdmin(context))) {
-      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
-    }
-    const { chave } = data;
-    const fixa = ehObraFixa(chave);
+   .inputValidator((input: unknown) =>
+     z
+       .object({
+         chave: z.number().int().min(1).max(MAX_CHAVE),
+         audiodescricao: z.string().min(1).max(20000).optional(),
+       })
+       .parse(input),
+   )
+   .handler(async ({ data, context }) => {
+     if (!(await ehAdmin(context))) {
+       return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+     }
+     const { chave } = data;
+     const fixa = ehObraFixa(chave);
 
     const apiKey = process.env.ELEVENLABS_API_KEY;
     if (!apiKey) {
@@ -1305,37 +1306,57 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       "@/integrations/supabase/client.server"
     );
 
-    const tabela = fixa ? "obra_overrides" : "obras_extras";
+     const tabela = fixa ? "obra_overrides" : "obras_extras";
 
-    // Locução: usa o TEXTO DA AUDIODESCRIÇÃO (narrativa gerada), com fallback
-    // para a descrição salva e, por fim, para o texto estático (obras fixas).
-    const { data: existente } = await supabaseAdmin
-      .from(tabela)
-      .select("audiodescricao, descricao")
-      .eq("num", chave)
-      .maybeSingle();
+     // Se a audiodescrição foi enviada, persiste ANTES de gerar (mantém banco
+     // e locução sincronizados) e usa exatamente esse texto.
+     if (typeof data.audiodescricao === "string" && data.audiodescricao.trim()) {
+       const { error: upErr } = await supabaseAdmin
+         .from(tabela)
+         .upsert(
+           { num: chave, audiodescricao: data.audiodescricao },
+           { onConflict: "num" },
+         );
+       if (upErr) {
+         console.error("regenerarAudio (salvar audiodescricao):", upErr.message);
+         return {
+           ok: false as const,
+           erro: "Não foi possível salvar a audiodescrição.",
+         };
+       }
+     }
 
-    const estatica = fixa ? getObra(chave) : undefined;
-    const texto =
-      existente?.audiodescricao ??
-      existente?.descricao ??
-      estatica?.descricao ??
-      "";
+     // Locução: usa EXCLUSIVAMENTE o TEXTO DA AUDIODESCRIÇÃO. Para obras fixas
+     // legadas sem audiodescrição salva, recorre ao texto estático da obra.
+     const { data: existente } = await supabaseAdmin
+       .from(tabela)
+       .select("audiodescricao")
+       .eq("num", chave)
+       .maybeSingle();
 
-    if (!texto.trim()) {
-      return {
-        ok: false as const,
-        erro: "Gere o texto da audiodescrição antes de gerar a locução.",
-      };
-    }
+     const estatica = fixa ? getObra(chave) : undefined;
+     const texto =
+       (typeof data.audiodescricao === "string" && data.audiodescricao.trim()
+         ? data.audiodescricao
+         : null) ??
+       existente?.audiodescricao ??
+       estatica?.descricao ??
+       "";
 
-    const pedacos = chunkTexto(texto);
-    if (pedacos.length === 0) {
-      return {
-        ok: false as const,
-        erro: "Gere o texto da audiodescrição antes de gerar a locução.",
-      };
-    }
+     if (!texto.trim()) {
+       return {
+         ok: false as const,
+         erro: "Gere e salve o texto da audiodescrição antes de gerar a locução.",
+       };
+     }
+
+     const pedacos = chunkTexto(texto);
+     if (pedacos.length === 0) {
+       return {
+         ok: false as const,
+         erro: "Gere e salve o texto da audiodescrição antes de gerar a locução.",
+       };
+     }
 
     // Gera o áudio de um pedaço (com contexto dos vizinhos) e retorna o buffer.
     async function gerarVoz(
