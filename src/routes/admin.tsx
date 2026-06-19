@@ -245,7 +245,7 @@ function ObraEditor({
   const [salvando, setSalvando] = useState(false);
   const [salvandoAudio, setSalvandoAudio] = useState(false);
   const [gerando, setGerando] = useState(false);
-  const [baixando, setBaixando] = useState(false);
+  
   const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
@@ -337,28 +337,23 @@ function ObraEditor({
     ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
     : null;
 
-  const downloadSrc = audioRegenSrc ?? audioEstatico;
+  const downloadSrc = temAudioRegen
+    ? `/api/public/obra-audio/${num}?voz=fem&download=1&v=${versaoAudio}`
+    : audioEstatico;
 
-  const handleBaixar = async () => {
+  const handleBaixar = () => {
     if (!downloadSrc) return;
-    setBaixando(true);
     setMsg(null);
     try {
-      const resp = await fetch(downloadSrc);
-      if (!resp.ok) throw new Error("download");
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = downloadSrc;
       a.download = `obra-${num}.mp3`;
+      a.rel = "noopener";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
     } catch {
       setMsg("Não foi possível baixar o áudio.");
-    } finally {
-      setBaixando(false);
     }
   };
 
@@ -465,14 +460,9 @@ function ObraEditor({
             <Button
               variant="outline"
               onClick={handleBaixar}
-              disabled={baixando}
               className="min-h-11"
             >
-              {baixando ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
+              <Download aria-hidden="true" />
               <span>Baixar áudio</span>
             </Button>
           )}
