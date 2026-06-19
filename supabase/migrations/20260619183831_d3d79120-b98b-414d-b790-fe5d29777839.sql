@@ -1,0 +1,1 @@
+ALTER TABLE public.obra_overrides ADD COLUMN IF NOT EXISTS aprovada boolean NOT NULL DEFAULT false;
