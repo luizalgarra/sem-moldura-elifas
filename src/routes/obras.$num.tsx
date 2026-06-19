@@ -95,7 +95,7 @@ function ObraPagina() {
 
       <div className="mt-6">
         <AudioDescricao
-          texto={obra.descricao}
+          texto={obra.audiodescricao || obra.descricao}
           audio={obra.audio}
           audioFem={obra.audioFem}
           audioMasc={obra.audioMasc}

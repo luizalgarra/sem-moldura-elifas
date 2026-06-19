@@ -18,6 +18,7 @@ export interface OverrideObra {
   dimensao: string | null;
   parede: string | null;
   descricao: string | null;
+  audiodescricao: string | null;
   imagemPath: string | null;
   audioPath: string | null;
   audioFemPath: string | null;
@@ -53,6 +54,7 @@ export interface TrechoPublico {
 export interface ObraAcervo extends Obra {
   chave: number;
   extra: boolean;
+  audiodescricao: string;
   audioFem: string | null;
   audioMasc: string | null;
   audioTrechos: TrechoPublico[] | null;
@@ -283,12 +285,12 @@ async function construirAcervo(
     supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
       ),
     supabaseAdmin
       .from("obras_extras")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
       ),
     supabaseAdmin.from("acervo_ordem").select("chave, posicao"),
   ]);
@@ -321,6 +323,7 @@ async function construirAcervo(
       dimensao: ov?.dimensao ?? obra.dimensao,
       parede: ov?.parede ?? obra.parede,
       descricao: ov?.descricao ?? obra.descricao,
+      audiodescricao: ov?.audiodescricao ?? ov?.descricao ?? obra.descricao,
       imagem: ov?.imagem_path
         ? `/api/public/obra-imagem/${obra.num}?v=${v}`
         : obra.imagem,
@@ -352,6 +355,7 @@ async function construirAcervo(
       dimensao: ex.dimensao ?? "",
       parede: ex.parede ?? "Parede 4",
       descricao: ex.descricao ?? "",
+      audiodescricao: ex.audiodescricao ?? ex.descricao ?? "",
       imagem: ex.imagem_path
         ? `/api/public/obra-imagem/${ex.num}?v=${v}`
         : null,
@@ -432,7 +436,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, voz_id, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, voz_id, updated_at",
       )
       .order("num", { ascending: true });
 
@@ -450,6 +454,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
       dimensao: row.dimensao,
       parede: row.parede,
       descricao: row.descricao,
+      audiodescricao: row.audiodescricao,
       imagemPath: row.imagem_path,
       audioPath: row.audio_url,
       audioFemPath: row.audio_fem_path,
@@ -855,6 +860,7 @@ async function registrarVersao(
   await supabaseAdmin.from("obra_versoes").delete().in("id", ids);
 }
 
+/** Salva a DESCRIÇÃO de referência (texto factual/curatorial) da obra. */
 export const salvarTexto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -884,11 +890,50 @@ export const salvarTexto = createServerFn({ method: "POST" })
       console.error("salvarTexto:", error.message);
       return { ok: false as const, erro: "Não foi possível salvar o texto." };
     }
+    return { ok: true as const };
+  });
+
+/**
+ * Salva o TEXTO DA AUDIODESCRIÇÃO (narrativa que vira a locução) e registra
+ * uma versão de texto no histórico.
+ */
+export const salvarAudiodescricao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        chave: z.number().int().min(1).max(MAX_CHAVE),
+        audiodescricao: z.string().min(1).max(20000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const tabela = ehObraFixa(data.chave) ? "obra_overrides" : "obras_extras";
+    const { error } = await supabaseAdmin
+      .from(tabela)
+      .upsert(
+        { num: data.chave, audiodescricao: data.audiodescricao },
+        { onConflict: "num" },
+      );
+
+    if (error) {
+      console.error("salvarAudiodescricao:", error.message);
+      return {
+        ok: false as const,
+        erro: "Não foi possível salvar a audiodescrição.",
+      };
+    }
     await registrarVersao(supabaseAdmin, {
       num: data.chave,
       tipo: "texto",
       origem: "manual",
-      descricao: data.descricao,
+      descricao: data.audiodescricao,
     });
     return { ok: true as const };
   });
@@ -1122,21 +1167,22 @@ export const gerarTextoDescricao = createServerFn({ method: "POST" })
     const system = [
       "Você é especialista em audiodescrição de obras de arte para pessoas com deficiência visual.",
       "Analise a imagem do quadro fornecida e escreva a audiodescrição do zero, com palavras próprias, a partir do que você vê.",
-      "Use a descrição de referência APENAS como contexto de fatos (título, autor, ano, técnica, dimensão e elementos já citados). NÃO reproduza o texto de referência na íntegra nem copie trechos literais dele.",
+      "A descrição de referência traz fatos sobre a obra (título, autor, ano, técnica, dimensão, contexto e elementos). INTEGRE essas informações de forma NATURAL, COLOQUIAL e fluida à narrativa da audiodescrição, como se conversasse com a pessoa, sem copiar trechos literais nem soar como uma ficha de catálogo.",
       "Produza UMA audiodescrição única, fluida e contínua, em português do Brasil.",
-      "Descreva objetivamente: composição, figuras, cores, formas, expressões, ambiente, técnica e atmosfera, do geral para o detalhe.",
-      "Integre os dados de catálogo (título, autor, ano, técnica, dimensão) de forma natural ao texto.",
-      "Tom claro e acolhedor, sem interpretações subjetivas excessivas e sem listar itens com marcadores.",
+      "Descreva objetivamente: composição, figuras, cores, formas, expressões, ambiente, técnica e atmosfera, do geral para o detalhe, costurando os fatos da referência ao longo do texto de maneira orgânica.",
+      "Tom claro, acolhedor e conversacional, sem interpretações subjetivas excessivas e sem listar itens com marcadores.",
+      "Lembre-se: este texto será lido em voz alta (locução). Escreva pensando na escuta, com ritmo natural de fala.",
       "Não use títulos, cabeçalhos, markdown ou rótulos de seção. Devolva apenas o texto corrido da audiodescrição.",
     ].join(" ");
 
     const userText = [
       titulo ? `Título: ${titulo}.` : "",
-      "Texto de referência (não copie; use apenas como contexto):",
+      "Descrição de referência (use os fatos; integre de forma coloquial, não copie):",
       descricaoAtual || "(sem descrição prévia)",
     ]
       .filter(Boolean)
       .join("\n");
+
 
     try {
       const resp = await fetch(
@@ -1261,23 +1307,34 @@ export const regenerarAudio = createServerFn({ method: "POST" })
 
     const tabela = fixa ? "obra_overrides" : "obras_extras";
 
-    // Texto: usa o registro salvo se existir, senão o texto estático (fixas).
+    // Locução: usa o TEXTO DA AUDIODESCRIÇÃO (narrativa gerada), com fallback
+    // para a descrição salva e, por fim, para o texto estático (obras fixas).
     const { data: existente } = await supabaseAdmin
       .from(tabela)
-      .select("descricao")
+      .select("audiodescricao, descricao")
       .eq("num", chave)
       .maybeSingle();
 
     const estatica = fixa ? getObra(chave) : undefined;
-    const texto = existente?.descricao ?? estatica?.descricao ?? "";
+    const texto =
+      existente?.audiodescricao ??
+      existente?.descricao ??
+      estatica?.descricao ??
+      "";
 
     if (!texto.trim()) {
-      return { ok: false as const, erro: "Esta obra não tem texto." };
+      return {
+        ok: false as const,
+        erro: "Gere o texto da audiodescrição antes de gerar a locução.",
+      };
     }
 
     const pedacos = chunkTexto(texto);
     if (pedacos.length === 0) {
-      return { ok: false as const, erro: "Esta obra não tem texto." };
+      return {
+        ok: false as const,
+        erro: "Gere o texto da audiodescrição antes de gerar a locução.",
+      };
     }
 
     // Gera o áudio de um pedaço (com contexto dos vizinhos) e retorna o buffer.
@@ -1506,7 +1563,7 @@ export const restaurarVersaoTexto = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from(tabela)
       .upsert(
-        { num: versao.num, descricao: versao.descricao },
+        { num: versao.num, audiodescricao: versao.descricao },
         { onConflict: "num" },
       );
 

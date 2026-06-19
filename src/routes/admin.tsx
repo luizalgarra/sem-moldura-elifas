@@ -17,6 +17,7 @@ import { obras } from "@/data/obras";
 import {
   listarOverrides,
   salvarTexto,
+  salvarAudiodescricao,
   regenerarAudio,
   gerarTextoDescricao,
   cadastrarImagensEstaticas,
@@ -233,11 +234,16 @@ function ObraEditor({
   onChanged: () => void;
 }) {
   const salvar = useServerFn(salvarTexto);
+  const salvarAudio = useServerFn(salvarAudiodescricao);
   const regenerar = useServerFn(regenerarAudio);
   const gerarTexto = useServerFn(gerarTextoDescricao);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
+  const [audiodescricao, setAudiodescricao] = useState(
+    override?.audiodescricao ?? override?.descricao ?? textoEstatico,
+  );
   const [salvando, setSalvando] = useState(false);
+  const [salvandoAudio, setSalvandoAudio] = useState(false);
   const [gerando, setGerando] = useState(false);
   const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -254,7 +260,25 @@ function ObraEditor({
     setMsg(null);
     try {
       const r = await salvar({ data: { chave: num, descricao: texto } });
-      setMsg(r.ok ? "Texto salvo." : (r.erro ?? "Erro ao salvar."));
+      setMsg(r.ok ? "Descrição salva." : (r.erro ?? "Erro ao salvar."));
+      if (r.ok) {
+        onChanged();
+      }
+    } catch {
+      setMsg("Erro ao salvar.");
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleSalvarAudio = async () => {
+    setSalvandoAudio(true);
+    setMsg(null);
+    try {
+      const r = await salvarAudio({
+        data: { chave: num, audiodescricao },
+      });
+      setMsg(r.ok ? "Audiodescrição salva." : (r.erro ?? "Erro ao salvar."));
       if (r.ok) {
         onChanged();
         recarregarHist();
@@ -262,7 +286,7 @@ function ObraEditor({
     } catch {
       setMsg("Erro ao salvar.");
     } finally {
-      setSalvando(false);
+      setSalvandoAudio(false);
     }
   };
 
@@ -292,8 +316,8 @@ function ObraEditor({
     try {
       const r = await gerarTexto({ data: { chave: num } });
       if (r.ok) {
-        setTexto(r.texto);
-        setMsg("Texto gerado — revise e salve.");
+        setAudiodescricao(r.texto);
+        setMsg("Audiodescrição gerada — revise e salve.");
         recarregarHist();
       } else {
         setMsg(r.erro ?? "Erro ao gerar o texto.");
@@ -304,6 +328,7 @@ function ObraEditor({
       setGerandoTexto(false);
     }
   };
+
 
 
 
@@ -320,71 +345,115 @@ function ObraEditor({
           <span className="text-accent">#{num}</span> {titulo}
         </h2>
         {override?.descricao && (
-          <span className="text-xs text-muted-foreground">texto editado</span>
+          <span className="text-xs text-muted-foreground">editado</span>
         )}
       </div>
 
-      <Textarea
-        value={texto}
-        onChange={(e) => setTexto(e.target.value)}
-        rows={6}
-        className="mt-3"
-        aria-label={`Texto da obra ${num}`}
-      />
-
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Button onClick={handleSalvar} disabled={salvando} className="min-h-11">
-          {salvando ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Save aria-hidden="true" />
-          )}
-          <span>Salvar texto</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleGerarTexto}
-          disabled={gerandoTexto}
-          className="min-h-11"
+      <div className="mt-3">
+        <label
+          htmlFor={`descricao-${num}`}
+          className="text-xs font-semibold uppercase text-muted-foreground"
         >
-          {gerandoTexto ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Sparkles aria-hidden="true" />
-          )}
-          <span>Gerar audiodescrição (IA)</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleRegenerar}
-          disabled={gerando}
-          className="min-h-11"
-        >
-          {gerando ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <RefreshCw aria-hidden="true" />
-          )}
-          <span>Gerar locução</span>
-        </Button>
-
-        {downloadSrc && (
-          <Button asChild variant="outline" className="min-h-11">
-            <a href={downloadSrc} download={`obra-${num}.mp3`}>
-              <Download aria-hidden="true" />
-              <span>Baixar áudio</span>
-            </a>
+          Descrição (referência)
+        </label>
+        <Textarea
+          id={`descricao-${num}`}
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          rows={5}
+          className="mt-1"
+          aria-label={`Descrição de referência da obra ${num}`}
+        />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Button
+            onClick={handleSalvar}
+            disabled={salvando}
+            className="min-h-11"
+          >
+            {salvando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Save aria-hidden="true" />
+            )}
+            <span>Salvar descrição</span>
           </Button>
-        )}
 
-        {msg && (
-          <span className="text-sm text-muted-foreground" role="status">
-            {msg}
-          </span>
-        )}
+          <Button
+            variant="outline"
+            onClick={handleGerarTexto}
+            disabled={gerandoTexto}
+            className="min-h-11"
+          >
+            {gerandoTexto ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles aria-hidden="true" />
+            )}
+            <span>Gerar audiodescrição (IA)</span>
+          </Button>
+        </div>
       </div>
+
+      <div className="mt-4">
+        <label
+          htmlFor={`audiodescricao-${num}`}
+          className="text-xs font-semibold uppercase text-muted-foreground"
+        >
+          Texto da audiodescrição (locução)
+        </label>
+        <Textarea
+          id={`audiodescricao-${num}`}
+          value={audiodescricao}
+          onChange={(e) => setAudiodescricao(e.target.value)}
+          rows={6}
+          className="mt-1"
+          aria-label={`Texto da audiodescrição da obra ${num}`}
+        />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Button
+            onClick={handleSalvarAudio}
+            disabled={salvandoAudio}
+            className="min-h-11"
+          >
+            {salvandoAudio ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Save aria-hidden="true" />
+            )}
+            <span>Salvar audiodescrição</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleRegenerar}
+            disabled={gerando}
+            className="min-h-11"
+          >
+            {gerando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <RefreshCw aria-hidden="true" />
+            )}
+            <span>Gerar locução</span>
+          </Button>
+
+          {downloadSrc && (
+            <Button asChild variant="outline" className="min-h-11">
+              <a href={downloadSrc} download={`obra-${num}.mp3`}>
+                <Download aria-hidden="true" />
+                <span>Baixar áudio</span>
+              </a>
+            </Button>
+          )}
+
+          {msg && (
+            <span className="text-sm text-muted-foreground" role="status">
+              {msg}
+            </span>
+          )}
+        </div>
+      </div>
+
 
       {audioRegenSrc && (
         <div className="mt-3">
@@ -403,7 +472,7 @@ function ObraEditor({
       <Historico
         num={num}
         refreshKey={histKey}
-        onRestaurarTexto={(t) => setTexto(t)}
+        onRestaurarTexto={(t) => setAudiodescricao(t)}
         onRestaurarAudio={(v) => setVersaoAudio(v)}
       />
     </li>

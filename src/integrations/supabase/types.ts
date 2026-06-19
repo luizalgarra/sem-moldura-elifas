@@ -54,6 +54,7 @@ export type Database = {
           audio_masc_path: string | null
           audio_trechos: Json | null
           audio_url: string | null
+          audiodescricao: string | null
           autor: string | null
           descricao: string | null
           dimensao: string | null
@@ -71,6 +72,7 @@ export type Database = {
           audio_masc_path?: string | null
           audio_trechos?: Json | null
           audio_url?: string | null
+          audiodescricao?: string | null
           autor?: string | null
           descricao?: string | null
           dimensao?: string | null
@@ -88,6 +90,7 @@ export type Database = {
           audio_masc_path?: string | null
           audio_trechos?: Json | null
           audio_url?: string | null
+          audiodescricao?: string | null
           autor?: string | null
           descricao?: string | null
           dimensao?: string | null
@@ -138,6 +141,7 @@ export type Database = {
           audio_masc_path: string | null
           audio_trechos: Json | null
           audio_url: string | null
+          audiodescricao: string | null
           autor: string | null
           created_at: string
           descricao: string | null
@@ -156,6 +160,7 @@ export type Database = {
           audio_masc_path?: string | null
           audio_trechos?: Json | null
           audio_url?: string | null
+          audiodescricao?: string | null
           autor?: string | null
           created_at?: string
           descricao?: string | null
@@ -174,6 +179,7 @@ export type Database = {
           audio_masc_path?: string | null
           audio_trechos?: Json | null
           audio_url?: string | null
+          audiodescricao?: string | null
           autor?: string | null
           created_at?: string
           descricao?: string | null
