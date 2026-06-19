@@ -245,6 +245,7 @@ function ObraEditor({
   const [salvando, setSalvando] = useState(false);
   const [salvandoAudio, setSalvandoAudio] = useState(false);
   const [gerando, setGerando] = useState(false);
+  const [baixando, setBaixando] = useState(false);
   const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
@@ -337,6 +338,29 @@ function ObraEditor({
     : null;
 
   const downloadSrc = audioRegenSrc ?? audioEstatico;
+
+  const handleBaixar = async () => {
+    if (!downloadSrc) return;
+    setBaixando(true);
+    setMsg(null);
+    try {
+      const resp = await fetch(downloadSrc);
+      if (!resp.ok) throw new Error("download");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `obra-${num}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setMsg("Não foi possível baixar o áudio.");
+    } finally {
+      setBaixando(false);
+    }
+  };
 
   return (
     <li className="rounded-lg border border-border bg-card p-4">
@@ -438,11 +462,18 @@ function ObraEditor({
           </Button>
 
           {downloadSrc && (
-            <Button asChild variant="outline" className="min-h-11">
-              <a href={downloadSrc} download={`obra-${num}.mp3`}>
+            <Button
+              variant="outline"
+              onClick={handleBaixar}
+              disabled={baixando}
+              className="min-h-11"
+            >
+              {baixando ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
                 <Download aria-hidden="true" />
-                <span>Baixar áudio</span>
-              </a>
+              )}
+              <span>Baixar áudio</span>
             </Button>
           )}
 

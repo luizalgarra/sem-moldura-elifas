@@ -1,33 +1,21 @@
+# Corrigir o botão "Baixar áudio"
+
 ## Problema
+No editor de obras (`src/routes/admin.tsx`), o botão **Baixar áudio** é um link `<a href={downloadSrc} download>`. Quando `downloadSrc` aponta para uma URL de outra origem (o áudio estático vem da CDN de assets), o navegador ignora o atributo `download` e **navega** o navegador até o arquivo. Isso descarta a página `/admin` e todo o estado em memória do componente (texto da audiodescrição gerado, locução recém-criada, mensagens). Ao voltar, a query recarrega do banco e parece que "sumiu tudo e voltou ao que estava".
 
-A locução continua saindo da descrição porque:
+## Solução
+Trocar o link de download por um download programático via `fetch` + Blob, que nunca navega nem recarrega a página.
 
-1. **A migração copiou `descricao` → `audiodescricao`**, então os dois campos ainda são idênticos em todas as obras existentes até serem editados separadamente.
-2. **O botão "Gerar locução" lê o texto gravado no banco**, não o conteúdo atual da caixa "Texto da audiodescrição (locução)". Se o admin editar a caixa e clicar em "Gerar locução" sem salvar antes, a locução usa o valor antigo (a descrição copiada).
-3. **A função `regenerarAudio` tem fallback para `descricao`**, mascarando casos em que a audiodescrição não foi definida e fazendo a locução cair na descrição silenciosamente.
+### Mudanças em `src/routes/admin.tsx` (componente `ObraEditor`)
+- Adicionar um handler `handleBaixar` que:
+  - Faz `fetch(downloadSrc)` e obtém o `blob()`.
+  - Cria uma URL temporária com `URL.createObjectURL(blob)`.
+  - Cria um elemento `<a>` em memória com `download="obra-${num}.mp3"`, dispara o clique e revoga a URL com `URL.revokeObjectURL`.
+  - Em caso de erro, mostra mensagem em `msg` (ex.: "Não foi possível baixar o áudio.").
+  - Usa um estado `baixando` para desabilitar o botão e mostrar o spinner durante o download.
+- Substituir o `<Button asChild><a href=... download></a></Button>` por um `<Button onClick={handleBaixar} disabled={baixando}>` comum, mantendo o ícone `Download` e o texto "Baixar áudio".
 
-## Objetivo
+Nenhuma outra lógica (geração de texto, locução, histórico, banco) é alterada — apenas o mecanismo de download deixa de recarregar a página.
 
-A locução deve ser gerada **estritamente a partir do Texto da audiodescrição (locução)** atual, nunca da descrição de referência.
-
-## Mudanças
-
-### 1. Backend — `src/lib/admin-obras.functions.ts`
-
-- **`regenerarAudio`**: aceitar um parâmetro opcional `audiodescricao` (texto) no `inputValidator`. Quando enviado:
-  - Salvar esse texto na coluna `audiodescricao` (upsert) **antes** de gerar o áudio, garantindo que banco e locução fiquem sincronizados.
-  - Usar exatamente esse texto como fonte da locução.
-- Quando o parâmetro **não** for enviado (ex.: geração em lote "todas as obras"), ler `audiodescricao` do banco.
-- **Remover o fallback para a descrição do override** (`existente?.descricao`). A fonte passa a ser apenas: `audiodescricao` salva (ou recebida) → para obras fixas legadas sem audiodescrição, o texto estático da obra. Se nada disso existir, retornar erro claro: "Gere e salve o texto da audiodescrição antes de gerar a locução."
-
-### 2. Admin UI — `src/routes/admin.tsx`
-
-- Em `handleRegenerar`, passar o conteúdo atual do estado `audiodescricao` para `regenerar({ data: { chave: num, audiodescricao } })`, de modo que "Gerar locução" sempre use (e persista) o texto exibido na caixa, sem exigir um "Salvar audiodescrição" prévio.
-- Após gerar, atualizar o histórico (já ocorre via `recarregarHist`).
-- A geração em lote ("Gerar locução de todas as obras") continua chamando `regenerar({ data: { chave } })` sem o texto, lendo a audiodescrição salva no banco.
-
-## Observações
-
-- Nenhuma mudança de schema é necessária (a coluna `audiodescricao` já existe).
-- O campo "Descrição (referência)" deixa de influenciar a locução em qualquer cenário.
-- Obras fixas antigas sem audiodescrição salva ainda funcionam via texto estático até serem editadas.
+## Resultado
+Clicar em **Baixar áudio** baixa o arquivo sem navegar, preservando o texto gerado, a locução e o estado da tela.
