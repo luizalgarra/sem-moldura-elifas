@@ -1563,7 +1563,7 @@ export const restaurarVersaoTexto = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from(tabela)
       .upsert(
-        { num: versao.num, descricao: versao.descricao },
+        { num: versao.num, audiodescricao: versao.descricao },
         { onConflict: "num" },
       );
 
