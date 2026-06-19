@@ -304,6 +304,8 @@ function ObraEditor({
   const salvarAudio = useServerFn(salvarAudiodescricao);
   const regenerar = useServerFn(regenerarAudio);
   const gerarTexto = useServerFn(gerarTextoDescricao);
+  const aprovar = useServerFn(definirAprovacao);
+  const [aprovando, setAprovando] = useState(false);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
   const [audiodescricao, setAudiodescricao] = useState(
