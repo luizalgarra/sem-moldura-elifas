@@ -275,6 +275,7 @@ function ObraEditor({
         setVersaoAudio(Date.now().toString());
         setMsg("Locução gerada.");
         onChanged();
+        recarregarHist();
       } else {
         setMsg(r.erro ?? "Erro ao gerar.");
       }
