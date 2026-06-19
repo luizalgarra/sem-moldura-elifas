@@ -244,6 +244,8 @@ function ObraEditor({
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
     override?.audioFemPath ? Date.now().toString() : null,
   );
+  const [histKey, setHistKey] = useState(0);
+  const recarregarHist = () => setHistKey((k) => k + 1);
 
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
 
