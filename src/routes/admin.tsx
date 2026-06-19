@@ -249,12 +249,21 @@ function ObraEditor({
   const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioFemPath ? Date.now().toString() : null,
+    override?.audioFemPath ? versaoDeOverride(override) : null,
   );
   const [histKey, setHistKey] = useState(0);
   const recarregarHist = () => setHistKey((k) => k + 1);
 
+  // Sincroniza com o banco quando os dados recarregam (refetch). Assim a tela
+  // reflete o áudio recém-salvo em vez de "voltar ao estado" anterior.
+  useEffect(() => {
+    if (override?.audioFemPath) {
+      setVersaoAudio(versaoDeOverride(override));
+    }
+  }, [override?.audioFemPath, override?.updatedAt]);
+
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
+
 
   const handleSalvar = async () => {
     setSalvando(true);
