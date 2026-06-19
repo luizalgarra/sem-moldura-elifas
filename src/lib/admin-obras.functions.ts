@@ -1282,19 +1282,20 @@ function chunkTexto(texto: string, maxChars = 2500): string[] {
  */
 export const regenerarAudio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        chave: z.number().int().min(1).max(MAX_CHAVE),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    if (!(await ehAdmin(context))) {
-      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
-    }
-    const { chave } = data;
-    const fixa = ehObraFixa(chave);
+   .inputValidator((input: unknown) =>
+     z
+       .object({
+         chave: z.number().int().min(1).max(MAX_CHAVE),
+         audiodescricao: z.string().min(1).max(20000).optional(),
+       })
+       .parse(input),
+   )
+   .handler(async ({ data, context }) => {
+     if (!(await ehAdmin(context))) {
+       return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+     }
+     const { chave } = data;
+     const fixa = ehObraFixa(chave);
 
     const apiKey = process.env.ELEVENLABS_API_KEY;
     if (!apiKey) {
