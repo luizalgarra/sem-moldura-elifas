@@ -218,7 +218,15 @@ function AdminPagina() {
   );
 }
 
+/** Versão (cache-buster) derivada do `updatedAt` do override salvo no banco. */
+function versaoDeOverride(override: OverrideObra | undefined): string {
+  return override?.updatedAt
+    ? new Date(override.updatedAt).getTime().toString()
+    : Date.now().toString();
+}
+
 function ObraEditor({
+
   num,
   titulo,
   textoEstatico,
@@ -249,12 +257,21 @@ function ObraEditor({
   const [gerandoTexto, setGerandoTexto] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioFemPath ? Date.now().toString() : null,
+    override?.audioFemPath ? versaoDeOverride(override) : null,
   );
   const [histKey, setHistKey] = useState(0);
   const recarregarHist = () => setHistKey((k) => k + 1);
 
+  // Sincroniza com o banco quando os dados recarregam (refetch). Assim a tela
+  // reflete o áudio recém-salvo em vez de "voltar ao estado" anterior.
+  useEffect(() => {
+    if (override?.audioFemPath) {
+      setVersaoAudio(versaoDeOverride(override));
+    }
+  }, [override?.audioFemPath, override?.updatedAt]);
+
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
+
 
   const handleSalvar = async () => {
     setSalvando(true);
@@ -297,8 +314,8 @@ function ObraEditor({
     try {
       const r = await regenerar({ data: { chave: num, audiodescricao } });
       if (r.ok) {
-        setVersaoAudio(Date.now().toString());
-        setMsg("Locução gerada.");
+        setVersaoAudio(r.versao);
+        setMsg("Locução gerada e salva.");
         onChanged();
         recarregarHist();
       } else {

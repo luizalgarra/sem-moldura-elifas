@@ -1,21 +1,30 @@
-## Problema
+## Diagnóstico
 
-Ao clicar em **"Gerar audiodescrição (IA)"**, o botão fica girando e para sem gerar texto. A geração usa o modelo `google/gemini-2.5-pro` analisando a imagem da obra. Esse é o modelo mais lento e, somado à análise de imagem, a chamada frequentemente ultrapassa o tempo limite do servidor — a requisição é interrompida e o texto nunca volta. Verifiquei que o gateway de IA e a autenticação estão funcionando normalmente; o gargalo é o tempo da chamada.
+A locução recente foi realmente gerada e gravada: há um arquivo novo no armazenamento (`obra-1-fem-...mp3`) e o banco aponta para ele. O problema mais provável está no fluxo de retorno/atualização da tela: após gerar, o admin chama `refetch()`, mas o componente mantém estados locais (`versaoAudio`, `audiodescricao`) derivados do `override` antigo e não se sincroniza quando os dados novos chegam. Isso faz parecer que “voltou ao estado”, mesmo quando o áudio foi salvo.
 
-## Correção
+Também encontrei um risco real no backend: o áudio é enviado ao armazenamento antes do registro final no banco. Se o registro falhar ou a função for interrompida nesse intervalo, fica um MP3 órfão e a tela volta sem áudio salvo. Já existem arquivos órfãos antigos, sinal de que esse cenário já aconteceu.
 
-Em `src/lib/admin-obras.functions.ts`, dentro de `gerarTextoDescricao`:
+## Plano de correção
 
-1. **Trocar o modelo por um mais rápido com visão**: usar `google/gemini-3-flash-preview` no lugar de `google/gemini-2.5-pro`. Ele analisa imagem e texto com qualidade boa e responde muito mais rápido, eliminando o estouro de tempo. A mesma instrução (prompt) é mantida, então a qualidade do texto continua alta.
+1. **Sincronizar o estado local do admin com o banco**
+   - Em `src/routes/admin.tsx`, atualizar o `ObraEditor` quando `override` mudar após `refetch()`.
+   - Manter o texto que o usuário está digitando durante operações, mas após sucesso de geração/salvamento refletir o `audio_fem_path` novo e não cair de volta no estado anterior.
 
-2. **Adicionar um tempo limite explícito com mensagem clara**: envolver o `fetch` num `AbortController` (por exemplo, ~90s). Se mesmo assim demorar demais, retornar uma mensagem amigável ("A geração demorou mais que o esperado. Tente novamente.") em vez de o botão simplesmente parar de girar sem explicação.
+2. **Usar a versão retornada pelo backend imediatamente**
+   - `regenerarAudio` já retorna `versao`.
+   - No `handleRegenerar`, trocar `setVersaoAudio(Date.now().toString())` por `setVersaoAudio(r.versao)` para a URL do áudio usar exatamente a versão salva no banco.
 
-3. **Mensagem de erro mais explícita no admin**: garantir que, quando a geração falhar ou expirar, a mensagem apareça de forma visível ao lado do botão (já existe o `msg`, apenas confirmar que o caso de timeout cai nele).
+3. **Preservar o áudio anterior se algo falhar no final**
+   - Em `src/lib/admin-obras.functions.ts`, antes de trocar `audio_fem_path`, buscar o áudio atual.
+   - Só substituir o áudio atual após upload e update do banco concluírem.
+   - Se o update do banco falhar depois do upload, remover o novo arquivo órfão e retornar erro claro.
+   - Não limpar nem apagar o áudio anterior enquanto o novo não estiver registrado.
 
-## Resultado esperado
+4. **Retornar mais dados no sucesso da geração**
+   - Fazer `regenerarAudio` devolver também `audioPath`/estado salvo suficiente para a interface saber que a persistência aconteceu.
+   - No admin, exibir mensagem explícita: “Locução gerada e salva.”
 
-Clicar em "Gerar audiodescrição (IA)" passa a retornar o texto em poucos segundos. Caso ocorra qualquer falha, uma mensagem clara é exibida em vez de o botão girar e parar silenciosamente.
-
-## Observação
-
-Se você preferir manter a maior capacidade de análise do `gemini-2.5-pro` mesmo correndo risco de lentidão, posso, em vez de trocar o modelo, converter a geração para um processo em segundo plano (gera e avisa quando ficar pronto). Isso é mais robusto, porém mais trabalhoso. Me diga se prefere essa abordagem.
+5. **Conferência final**
+   - Validar no banco que o registro `audio_fem_path` muda após a geração.
+   - Validar que a URL `/api/public/obra-audio/<num>?voz=fem&v=<versao>` responde com áudio.
+   - Confirmar que o card do admin permanece com o player e botão de download após o `refetch()`.
