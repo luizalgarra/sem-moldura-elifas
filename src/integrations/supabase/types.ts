@@ -50,6 +50,7 @@ export type Database = {
       obra_overrides: {
         Row: {
           ano: string | null
+          aprovada: boolean
           audio_fem_path: string | null
           audio_masc_path: string | null
           audio_trechos: Json | null
@@ -68,6 +69,7 @@ export type Database = {
         }
         Insert: {
           ano?: string | null
+          aprovada?: boolean
           audio_fem_path?: string | null
           audio_masc_path?: string | null
           audio_trechos?: Json | null
@@ -86,6 +88,7 @@ export type Database = {
         }
         Update: {
           ano?: string | null
+          aprovada?: boolean
           audio_fem_path?: string | null
           audio_masc_path?: string | null
           audio_trechos?: Json | null

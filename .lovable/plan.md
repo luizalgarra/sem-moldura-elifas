@@ -1,69 +1,40 @@
-## Objetivo
+# Filtro de status no painel Admin
 
-Corrigir o download do MP3 no iOS Safari, que hoje navega o documento para fora e zera o estado do componente (sintoma "gerou a locução mas voltou ao estado anterior"). A correção troca o download por link direto por um download em memória (blob) + compartilhamento nativo, com fallback para desktop.
+Adicionar um filtro por status para controlar quais obras aparecem em `/admin`, mais um controle de aprovação manual.
 
-## Mudança (arquivo: `src/routes/admin.tsx`)
+## Status (derivados da presença de dados)
 
-### 1. Novo estado
-Adicionar junto aos demais `useState` do componente da obra:
-```ts
-const [baixando, setBaixando] = useState(false);
-```
+Cada obra recebe exatamente um status, na ordem de prioridade:
 
-### 2. Reescrever `handleBaixar` (linhas 361–375)
-```ts
-const handleBaixar = async () => {
-  if (!downloadSrc || baixando) return;
-  setMsg(null);
-  setBaixando(true);
-  try {
-    // iOS Safari ignora o atributo `download` em URLs de servidor e navega
-    // para fora (zerando o estado). Baixar como blob evita qualquer navegação.
-    const resp = await fetch(downloadSrc);
-    if (!resp.ok) throw new Error("falha no download");
-    const blob = await resp.blob();
-    const nome = `obra-${num}.mp3`;
+1. **APROVADA** — quando o campo `aprovada` do override estiver marcado.
+2. **LOCUÇÃO GERADA** — existe `audio_fem_path` salvo (e não aprovada).
+3. **TEXTO GERADO** — existe texto de audiodescrição salvo (`audiodescricao`), mas sem locução.
+4. **SEM GERAR** — nenhum dos acima (apenas conteúdo estático).
 
-    // iOS/mobile: compartilhamento nativo (inclui "Salvar em Arquivos").
-    const file = new File([blob], nome, { type: "audio/mpeg" });
-    const nav = navigator as Navigator & {
-      canShare?: (data?: ShareData) => boolean;
-    };
-    if (nav.canShare && nav.canShare({ files: [file] })) {
-      try {
-        await nav.share({ files: [file], title: nome });
-        return;
-      } catch (err) {
-        if ((err as Error)?.name === "AbortError") return; // usuário cancelou
-        // share indisponível: segue para o fallback por link
-      }
-    }
+## Comportamento do filtro
 
-    // Fallback (desktop/navegadores sem Web Share): link com object URL.
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = nome;
-    a.rel = "noopener";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  } catch {
-    setMsg("Não foi possível baixar o áudio.");
-  } finally {
-    setBaixando(false);
-  }
-};
-```
+- Botões/abas exclusivos no topo: **Todas · Sem gerar · Texto gerado · Locução gerada · Aprovada**. Seleciona um por vez.
+- Funciona **em conjunto** com o campo de busca por número/título já existente (busca + status aplicados juntos).
+- Cada cartão de obra mostra um selo com seu status atual.
 
-### 3. Botão de download (≈ linha 476–479)
-Refletir o estado assíncrono: `disabled={baixando}` e label "Baixando…" enquanto `baixando` for `true`.
+## Aprovação
 
-## Validação
-- Build/typecheck (automático).
-- Verificar no preview que o botão de download funciona no desktop (fallback por link).
-- Confirmar com o usuário no iPhone que: baixar o MP3 abre o menu nativo de compartilhamento/"Salvar em Arquivos" e **não** reseta a tela.
+- Botão **"Aprovar"** em cada obra (alterna para **"Desaprovar"** quando já aprovada).
+- Persiste no banco via nova coluna `aprovada` em `obra_overrides`.
 
-## Observações
-- Não altera a lógica de geração/persistência (`handleRegenerar`, server functions) — essas já foram corrigidas antes. Esta mudança ataca a causa mobile remanescente: a navegação disparada pelo clique de download.
+## Mudanças técnicas
+
+### Banco (migração)
+- Adicionar coluna `aprovada boolean not null default false` em `public.obra_overrides`.
+
+### `src/lib/admin-obras.functions.ts`
+- Incluir `aprovada` no `select` e no tipo `OverrideObra` (em `listarOverrides`).
+- Nova server function `definirAprovacao` (`{ chave: number, aprovada: boolean }`, protegida por `garantirAdmin`) que faz upsert da coluna `aprovada` no override.
+
+### `src/routes/admin.tsx`
+- Helper `statusDaObra(override)` retornando `"sem-gerar" | "texto" | "locucao" | "aprovada"`.
+- Estado `filtroStatus` + linha de botões de filtro (logo abaixo/junto da busca); `filtradas` passa a aplicar busca **e** status.
+- Selo de status em cada `ObraEditor`.
+- Botão **Aprovar/Desaprovar** em cada `ObraEditor`, chamando `definirAprovacao` e atualizando via `onChanged()`/`refetch()`.
+
+Nenhuma alteração na lógica de geração de texto/locução já existente.

@@ -12,6 +12,8 @@ import {
   Images,
   History,
   RotateCcw,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
@@ -24,6 +26,7 @@ import {
   listarVersoes,
   restaurarVersaoTexto,
   restaurarVersaoAudio,
+  definirAprovacao,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
@@ -42,6 +45,31 @@ export const Route = createFileRoute("/admin")({
   component: AdminPagina,
 });
 
+/** Status de produção de uma obra, derivado da presença de dados. */
+type StatusObra = "sem-gerar" | "texto" | "locucao" | "aprovada";
+
+function statusDaObra(override: OverrideObra | undefined): StatusObra {
+  if (override?.aprovada) return "aprovada";
+  if (override?.audioFemPath) return "locucao";
+  if (override?.audiodescricao && override.audiodescricao.trim()) return "texto";
+  return "sem-gerar";
+}
+
+const STATUS_ROTULO: Record<StatusObra, string> = {
+  "sem-gerar": "Sem gerar",
+  texto: "Texto gerado",
+  locucao: "Locução gerada",
+  aprovada: "Aprovada",
+};
+
+const FILTROS: { valor: StatusObra | "todas"; rotulo: string }[] = [
+  { valor: "todas", rotulo: "Todas" },
+  { valor: "sem-gerar", rotulo: "Sem gerar" },
+  { valor: "texto", rotulo: "Texto gerado" },
+  { valor: "locucao", rotulo: "Locução gerada" },
+  { valor: "aprovada", rotulo: "Aprovada" },
+];
+
 function AdminPagina() {
   const fetchOverrides = useServerFn(listarOverrides);
   const { data: overrides, refetch } = useQuery({
@@ -56,6 +84,9 @@ function AdminPagina() {
   }, [overrides]);
 
   const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState<StatusObra | "todas">(
+    "todas",
+  );
 
   // Geração em lote (todas as obras).
   const regenerar = useServerFn(regenerarAudio);
@@ -71,12 +102,16 @@ function AdminPagina() {
 
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
-    if (!q) return obras;
-    return obras.filter(
-      (o) =>
-        String(o.num).includes(q) || o.titulo.toLowerCase().includes(q),
-    );
-  }, [busca]);
+    return obras.filter((o) => {
+      const correspondeBusca =
+        !q ||
+        String(o.num).includes(q) ||
+        o.titulo.toLowerCase().includes(q);
+      if (!correspondeBusca) return false;
+      if (filtroStatus === "todas") return true;
+      return statusDaObra(mapa.get(o.num)) === filtroStatus;
+    });
+  }, [busca, filtroStatus, mapa]);
 
 
 
@@ -199,7 +234,31 @@ function AdminPagina() {
             aria-label="Buscar obra"
           />
         </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {FILTROS.map((f) => {
+            const ativo = filtroStatus === f.valor;
+            const total =
+              f.valor === "todas"
+                ? obras.length
+                : obras.filter(
+                    (o) => statusDaObra(mapa.get(o.num)) === f.valor,
+                  ).length;
+            return (
+              <Button
+                key={f.valor}
+                size="sm"
+                variant={ativo ? "default" : "outline"}
+                onClick={() => setFiltroStatus(f.valor)}
+                aria-pressed={ativo}
+              >
+                {f.rotulo}
+                <span className="ml-1 opacity-70">({total})</span>
+              </Button>
+            );
+          })}
+        </div>
       </div>
+
 
       <ul className="mt-4 space-y-4">
         {filtradas.map((obra) => (
@@ -245,6 +304,8 @@ function ObraEditor({
   const salvarAudio = useServerFn(salvarAudiodescricao);
   const regenerar = useServerFn(regenerarAudio);
   const gerarTexto = useServerFn(gerarTextoDescricao);
+  const aprovar = useServerFn(definirAprovacao);
+  const [aprovando, setAprovando] = useState(false);
 
   const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
   const [audiodescricao, setAudiodescricao] = useState(
@@ -272,6 +333,28 @@ function ObraEditor({
   }, [override?.audioFemPath, override?.updatedAt]);
 
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
+  const status = statusDaObra(override);
+  const aprovada = status === "aprovada";
+
+  const handleAprovar = async () => {
+    setAprovando(true);
+    setMsg(null);
+    try {
+      const r = await aprovar({ data: { chave: num, aprovada: !aprovada } });
+      if (r.ok) {
+        setMsg(aprovada ? "Aprovação removida." : "Obra aprovada.");
+        onChanged();
+      } else {
+        setMsg(r.erro ?? "Erro ao atualizar a aprovação.");
+      }
+    } catch {
+      setMsg("Erro ao atualizar a aprovação.");
+    } finally {
+      setAprovando(false);
+    }
+  };
+
+
 
 
   const handleSalvar = async () => {
@@ -409,10 +492,17 @@ function ObraEditor({
         <h2 className="font-medium text-foreground">
           <span className="text-accent">#{num}</span> {titulo}
         </h2>
-        {override?.descricao && (
-          <span className="text-xs text-muted-foreground">editado</span>
-        )}
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+            aprovada
+              ? "bg-primary/15 text-primary"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {STATUS_ROTULO[status]}
+        </span>
       </div>
+
 
       <div className="mt-3">
         <label
@@ -513,6 +603,24 @@ function ObraEditor({
               <span>{baixando ? "Baixando…" : "Baixar áudio"}</span>
             </Button>
           )}
+
+          <Button
+            variant={aprovada ? "default" : "outline"}
+            onClick={handleAprovar}
+            disabled={aprovando}
+            className="min-h-11"
+          >
+            {aprovando ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : aprovada ? (
+              <CheckCircle2 aria-hidden="true" />
+            ) : (
+              <Circle aria-hidden="true" />
+            )}
+            <span>{aprovada ? "Desaprovar" : "Aprovar"}</span>
+          </Button>
+
+
 
           {msg && (
             <span className="text-sm text-muted-foreground" role="status">

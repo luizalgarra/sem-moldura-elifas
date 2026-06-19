@@ -25,6 +25,7 @@ export interface OverrideObra {
   audioMascPath: string | null;
   audioTrechos: Trecho[] | null;
   vozId: string;
+  aprovada: boolean;
   updatedAt: string | null;
 }
 
@@ -436,7 +437,7 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, voz_id, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, voz_id, aprovada, updated_at",
       )
       .order("num", { ascending: true });
 
@@ -463,10 +464,46 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
         ? (row.audio_trechos as unknown as Trecho[])
         : null,
       vozId: row.voz_id,
+      aprovada: row.aprovada ?? false,
       updatedAt: row.updated_at,
     }));
   },
 );
+
+/** Marca/desmarca uma obra como aprovada (somente admin). */
+export const definirAprovacao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        chave: z.number().int().min(1).max(MAX_CHAVE),
+        aprovada: z.boolean(),
+      })
+      .parse(input),
+  )
+  .handler(
+    async ({ data, context }): Promise<{ ok: boolean; erro?: string }> => {
+      if (!(await ehAdmin(context))) {
+        return { ok: false, erro: ERRO_NAO_AUTORIZADO };
+      }
+      const { supabaseAdmin } = await import(
+        "@/integrations/supabase/client.server"
+      );
+      const { error } = await supabaseAdmin
+        .from("obra_overrides")
+        .upsert(
+          { num: data.chave, aprovada: data.aprovada, updated_at: new Date().toISOString() },
+          { onConflict: "num" },
+        );
+      if (error) {
+        console.error("definirAprovacao:", error.message);
+        return { ok: false, erro: "Erro ao salvar a aprovação." };
+      }
+      return { ok: true };
+    },
+  );
+
+
 
 /** Acervo final ordenado (público e página de edição). */
 export const listarAcervo = createServerFn({ method: "GET" }).handler(
