@@ -799,6 +799,62 @@ export const salvarImagem = createServerFn({ method: "POST" })
   });
 
 /** Salva o texto (descrição) editado de uma obra. */
+type AdminClient = Awaited<
+  typeof import("@/integrations/supabase/client.server")
+>["supabaseAdmin"];
+
+/**
+ * Registra uma versão (texto ou áudio) de uma obra no histórico, mantendo
+ * apenas as 3 mais recentes por obra/tipo. Para áudio, apaga do storage os
+ * arquivos das versões podadas (o áudio atual está sempre entre os 3 mais
+ * recentes, então nunca é removido).
+ */
+async function registrarVersao(
+  supabaseAdmin: AdminClient,
+  v: {
+    num: number;
+    tipo: "texto" | "audio";
+    origem: "ia" | "manual";
+    descricao?: string | null;
+    audioPath?: string | null;
+  },
+): Promise<void> {
+  const { error } = await supabaseAdmin.from("obra_versoes").insert({
+    num: v.num,
+    tipo: v.tipo,
+    origem: v.origem,
+    descricao: v.descricao ?? null,
+    audio_path: v.audioPath ?? null,
+  });
+  if (error) {
+    console.error("registrarVersao:", error.message);
+    return;
+  }
+
+  const { data: todas } = await supabaseAdmin
+    .from("obra_versoes")
+    .select("id, audio_path")
+    .eq("num", v.num)
+    .eq("tipo", v.tipo)
+    .order("created_at", { ascending: false });
+
+  if (!todas || todas.length <= 3) return;
+
+  const excedentes = todas.slice(3);
+  const ids = excedentes.map((r) => r.id);
+
+  if (v.tipo === "audio") {
+    const paths = excedentes
+      .map((r) => r.audio_path)
+      .filter((p): p is string => !!p);
+    if (paths.length) {
+      await supabaseAdmin.storage.from("audios-obras").remove(paths);
+    }
+  }
+
+  await supabaseAdmin.from("obra_versoes").delete().in("id", ids);
+}
+
 export const salvarTexto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
