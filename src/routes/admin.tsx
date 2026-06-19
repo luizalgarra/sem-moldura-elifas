@@ -492,10 +492,17 @@ function ObraEditor({
         <h2 className="font-medium text-foreground">
           <span className="text-accent">#{num}</span> {titulo}
         </h2>
-        {override?.descricao && (
-          <span className="text-xs text-muted-foreground">editado</span>
-        )}
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+            aprovada
+              ? "bg-primary/15 text-primary"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {STATUS_ROTULO[status]}
+        </span>
       </div>
+
 
       <div className="mt-3">
         <label
