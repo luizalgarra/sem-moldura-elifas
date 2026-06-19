@@ -45,7 +45,32 @@ export const Route = createFileRoute("/admin")({
   component: AdminPagina,
 });
 
-function AdminPagina() {
+/** Status de produção de uma obra, derivado da presença de dados. */
+type StatusObra = "sem-gerar" | "texto" | "locucao" | "aprovada";
+
+function statusDaObra(override: OverrideObra | undefined): StatusObra {
+  if (override?.aprovada) return "aprovada";
+  if (override?.audioFemPath) return "locucao";
+  if (override?.audiodescricao && override.audiodescricao.trim()) return "texto";
+  return "sem-gerar";
+}
+
+const STATUS_ROTULO: Record<StatusObra, string> = {
+  "sem-gerar": "Sem gerar",
+  texto: "Texto gerado",
+  locucao: "Locução gerada",
+  aprovada: "Aprovada",
+};
+
+const FILTROS: { valor: StatusObra | "todas"; rotulo: string }[] = [
+  { valor: "todas", rotulo: "Todas" },
+  { valor: "sem-gerar", rotulo: "Sem gerar" },
+  { valor: "texto", rotulo: "Texto gerado" },
+  { valor: "locucao", rotulo: "Locução gerada" },
+  { valor: "aprovada", rotulo: "Aprovada" },
+];
+
+
   const fetchOverrides = useServerFn(listarOverrides);
   const { data: overrides, refetch } = useQuery({
     queryKey: ["overrides"],
