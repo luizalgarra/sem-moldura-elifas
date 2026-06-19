@@ -57,6 +57,12 @@ function AdminPagina() {
   const [loteFeito, setLoteFeito] = useState(0);
   const [loteMsg, setLoteMsg] = useState<string | null>(null);
 
+  // Cadastro em lote das imagens estáticas para a IA.
+  const cadastrarImagens = useServerFn(cadastrarImagensEstaticas);
+  const [imgRodando, setImgRodando] = useState(false);
+  const [imgMsg, setImgMsg] = useState<string | null>(null);
+
+
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
     if (!q) return obras;
