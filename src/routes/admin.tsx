@@ -460,14 +460,9 @@ function ObraEditor({
             <Button
               variant="outline"
               onClick={handleBaixar}
-              disabled={baixando}
               className="min-h-11"
             >
-              {baixando ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
+              <Download aria-hidden="true" />
               <span>Baixar áudio</span>
             </Button>
           )}
