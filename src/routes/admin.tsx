@@ -24,6 +24,7 @@ import {
   listarVersoes,
   restaurarVersaoTexto,
   restaurarVersaoAudio,
+  definirAprovacao,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
