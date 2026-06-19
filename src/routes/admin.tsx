@@ -157,7 +157,27 @@ function AdminPagina() {
             {loteMsg}
           </span>
         )}
+
+        <Button
+          variant="outline"
+          onClick={handleCadastrarImagens}
+          disabled={imgRodando}
+          className="min-h-11"
+        >
+          {imgRodando ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Images aria-hidden="true" />
+          )}
+          <span>Cadastrar imagens das obras (IA)</span>
+        </Button>
+        {imgMsg && (
+          <span className="text-sm text-muted-foreground" role="status">
+            {imgMsg}
+          </span>
+        )}
       </div>
+
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
         <div className="relative">
