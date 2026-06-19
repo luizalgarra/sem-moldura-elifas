@@ -470,6 +470,41 @@ export const listarOverrides = createServerFn({ method: "GET" }).handler(
   },
 );
 
+/** Marca/desmarca uma obra como aprovada (somente admin). */
+export const definirAprovacao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        chave: z.number().int().min(1).max(MAX_CHAVE),
+        aprovada: z.boolean(),
+      })
+      .parse(input),
+  )
+  .handler(
+    async ({ data, context }): Promise<{ ok: boolean; erro?: string }> => {
+      if (!(await ehAdmin(context))) {
+        return { ok: false, erro: ERRO_NAO_AUTORIZADO };
+      }
+      const { supabaseAdmin } = await import(
+        "@/integrations/supabase/client.server"
+      );
+      const { error } = await supabaseAdmin
+        .from("obra_overrides")
+        .upsert(
+          { num: data.chave, aprovada: data.aprovada, updated_at: new Date().toISOString() },
+          { onConflict: "num" },
+        );
+      if (error) {
+        console.error("definirAprovacao:", error.message);
+        return { ok: false, erro: "Erro ao salvar a aprovação." };
+      }
+      return { ok: true };
+    },
+  );
+
+
+
 /** Acervo final ordenado (público e página de edição). */
 export const listarAcervo = createServerFn({ method: "GET" }).handler(
   async (): Promise<ObraAcervo[]> => {
