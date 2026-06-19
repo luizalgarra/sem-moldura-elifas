@@ -605,24 +605,6 @@ function ObraEditor({
             </Button>
           )}
 
-          <Button
-            variant={aprovada ? "default" : "outline"}
-            onClick={handleAprovar}
-            disabled={aprovando}
-            className="min-h-11"
-          >
-            {aprovando ? (
-              <Loader2 className="animate-spin" aria-hidden="true" />
-            ) : aprovada ? (
-              <CheckCircle2 aria-hidden="true" />
-            ) : (
-              <Circle aria-hidden="true" />
-            )}
-            <span>{aprovada ? "Desaprovar" : "Aprovar"}</span>
-          </Button>
-
-
-
           {msg && (
             <span className="text-sm text-muted-foreground" role="status">
               {msg}
@@ -643,6 +625,23 @@ function ObraEditor({
           >
             Seu navegador não suporta áudio.
           </audio>
+          <div className="mt-2 flex items-center gap-2">
+            <Checkbox
+              id={`aprovar-${num}`}
+              checked={aprovada}
+              disabled={aprovando}
+              onCheckedChange={() => handleAprovar()}
+            />
+            <label
+              htmlFor={`aprovar-${num}`}
+              className="flex items-center gap-1.5 text-sm font-medium leading-none cursor-pointer"
+            >
+              {aprovando && (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              )}
+              Aprovar
+            </label>
+          </div>
         </div>
       )}
 
