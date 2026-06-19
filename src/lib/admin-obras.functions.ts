@@ -285,7 +285,7 @@ async function construirAcervo(
     supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
       ),
     supabaseAdmin
       .from("obras_extras")
