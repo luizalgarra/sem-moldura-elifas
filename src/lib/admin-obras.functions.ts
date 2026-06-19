@@ -868,19 +868,57 @@ async function imagemDataUrl(
   const estatica = fixa ? getObra(chave) : undefined;
   const url = estatica?.imagem;
   if (!url) return null;
-  try {
-    const absoluta = url.startsWith("http")
-      ? url
-      : new URL(url, new URL(getRequest().url).origin).toString();
-    const resp = await fetch(absoluta);
-    if (!resp.ok) return null;
-    const mime = resp.headers.get("content-type") ?? "image/jpeg";
-    const buf = Buffer.from(await resp.arrayBuffer());
-    return `data:${mime};base64,${buf.toString("base64")}`;
-  } catch (e) {
-    console.error("imagemDataUrl:", e);
-    return null;
+  const buf = await baixarImagemEstatica(url);
+  if (!buf) return null;
+  return `data:${buf.mime};base64,${buf.bytes.toString("base64")}`;
+}
+
+/**
+ * Baixa os bytes de uma imagem estática (asset da plataforma). A URL costuma
+ * ser relativa (`/__l5e/...`); tentamos resolvê-la contra a origem do request
+ * e, em caso de falha, contra as URLs públicas conhecidas do projeto.
+ */
+async function baixarImagemEstatica(
+  url: string,
+): Promise<{ bytes: Buffer; mime: string } | null> {
+  const candidatas: string[] = [];
+  if (url.startsWith("http")) {
+    candidatas.push(url);
+  } else {
+    const origens = new Set<string>();
+    try {
+      origens.add(new URL(getRequest().url).origin);
+    } catch {
+      // sem request disponível (ex.: prerender) — ignora
+    }
+    const publica = process.env.SITE_URL || process.env.VITE_SITE_URL;
+    if (publica) {
+      try {
+        origens.add(new URL(publica).origin);
+      } catch {
+        // ignora valor inválido
+      }
+    }
+    for (const origem of origens) {
+      candidatas.push(new URL(url, origem).toString());
+    }
   }
+
+  for (const candidata of candidatas) {
+    try {
+      const resp = await fetch(candidata);
+      if (!resp.ok) {
+        console.error("baixarImagemEstatica status:", resp.status, candidata);
+        continue;
+      }
+      const mime = resp.headers.get("content-type") ?? "image/jpeg";
+      const bytes = Buffer.from(await resp.arrayBuffer());
+      return { bytes, mime };
+    } catch (e) {
+      console.error("baixarImagemEstatica erro:", candidata, e);
+    }
+  }
+  return null;
 }
 
 /**
