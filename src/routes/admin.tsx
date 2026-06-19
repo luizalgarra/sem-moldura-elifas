@@ -9,6 +9,7 @@ import {
   Search,
   Download,
   Sparkles,
+  Images,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import {
@@ -16,6 +17,7 @@ import {
   salvarTexto,
   regenerarAudio,
   gerarTextoDescricao,
+  cadastrarImagensEstaticas,
   type OverrideObra,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
@@ -55,6 +57,12 @@ function AdminPagina() {
   const [loteFeito, setLoteFeito] = useState(0);
   const [loteMsg, setLoteMsg] = useState<string | null>(null);
 
+  // Cadastro em lote das imagens estáticas para a IA.
+  const cadastrarImagens = useServerFn(cadastrarImagensEstaticas);
+  const [imgRodando, setImgRodando] = useState(false);
+  const [imgMsg, setImgMsg] = useState<string | null>(null);
+
+
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
     if (!q) return obras;
@@ -90,6 +98,31 @@ function AdminPagina() {
     refetch();
   };
 
+  const handleCadastrarImagens = async () => {
+    setImgRodando(true);
+    setImgMsg(null);
+    try {
+      const r = await cadastrarImagens();
+      if (r.ok) {
+        setImgMsg(
+          r.total === 0
+            ? "Todas as obras com imagem já estão cadastradas para a IA."
+            : `Pronto! ${r.gravadas} de ${r.total} imagem(ns) cadastrada(s)` +
+                (r.falhas > 0 ? `, ${r.falhas} falha(s).` : "."),
+        );
+        refetch();
+      } else {
+        setImgMsg(r.erro ?? "Erro ao cadastrar as imagens.");
+      }
+    } catch {
+      setImgMsg("Erro ao cadastrar as imagens.");
+    } finally {
+      setImgRodando(false);
+    }
+  };
+
+
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <header>
@@ -124,7 +157,27 @@ function AdminPagina() {
             {loteMsg}
           </span>
         )}
+
+        <Button
+          variant="outline"
+          onClick={handleCadastrarImagens}
+          disabled={imgRodando}
+          className="min-h-11"
+        >
+          {imgRodando ? (
+            <Loader2 className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Images aria-hidden="true" />
+          )}
+          <span>Cadastrar imagens das obras (IA)</span>
+        </Button>
+        {imgMsg && (
+          <span className="text-sm text-muted-foreground" role="status">
+            {imgMsg}
+          </span>
+        )}
       </div>
+
 
       <div className="sticky top-0 z-10 -mx-4 mt-6 bg-background/95 px-4 py-3 backdrop-blur">
         <div className="relative">

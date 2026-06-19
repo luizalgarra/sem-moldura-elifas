@@ -1,38 +1,34 @@
-# Site 100% público + admin protegido de verdade
+## Contexto
 
-## Situação atual
+As imagens das obras já aparecem no site porque vêm dos **assets estáticos** do projeto (`src/assets/obras/obra-{num}.jpg.asset.json`), mapeados por número em `src/data/obras.ts`. A IA de audiodescrição, porém, prioriza a imagem em `imagem_path` (storage) e só cai num *fallback* que baixa o asset estático. Quando esse fallback falha, surge "Esta obra não tem imagem cadastrada para a IA analisar".
 
-O site **já é público** para visitantes: o portão de login em `src/routes/__root.tsx` só protege as rotas `/admin`, `/editar` e `/qrcodes`. Todas as páginas de conteúdo (obras, acervo, biografia, etc.) abrem sem login, e o site publicado está com visibilidade pública.
+Subir imagem por obra na tela de admin é inviável (são muitas). A solução é popular `imagem_path` de todas as obras de uma vez, reaproveitando os assets estáticos que já existem.
 
-Porém há uma falha importante: as funções de servidor que **criam, editam, removem e geram áudio/texto** (em `src/lib/admin-obras.functions.ts`) usam a chave de serviço e **não verificam se quem chamou é admin**. O portão de `__root.tsx` apenas esconde a tela — qualquer pessoa poderia chamar esses endpoints diretamente no site publicado e alterar o acervo ou gastar créditos de geração de voz/IA.
+## Objetivo
 
-O objetivo é deixar isso correto nos dois sentidos: **visitantes nunca veem login** e **as ações de admin só funcionam para admin de verdade**.
+Permitir que a IA gere audiodescrição de qualquer obra que já tenha imagem estática, sem upload manual.
 
 ## O que será feito
 
-### 1. Confirmar acesso público dos visitantes (sem mudança de comportamento)
-- Manter o portão de login restrito apenas a `/admin`, `/editar` e `/qrcodes`.
-- Confirmar que as funções de leitura pública (`listarAcervo`, `getObraPublica`) e as rotas de mídia pública continuam abertas, sem exigir sessão.
+1. **Tornar o fallback da IA mais robusto** (`src/lib/admin-obras.functions.ts`, `imagemDataUrl`)
+   - Garantir que a busca da imagem estática funcione mesmo quando a origem do request não resolve o caminho `/__l5e/...` (tentar a URL absoluta do asset e logar o motivo da falha em caso de erro), para o fallback deixar de falhar silenciosamente.
 
-### 2. Blindar as funções de administração
-Adicionar verificação de papel admin nas funções que escrevem ou custam créditos, para que o papel de admin realmente proteja essas áreas (e não só a interface):
-- `criarObra`, `removerObra`
-- `salvarDados`, `salvarImagem`, `salvarTexto`
-- `gerarTextoDescricao`, `regenerarAudio`
+2. **Nova server function de backfill em lote** (`admin-obras.functions.ts`)
+   - Protegida por `requireSupabaseAuth` + verificação de admin (`ehAdmin`), seguindo o padrão das demais funções.
+   - Para cada obra fixa com imagem estática e **sem** `imagem_path`: baixar os bytes do asset estático e enviar ao bucket `imagens-obras`, gravando o `imagem_path` em `obra_overrides` (upsert por `num`).
+   - Retornar contagem de sucessos/falhas (`{ ok, total, gravadas, falhas }`).
 
-Cada uma passará a exigir um usuário autenticado e com permissão de admin antes de executar. Sem isso, retornam "não autorizado".
+3. **Botão na área de admin** (`src/routes/admin.tsx`)
+   - Adicionar, ao lado de "Gerar locução de todas as obras", um botão **"Cadastrar imagens das obras (IA)"** que chama a função de backfill e mostra progresso/resultado, com `refetch()` ao final.
 
-### 3. Manter o que já funciona
-- Páginas públicas, players de áudio, QR Codes para visitantes, navegação e a home continuam iguais.
-- As telas de admin (`/admin`, `/editar`, `/qrcodes`) seguem exigindo login + papel admin.
+## Resultado esperado
+
+- Um clique cadastra `imagem_path` para todas as obras que já têm imagem estática.
+- A partir daí, "Gerar audiodescrição (IA)" funciona para essas obras (caminho rápido via storage), e o fallback estático cobre eventuais lacunas.
 
 ## Detalhes técnicos
 
-- Em `src/lib/admin-obras.functions.ts`, aplicar o middleware `requireSupabaseAuth` (de `@/integrations/supabase/auth-middleware`) nas funções de escrita e, dentro do handler, validar o papel admin via `context.supabase.rpc("is_admin")`, lançando `Response("Não autorizado", { status: 401 })` quando falso.
-- O `attachSupabaseAuth` já está registrado em `src/start.ts` como `functionMiddleware`, então o token do admin é anexado automaticamente nas chamadas — nenhuma mudança extra de wiring é necessária.
-- Como `/admin`, `/editar` e `/qrcodes` só são acessíveis a admin logado, essas chamadas continuarão funcionando normalmente para o admin; apenas chamadas não autenticadas passam a ser barradas.
-- Funções de leitura pública (`listarAcervo`, `getObraPublica`) permanecem sem middleware para não afetar visitantes.
-
-## Fora de escopo
-- Não altera a home "Em construção" nem o conteúdo das páginas.
-- Não muda regras de RLS nem o esquema do banco.
+- O backfill não altera o site público (apenas grava `imagem_path`; o front continua exibindo o asset estático).
+- Reutiliza o bucket privado existente `imagens-obras` e a tabela `obra_overrides`.
+- A leitura dos bytes do asset usa `fetch` da URL do asset (`obra.imagem`) dentro do handler server-only; nenhuma credencial nova é necessária.
+- Sem mudanças de schema, RLS ou migrações.
