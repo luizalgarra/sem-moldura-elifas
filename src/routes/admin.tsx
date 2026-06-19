@@ -462,11 +462,18 @@ function ObraEditor({
           </Button>
 
           {downloadSrc && (
-            <Button asChild variant="outline" className="min-h-11">
-              <a href={downloadSrc} download={`obra-${num}.mp3`}>
+            <Button
+              variant="outline"
+              onClick={handleBaixar}
+              disabled={baixando}
+              className="min-h-11"
+            >
+              {baixando ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
                 <Download aria-hidden="true" />
-                <span>Baixar áudio</span>
-              </a>
+              )}
+              <span>Baixar áudio</span>
             </Button>
           )}
 
