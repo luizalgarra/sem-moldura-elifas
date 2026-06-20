@@ -18,9 +18,9 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// Página temporária "Em construção".
-// Para reativar a home original, troque `component: EmConstrucao` por
-// `component: Index` acima e restaure o `head()` original.
+// Página temporária "Em construção" (mantida para reuso futuro).
+// Para reativá-la, troque `component: Index` por `component: EmConstrucao`.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function EmConstrucao() {
   return (
     <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-background px-4 py-20">
