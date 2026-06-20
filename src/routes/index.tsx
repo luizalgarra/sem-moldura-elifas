@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, QrCode as QrIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { obras } from "@/data/obras";
 import { Button } from "@/components/ui/button";
 import { marca } from "@/assets/marca";
