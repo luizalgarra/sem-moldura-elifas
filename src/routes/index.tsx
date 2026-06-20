@@ -89,7 +89,7 @@ function Index() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" className="min-h-12 border border-primary-foreground/20 text-base">
               <Link to="/obras">
-                Ver o acervo
+                Ver as cenas
                 <ArrowRight aria-hidden="true" />
               </Link>
             </Button>
