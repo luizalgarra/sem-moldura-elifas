@@ -171,7 +171,7 @@ function Conteudo() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { carregando, session, isAdmin, sair } = useAdminAuth();
 
-  // A home ("/") fica pública em modo "Em construção": sem topo/rodapé.
+  // A home ("/") usa o layout completo do site (cabeçalho e rodapé).
   const emConstrucao = false;
   // A tela de login é pública e não usa o layout interno.
   const ehAuth = pathname === "/auth";
