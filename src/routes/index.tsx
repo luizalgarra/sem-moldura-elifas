@@ -56,7 +56,6 @@ function EmConstrucao() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Index() {
   const destaques = obras.filter((o) => o.imagem).slice(0, 6);
 
