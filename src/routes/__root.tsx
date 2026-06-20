@@ -172,7 +172,7 @@ function Conteudo() {
   const { carregando, session, isAdmin, sair } = useAdminAuth();
 
   // A home ("/") fica pública em modo "Em construção": sem topo/rodapé.
-  const emConstrucao = pathname === "/";
+  const emConstrucao = false;
   // A tela de login é pública e não usa o layout interno.
   const ehAuth = pathname === "/auth";
 
