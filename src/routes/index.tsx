@@ -7,20 +7,20 @@ import { marca } from "@/assets/marca";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Em breve — Elifas Andreato" },
+      { title: "Elifas Andreato — Além da Moldura · Catálogo Virtual" },
       {
         name: "description",
         content:
-          "Estamos preparando o catálogo virtual da exposição Elifas Andreato: Além da Moldura. Volte em breve.",
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Além da Moldura. Obras com áudio-descrição e acesso por QR Code.",
       },
     ],
   }),
-  component: EmConstrucao,
+  component: Index,
 });
 
-// Página temporária "Em construção".
-// Para reativar a home original, troque `component: EmConstrucao` por
-// `component: Index` acima e restaure o `head()` original.
+// Página temporária "Em construção" (mantida para reuso futuro).
+// Para reativá-la, troque `component: Index` por `component: EmConstrucao`.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function EmConstrucao() {
   return (
     <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-background px-4 py-20">
@@ -56,7 +56,6 @@ function EmConstrucao() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Index() {
   const destaques = obras.filter((o) => o.imagem).slice(0, 6);
 
