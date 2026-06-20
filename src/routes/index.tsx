@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, QrCode as QrIcon, Headphones } from "lucide-react";
+import { ArrowRight, QrCode as QrIcon } from "lucide-react";
 import { obras } from "@/data/obras";
 import { Button } from "@/components/ui/button";
 import { marca } from "@/assets/marca";
@@ -101,17 +101,7 @@ function Index() {
       </section>
 
       <section className="relative mx-auto max-w-5xl px-4 py-12">
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-card p-6">
-            <Headphones className="size-7 text-accent" aria-hidden="true" />
-            <h2 className="mt-3 text-xl font-semibold text-card-foreground">
-              Áudio-descrição em todas as obras
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              Ouça a descrição de cada obra com a voz do próprio navegador,
-              em português, no seu ritmo.
-            </p>
-          </div>
+        <div className="grid gap-6">
           <div className="rounded-lg border border-border bg-card p-6">
             <QrIcon className="size-7 text-accent" aria-hidden="true" />
             <h2 className="mt-3 text-xl font-semibold text-card-foreground">
