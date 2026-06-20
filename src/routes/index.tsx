@@ -7,15 +7,15 @@ import { marca } from "@/assets/marca";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Em breve — Elifas Andreato" },
+      { title: "Elifas Andreato — Além da Moldura · Catálogo Virtual" },
       {
         name: "description",
         content:
-          "Estamos preparando o catálogo virtual da exposição Elifas Andreato: Além da Moldura. Volte em breve.",
+          "Catálogo virtual da exposição 80 anos de Elifas Andreato: Além da Moldura. Obras com áudio-descrição e acesso por QR Code.",
       },
     ],
   }),
-  component: EmConstrucao,
+  component: Index,
 });
 
 // Página temporária "Em construção".
