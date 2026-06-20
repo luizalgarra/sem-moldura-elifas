@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as QrcodesRouteImport } from './routes/qrcodes'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ParticipeRouteImport } from './routes/participe'
 import { Route as LinhasDaVidaRouteImport } from './routes/linhas-da-vida'
 import { Route as InstitutoRouteImport } from './routes/instituto'
@@ -70,6 +71,11 @@ const SobreRoute = SobreRouteImport.update({
 const QrcodesRoute = QrcodesRouteImport.update({
   id: '/qrcodes',
   path: '/qrcodes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParticipeRoute = ParticipeRouteImport.update({
@@ -349,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/participe': typeof ParticipeRouteWithChildren
+  '/privacidade': typeof PrivacidadeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/como-usar': typeof ComoUsarRoute
   '/editar': typeof EditarRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
   '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/participe': typeof ParticipeRouteWithChildren
+  '/privacidade': typeof PrivacidadeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
@@ -508,6 +517,7 @@ export interface FileRouteTypes {
     | '/instituto'
     | '/linhas-da-vida'
     | '/participe'
+    | '/privacidade'
     | '/qrcodes'
     | '/sobre'
     | '/acervo/busca'
@@ -557,6 +567,7 @@ export interface FileRouteTypes {
     | '/como-usar'
     | '/editar'
     | '/linhas-da-vida'
+    | '/privacidade'
     | '/sobre'
     | '/acervo/busca'
     | '/acervo/cadernos-e-manuscritos'
@@ -610,6 +621,7 @@ export interface FileRouteTypes {
     | '/instituto'
     | '/linhas-da-vida'
     | '/participe'
+    | '/privacidade'
     | '/qrcodes'
     | '/sobre'
     | '/acervo/busca'
@@ -665,6 +677,7 @@ export interface RootRouteChildren {
   InstitutoRoute: typeof InstitutoRouteWithChildren
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
   ParticipeRoute: typeof ParticipeRouteWithChildren
+  PrivacidadeRoute: typeof PrivacidadeRoute
   QrcodesRoute: typeof QrcodesRouteWithChildren
   SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
@@ -687,6 +700,13 @@ declare module '@tanstack/react-router' {
       path: '/qrcodes'
       fullPath: '/qrcodes'
       preLoaderRoute: typeof QrcodesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/participe': {
@@ -1183,6 +1203,7 @@ const rootRouteChildren: RootRouteChildren = {
   InstitutoRoute: InstitutoRouteWithChildren,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
   ParticipeRoute: ParticipeRouteWithChildren,
+  PrivacidadeRoute: PrivacidadeRoute,
   QrcodesRoute: QrcodesRouteWithChildren,
   SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
