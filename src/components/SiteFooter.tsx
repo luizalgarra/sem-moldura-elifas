@@ -44,6 +44,11 @@ export function SiteFooter() {
                 QR Codes
               </Link>
             </li>
+            <li>
+              <Link to="/privacidade" className="hover:text-accent">
+                Privacidade e Segurança
+              </Link>
+            </li>
           </ul>
         </nav>
 
