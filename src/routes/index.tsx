@@ -100,22 +100,6 @@ function Index() {
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-5xl px-4 py-12">
-        <div className="grid gap-6">
-          <div className="rounded-lg border border-border bg-card p-6">
-            <QrIcon className="size-7 text-accent" aria-hidden="true" />
-            <h2 className="mt-3 text-xl font-semibold text-card-foreground">
-              Acesso pelo QR Code
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              Aponte a câmera para o QR Code ao lado da obra na exposição e
-              continue navegando pelo acervo completo.
-            </p>
-          </div>
-
-        </div>
-      </section>
-
       {destaques.length > 0 && (
         <section className="mx-auto max-w-5xl px-4 pb-16">
           <div className="flex items-end justify-between gap-4">
