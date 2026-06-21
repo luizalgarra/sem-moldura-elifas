@@ -1520,10 +1520,96 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       audioPath: path,
     });
 
+    // Registra o consumo (caracteres enviados ao serviço de voz) para
+    // acompanhamento de custo. Falha aqui não invalida a geração.
+    {
+      const { error: consumoErr } = await supabaseAdmin
+        .from("geracoes_audio")
+        .insert({
+          num: chave,
+          caracteres: texto.length,
+          voz_id: VOZ_FEMININA_ID,
+        });
+      if (consumoErr) {
+        console.error("regenerarAudio (consumo):", consumoErr.message);
+      }
+    }
+
     return {
       ok: true as const,
       versao: versaoDe(salvo?.updated_at),
       audioPath: path,
+    };
+  });
+
+// Tarifa de referência para estimativa de custo (ElevenLabs). Ajuste conforme
+// o seu plano. Valor padrão aproximado do plano Creator (US$/milhão de chars).
+const USD_POR_MILHAO_CARACTERES = 110;
+
+export interface ConsumoObra {
+  num: number;
+  caracteres: number;
+  geracoes: number;
+}
+
+export interface ResumoConsumoAudio {
+  totalCaracteres: number;
+  totalGeracoes: number;
+  custoEstimadoUsd: number;
+  usdPorMilhao: number;
+  porObra: ConsumoObra[];
+}
+
+/** Resumo de consumo de caracteres (custo estimado ElevenLabs) por obra. */
+export const resumoConsumoAudio = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ResumoConsumoAudio> => {
+    await garantirAdmin(context);
+
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data, error } = await supabaseAdmin
+      .from("geracoes_audio")
+      .select("num, caracteres");
+
+    if (error) {
+      console.error("resumoConsumoAudio:", error.message);
+      return {
+        totalCaracteres: 0,
+        totalGeracoes: 0,
+        custoEstimadoUsd: 0,
+        usdPorMilhao: USD_POR_MILHAO_CARACTERES,
+        porObra: [],
+      };
+    }
+
+    const linhas = data ?? [];
+    const mapa = new Map<number, ConsumoObra>();
+    let totalCaracteres = 0;
+
+    for (const linha of linhas) {
+      const num = linha.num as number;
+      const caracteres = (linha.caracteres as number) ?? 0;
+      totalCaracteres += caracteres;
+      const atual = mapa.get(num) ?? { num, caracteres: 0, geracoes: 0 };
+      atual.caracteres += caracteres;
+      atual.geracoes += 1;
+      mapa.set(num, atual);
+    }
+
+    const porObra = Array.from(mapa.values()).sort(
+      (a, b) => b.caracteres - a.caracteres,
+    );
+
+    return {
+      totalCaracteres,
+      totalGeracoes: linhas.length,
+      custoEstimadoUsd:
+        (totalCaracteres / 1_000_000) * USD_POR_MILHAO_CARACTERES,
+      usdPorMilhao: USD_POR_MILHAO_CARACTERES,
+      porObra,
     };
   });
 
