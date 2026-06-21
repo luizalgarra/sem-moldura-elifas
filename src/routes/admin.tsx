@@ -70,10 +70,12 @@ const FILTROS: { valor: StatusObra | "todas"; rotulo: string }[] = [
 ];
 
 function AdminPagina() {
+  const { session, isAdmin } = useAdminAuth();
   const fetchOverrides = useServerFn(listarOverrides);
   const { data: overrides, refetch } = useQuery({
     queryKey: ["overrides"],
     queryFn: () => fetchOverrides(),
+    enabled: Boolean(session) && isAdmin,
   });
 
   const mapa = useMemo(() => {
