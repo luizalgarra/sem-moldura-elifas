@@ -629,20 +629,12 @@ function ObraEditor({
   };
 
   return (
-    <li className="rounded-lg border border-border bg-card p-4">
-      <div className="flex items-baseline justify-between gap-2">
-        <h2 className="font-medium text-foreground">
-          <span className="text-accent">#{num}</span> {titulo}
+    <li className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
+        <h2 className="text-base font-semibold text-foreground">
+          <span className="text-primary">#{num}</span> {titulo}
         </h2>
-        <span
-          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-            aprovada
-              ? "bg-primary/15 text-primary"
-              : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {STATUS_ROTULO[status]}
-        </span>
+        <StatusBadge status={status} />
       </div>
 
 
