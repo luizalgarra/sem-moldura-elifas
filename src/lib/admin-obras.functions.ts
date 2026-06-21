@@ -1441,6 +1441,25 @@ export const regenerarAudio = createServerFn({ method: "POST" })
       if (!resp.ok) {
         const err = await resp.text();
         console.error("ElevenLabs:", resp.status, err);
+        // Detecta problema de pagamento/assinatura na conta de voz para dar
+        // uma mensagem clara ao usuário, em vez de apenas o código HTTP.
+        const pagamento =
+          /payment|subscription|quota|insufficient|invoice/i.test(err);
+        if (resp.status === 401 && pagamento) {
+          throw new Error(
+            "Falha ao gerar áudio: a conta de voz (ElevenLabs) está com uma cobrança pendente ou assinatura inativa. Regularize o pagamento na conta ElevenLabs e tente novamente.",
+          );
+        }
+        if (resp.status === 401) {
+          throw new Error(
+            "Falha ao gerar áudio: credencial de voz inválida ou sem permissão. Verifique a conexão da conta ElevenLabs.",
+          );
+        }
+        if (resp.status === 429) {
+          throw new Error(
+            "Falha ao gerar áudio: limite de uso da conta de voz atingido. Tente novamente mais tarde.",
+          );
+        }
         throw new Error(`Falha ao gerar áudio (${resp.status}).`);
       }
       return resp.arrayBuffer();
