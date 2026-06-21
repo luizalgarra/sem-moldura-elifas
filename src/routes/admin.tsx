@@ -12,6 +12,9 @@ import {
   Images,
   History,
   RotateCcw,
+  FileText,
+  BarChart3,
+  Coins,
 } from "lucide-react";
 import { obras } from "@/data/obras";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
