@@ -81,7 +81,7 @@ function AdminPagina() {
   });
 
   const fetchConsumo = useServerFn(resumoConsumoAudio);
-  const { data: consumo } = useQuery({
+  const { data: consumo, refetch: refetchConsumo } = useQuery({
     queryKey: ["consumo-audio"],
     queryFn: () => fetchConsumo(),
     enabled: Boolean(session) && isAdmin,
