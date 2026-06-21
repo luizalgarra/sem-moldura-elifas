@@ -629,7 +629,7 @@ function ObraEditor({
   };
 
   return (
-    <li className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <li className="admin-card rounded-2xl border bg-card p-5 shadow-sm transition-colors">
       <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
         <h2 className="text-base font-semibold text-foreground">
           <span className="text-primary">#{num}</span> {titulo}

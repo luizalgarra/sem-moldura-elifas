@@ -251,3 +251,15 @@ html {
   color: var(--foreground);
   min-height: 100vh;
 }
+
+/* Caixas das obras com contorno mais claro e destacado */
+.admin-theme .admin-card {
+  border-color: oklch(0.5 0.02 250);
+  border-width: 1.5px;
+  box-shadow:
+    0 1px 0 0 oklch(0.62 0.02 250 / 0.25) inset,
+    0 8px 24px -12px oklch(0 0 0 / 0.6);
+}
+.admin-theme .admin-card:hover {
+  border-color: oklch(0.62 0.04 250);
+}
