@@ -474,6 +474,25 @@ function ObraEditor({
     }
   }, [override?.audioFemPath, override?.updatedAt]);
 
+  // Sincroniza os campos de texto com o banco quando o `override` muda
+  // (carregamento assíncrono ou refetch após salvar/gerar). Sem isso, o selo
+  // de status reflete o banco mas as caixas continuam com o valor antigo/vazio.
+  const ultimoSync = useRef<string | null>(null);
+  useEffect(() => {
+    const marca = `${override?.updatedAt ?? ""}|${override?.descricao ?? ""}|${override?.audiodescricao ?? ""}`;
+    if (ultimoSync.current === marca) return;
+    ultimoSync.current = marca;
+    setTexto(override?.descricao ?? textoEstatico);
+    setAudiodescricao(
+      override?.audiodescricao ?? override?.descricao ?? textoEstatico,
+    );
+  }, [
+    override?.updatedAt,
+    override?.descricao,
+    override?.audiodescricao,
+    textoEstatico,
+  ]);
+
   const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
   const status = statusDaObra(override);
   const aprovada = status === "aprovada";
