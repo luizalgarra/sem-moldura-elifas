@@ -1,51 +1,40 @@
-# Acompanhamento de custo da geração de áudio
+# Redesenho da página /admin
 
-## Objetivo
-A geração de locução (obra #5 e demais) é feita pelo ElevenLabs, que **cobra por caractere** — esse custo NÃO sai dos créditos da Lovable, sai da sua conta ElevenLabs. Hoje o app gera o áudio mas não guarda nenhum registro de quanto custou. O plano cria um registro automático por geração e uma visão no painel admin, para você acompanhar o consumo sem precisar abrir o painel do ElevenLabs.
+Objetivo: deixar o painel interno (`/admin`) mais claro e fácil de usar, com uma identidade visual própria de "painel de controle" — separada da paleta do site público. Apenas a página `/admin` muda; nenhuma outra rota é tocada.
 
-## O que será entregue
-1. **Registro automático por geração**: a cada vez que um áudio é gerado, o sistema grava a obra, a data e o nº de caracteres do texto enviado ao ElevenLabs.
-2. **Estimativa de custo**: a partir dos caracteres, mostra um custo aproximado em dólar (com base na tarifa do plano ElevenLabs, configurável).
-3. **Painel no admin**: uma seção mostrando, por obra e no total, quantos caracteres já foram consumidos e o custo estimado.
+## Princípios
+- Sem mudar nenhuma lógica, server function, fluxo de geração de áudio/texto, histórico ou aprovação.
+- Mexer só na camada de apresentação (JSX/classes) dentro de `src/routes/admin.tsx`.
+- Paleta própria do admin via tokens locais (escopados ao container do admin), para não interferir no tema do site.
 
-## Como funciona (técnico)
+## Mudanças visuais
 
-### 1. Nova tabela `geracoes_audio` (migração)
-Guarda um histórico de cada geração:
-- `id uuid` (pk)
-- `num integer` (a obra/chave)
-- `caracteres integer` (tamanho do texto enviado)
-- `voz_id text`
-- `created_at timestamptz default now()`
+### 1. Tema do painel (paleta própria)
+- Definir um conjunto de tokens próprios do admin (fundo neutro escuro/grafite, superfície de cards levemente elevada, cor de destaque distinta da do site, e cores de status). Aplicados via uma classe wrapper no container raiz do admin, sem afetar o resto do app.
+- Codificação de status por cor consistente:
+  - Sem gerar → cinza neutro
+  - Texto gerado → âmbar
+  - Locução gerada → azul
+  - Aprovada → verde
 
-Com `GRANT` para `authenticated`/`service_role` e RLS: leitura apenas para admin via `is_admin()`. Inserção só acontece pelo servidor (service role).
+### 2. Cabeçalho e barra de ações
+- Cabeçalho mais compacto com título + subtítulo e, à direita, as ações em lote ("Gerar locução de todas" e "Cadastrar imagens"). Mensagens de progresso/resultado com aparência de badge.
 
-### 2. Gravar o consumo em `regenerarAudio`
-Em `src/lib/admin-obras.functions.ts`, dentro de `regenerarAudio` (e na geração em lote, se houver), após gerar o áudio com sucesso:
-- calcular `caracteres = texto.length` (o mesmo texto enviado ao ElevenLabs);
-- inserir uma linha em `geracoes_audio` via `supabaseAdmin`.
+### 3. Card de consumo (ElevenLabs)
+- Reorganizar as 3 métricas (Caracteres, Gerações, Custo estimado) em cards com hierarquia mais forte (número grande, rótulo discreto, ícone). Detalhamento por obra mantido em `details`, com melhor leitura.
 
-Isso reflete fielmente o que o ElevenLabs cobra, pois a tarifa deles é por caractere do texto enviado.
+### 4. Toolbar de busca/filtros
+- Manter sticky, mas com visual mais limpo: campo de busca com destaque e filtros como "chips" com contagem, usando as cores de status.
 
-### 3. Nova server function `resumoConsumoAudio`
-Função protegida (`requireSupabaseAuth` + checagem de admin) que retorna:
-- total de caracteres e custo estimado;
-- lista por obra (caracteres somados, nº de gerações).
+### 5. Lista de obras (ObraEditor)
+- Cada obra como um card mais legível: cabeçalho com número/título e badge de status colorido; seções "Descrição (referência)" e "Texto da audiodescrição" com rótulos claros e melhor espaçamento.
+- Agrupar as ações de cada bloco e dar destaque às primárias (Salvar / Gerar), com as secundárias em estilo discreto.
+- Player de locução e checkbox "Aprovar" em uma faixa destacada quando há áudio.
+- Bloco de Histórico com visual mais leve (itens com melhor contraste e densidade).
 
-### 4. Seção no painel admin (`src/routes/admin.tsx`)
-- Card "Consumo de voz (ElevenLabs)" com total de caracteres, custo estimado e tabela por obra.
-- Carregado via `useQuery` só quando há sessão admin (mesmo padrão já usado para `listarOverrides`).
+## Detalhes técnicos
+- Editar somente `src/routes/admin.tsx` e, se necessário para os tokens próprios, adicionar um pequeno bloco escopado em `src/styles.css` (classe `.admin-theme` com variáveis em `oklch`), sem alterar tokens globais existentes.
+- Nenhuma alteração em server functions, hooks, dados ou rotas.
+- Verificação: capturar a tela do `/admin` após o login não é possível automaticamente (exige sessão), então a validação será por build limpo e revisão do JSX.
 
-## Sobre a estimativa de custo
-A tarifa por caractere varia conforme o plano ElevenLabs. Vou usar uma constante configurável (ex.: `USD_POR_MILHAO_CARACTERES`) no código, com um valor padrão, e mostro o custo como **estimativa**. O valor oficial e definitivo continua sendo o do painel da sua conta ElevenLabs.
-
-## Observações
-- O histórico só passa a registrar a partir de agora; gerações anteriores (como já feitas) não têm registro retroativo, pois esse dado não foi salvo antes.
-- Nenhuma mudança na forma de gerar/tocar áudio — só acréscimo de registro e visualização.
-
-```text
-Gerar áudio ──> ElevenLabs (cobra por caractere)
-            └─> grava linha em geracoes_audio (num, caracteres, data)
-                              │
-Admin ──> resumoConsumoAudio ─┘──> Card "Consumo de voz" (total + por obra + custo estimado)
-```
+Sem mudanças funcionais — apenas aparência.
