@@ -153,6 +153,7 @@ function AdminPagina() {
         : `Concluído com ${falhas} falha(s) de ${alvos.length}.`,
     );
     refetch();
+    refetchConsumo();
   };
 
   const handleCadastrarImagens = async () => {
