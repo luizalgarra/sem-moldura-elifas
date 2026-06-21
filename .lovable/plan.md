@@ -1,31 +1,26 @@
 ## Objetivo
 
-Remover do bucket `audios-obras` os arquivos de áudio que **não** estão referenciados em `obra_overrides.audio_fem_path` (nem em `audio_trechos`, que hoje está vazio), mantendo apenas a versão atual de cada obra.
+Resolver a falha "Falha ao gerar áudio (401)" no painel de administração. O 401 é retornado pela própria API da ElevenLabs porque a credencial `ELEVENLABS_API_KEY` em uso está inválida ou expirada. A geração de **texto** (que usa a Lovable AI) continua funcionando — só a **locução por voz** falha.
 
-## Arquivos a manter (referenciados)
-- `obra-1-fem-1781889003385.mp3`
-- `obra-2-fem-1781894092421.mp3`
-- `obra-3-fem-1781894314791.mp3`
-- `obra-4-fem-1781807487798.mp3`
+## Causa
 
-## Arquivos órfãos a remover (8)
-- `obra-1-1780544736397.mp3`
-- `obra-1-fem-1781821039694.mp3`
-- `obra-1-fem-1781879940502.mp3`
-- `obra-1-fem-1781886838952.mp3`
-- `obra-1-fem-1781887375921.mp3`
-- `obra-4-t0-fem-1781805748260.mp3`
-- `obra-4-t1-fem-1781805748261.mp3`
-- `obra-4-t2-fem-1781805748261.mp3`
-- `obra-4-t3-fem-1781805748261.mp3`
+A função `regenerarAudio` chama `https://api.elevenlabs.io/.../text-to-speech` usando o cabeçalho `xi-api-key: ELEVENLABS_API_KEY`. Quando a chave é rejeitada, a ElevenLabs responde `401` e o app exibe a mensagem de erro. Não é um bug de código — é uma credencial inválida.
 
-(Total a remover: 9 arquivos — recontagem dinâmica no momento da execução; libera ~7 MB.)
+## Solução
 
-## Como será feito
-- Script único e descartável executado no ambiente do servidor, usando a **API de Storage** com `SUPABASE_SERVICE_ROLE_KEY` + `SUPABASE_URL` (remoção real dos bytes, não apenas metadados).
-- O script lista o conteúdo atual do bucket, lê os caminhos referenciados no banco, calcula o conjunto de órfãos **dinamicamente** (não usa lista fixa) e chama `POST /storage/v1/object/audios-obras` com a ação de remoção apenas para os órfãos.
-- Salvaguarda: nunca remove um arquivo cujo nome conste em `audio_fem_path`/`audio_trechos`.
+Existe um conector **"Luiz's ElevenLabs"** disponível no workspace, ainda **não vinculado** a este projeto. Vincular o conector sincroniza uma `ELEVENLABS_API_KEY` válida e atualizada para o ambiente do servidor, substituindo a chave defeituosa atual.
 
-## Verificação
-- Após a remoção, listar novamente o bucket e confirmar que restam exatamente os 4 arquivos referenciados.
-- Nenhuma alteração de código de aplicação, banco ou rotas — apenas limpeza de arquivos no storage.
+Passos:
+
+1. **Vincular o conector ElevenLabs** ao projeto (sincroniza automaticamente uma `ELEVENLABS_API_KEY` válida no runtime do servidor).
+2. **Validar a credencial** com uma verificação rápida (sem alterar dados), confirmando que a ElevenLabs não responde mais 401.
+3. **Testar a geração de locução** numa obra do painel para confirmar que o áudio é gerado e salvo corretamente.
+
+## Caso a vinculação não resolva
+
+Se, após vincular, a ElevenLabs ainda recusar a chave (ex.: a chave do conector também estiver sem saldo/permissões), o caminho alternativo é gerar uma nova API key na sua conta ElevenLabs e atualizá-la como segredo do projeto. Nesse caso eu aviso e conduzo esse passo.
+
+## Observações
+
+- Nenhuma mudança visual ou de lógica de negócio é necessária — apenas a correção da credencial.
+- A voz feminina atual e os parâmetros de entonação permanecem os mesmos.
