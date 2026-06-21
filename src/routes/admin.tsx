@@ -411,6 +411,7 @@ function AdminPagina() {
           />
         ))}
       </ul>
+      </div>
     </div>
   );
 }
