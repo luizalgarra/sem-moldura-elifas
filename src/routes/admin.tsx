@@ -748,17 +748,19 @@ function ObraEditor({
 
 
       {audioRegenSrc && (
-        <div className="mt-3">
-          <p className="text-xs text-muted-foreground">Locução gerada</p>
+        <div className="mt-4 rounded-xl border border-border bg-background/40 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Locução gerada
+          </p>
           <audio
             controls
             preload="none"
             src={audioRegenSrc}
-            className="mt-1 w-full"
+            className="mt-2 w-full"
           >
             Seu navegador não suporta áudio.
           </audio>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-3 flex items-center gap-2">
             <Checkbox
               id={`aprovar-${num}`}
               checked={aprovada}
