@@ -219,120 +219,140 @@ function AdminPagina() {
 
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <header>
-        <h1 className="font-serif text-3xl font-bold text-foreground">
-          Administração de textos e áudios
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Edite a descrição de cada obra e gere a locução (voz única).
-        </p>
-      </header>
-
-      <div className="mt-6 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-4">
-        <Button
-          onClick={handleLote}
-          disabled={loteRodando}
-          className="min-h-11"
-        >
-          {loteRodando ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <RefreshCw aria-hidden="true" />
-          )}
-          <span>Gerar locução de todas as obras</span>
-        </Button>
-        {loteRodando && (
-          <span className="text-sm text-muted-foreground" role="status">
-            Gerando… {loteFeito}/{obras.length}
-          </span>
-        )}
-        {!loteRodando && loteMsg && (
-          <span className="text-sm text-muted-foreground" role="status">
-            {loteMsg}
-          </span>
-        )}
-
-        <Button
-          variant="outline"
-          onClick={handleCadastrarImagens}
-          disabled={imgRodando}
-          className="min-h-11"
-        >
-          {imgRodando ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Images aria-hidden="true" />
-          )}
-          <span>Cadastrar imagens das obras (IA)</span>
-        </Button>
-        {imgMsg && (
-          <span className="text-sm text-muted-foreground" role="status">
-            {imgMsg}
-          </span>
-        )}
-      </div>
-
-      {consumo && consumo.totalGeracoes > 0 && (
-        <section className="mt-6 rounded-lg border border-border bg-card p-4">
-          <h2 className="font-serif text-lg font-bold text-foreground">
-            Consumo de voz (ElevenLabs)
-          </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Estimativa baseada em US$ {consumo.usdPorMilhao} por milhão de
-            caracteres. O valor oficial é o do painel da sua conta ElevenLabs.
-          </p>
-
-          <div className="mt-3 grid grid-cols-3 gap-3">
-            <div className="rounded-md border border-border p-3">
-              <div className="text-xs text-muted-foreground">Caracteres</div>
-              <div className="text-lg font-bold text-foreground">
-                {consumo.totalCaracteres.toLocaleString("pt-BR")}
-              </div>
+    <div className="admin-theme">
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <header className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                Painel
+              </p>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Textos e áudios das obras
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Edite a descrição de cada obra e gere a locução (voz única).
+              </p>
             </div>
-            <div className="rounded-md border border-border p-3">
-              <div className="text-xs text-muted-foreground">Gerações</div>
-              <div className="text-lg font-bold text-foreground">
-                {consumo.totalGeracoes.toLocaleString("pt-BR")}
-              </div>
-            </div>
-            <div className="rounded-md border border-border p-3">
-              <div className="text-xs text-muted-foreground">
-                Custo estimado
-              </div>
-              <div className="text-lg font-bold text-foreground">
-                US$ {consumo.custoEstimadoUsd.toFixed(2)}
-              </div>
+            <div className="flex flex-col items-stretch gap-2">
+              <Button onClick={handleLote} disabled={loteRodando} className="min-h-11">
+                {loteRodando ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <RefreshCw aria-hidden="true" />
+                )}
+                <span>Gerar locução de todas</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCadastrarImagens}
+                disabled={imgRodando}
+                className="min-h-11"
+              >
+                {imgRodando ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Images aria-hidden="true" />
+                )}
+                <span>Cadastrar imagens (IA)</span>
+              </Button>
             </div>
           </div>
 
-          <details className="mt-3">
-            <summary className="cursor-pointer text-sm font-medium text-foreground">
-              Detalhar por obra
-            </summary>
-            <ul className="mt-2 divide-y divide-border text-sm">
-              {consumo.porObra.map((o) => (
-                <li
-                  key={o.num}
-                  className="flex items-center justify-between gap-2 py-2"
+          {(loteRodando || loteMsg || imgMsg) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {loteRodando && (
+                <span
+                  className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
+                  role="status"
                 >
-                  <span className="text-foreground">
-                    #{o.num} {tituloPorNum.get(o.num) ?? ""}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {o.caracteres.toLocaleString("pt-BR")} car. ·{" "}
-                    {o.geracoes}× · US${" "}
-                    {(
-                      (o.caracteres / 1_000_000) *
-                      consumo.usdPorMilhao
-                    ).toFixed(2)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </details>
-        </section>
-      )}
+                  Gerando… {loteFeito}/{obras.length}
+                </span>
+              )}
+              {!loteRodando && loteMsg && (
+                <span
+                  className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
+                  role="status"
+                >
+                  {loteMsg}
+                </span>
+              )}
+              {imgMsg && (
+                <span
+                  className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
+                  role="status"
+                >
+                  {imgMsg}
+                </span>
+              )}
+            </div>
+          )}
+        </header>
+
+        {consumo && consumo.totalGeracoes > 0 && (
+          <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-foreground">
+              Consumo de voz (ElevenLabs)
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Estimativa baseada em US$ {consumo.usdPorMilhao} por milhão de
+              caracteres. O valor oficial é o do painel da sua conta ElevenLabs.
+            </p>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-border bg-background/40 p-4">
+                <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <FileText className="size-3.5" aria-hidden="true" /> Caracteres
+                </div>
+                <div className="mt-2 text-2xl font-bold text-foreground">
+                  {consumo.totalCaracteres.toLocaleString("pt-BR")}
+                </div>
+              </div>
+              <div className="rounded-xl border border-border bg-background/40 p-4">
+                <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <BarChart3 className="size-3.5" aria-hidden="true" /> Gerações
+                </div>
+                <div className="mt-2 text-2xl font-bold text-foreground">
+                  {consumo.totalGeracoes.toLocaleString("pt-BR")}
+                </div>
+              </div>
+              <div className="rounded-xl border border-border bg-background/40 p-4">
+                <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <Coins className="size-3.5" aria-hidden="true" /> Custo estimado
+                </div>
+                <div className="mt-2 text-2xl font-bold text-primary">
+                  US$ {consumo.custoEstimadoUsd.toFixed(2)}
+                </div>
+              </div>
+            </div>
+
+            <details className="mt-4">
+              <summary className="cursor-pointer text-sm font-medium text-foreground">
+                Detalhar por obra
+              </summary>
+              <ul className="mt-2 divide-y divide-border text-sm">
+                {consumo.porObra.map((o) => (
+                  <li
+                    key={o.num}
+                    className="flex items-center justify-between gap-2 py-2"
+                  >
+                    <span className="text-foreground">
+                      #{o.num} {tituloPorNum.get(o.num) ?? ""}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {o.caracteres.toLocaleString("pt-BR")} car. ·{" "}
+                      {o.geracoes}× · US${" "}
+                      {(
+                        (o.caracteres / 1_000_000) *
+                        consumo.usdPorMilhao
+                      ).toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </section>
+        )}
 
 
 
