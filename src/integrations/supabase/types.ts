@@ -47,6 +47,30 @@ export type Database = {
         }
         Relationships: []
       }
+      geracoes_audio: {
+        Row: {
+          caracteres: number
+          created_at: string
+          id: string
+          num: number
+          voz_id: string | null
+        }
+        Insert: {
+          caracteres: number
+          created_at?: string
+          id?: string
+          num: number
+          voz_id?: string | null
+        }
+        Update: {
+          caracteres?: number
+          created_at?: string
+          id?: string
+          num?: number
+          voz_id?: string | null
+        }
+        Relationships: []
+      }
       obra_overrides: {
         Row: {
           ano: string | null
