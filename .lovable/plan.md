@@ -1,26 +1,10 @@
-## Objetivo
+Diagnóstico confirmado: a chave está válida, mas a ElevenLabs está recusando a geração com `payment_required/payment_issue`: “Your subscription has a failed or incomplete payment”. Por isso o app mostra “Falha ao gerar áudio (401)”.
 
-Resolver a falha "Falha ao gerar áudio (401)" no painel de administração. O 401 é retornado pela própria API da ElevenLabs porque a credencial `ELEVENLABS_API_KEY` em uso está inválida ou expirada. A geração de **texto** (que usa a Lovable AI) continua funcionando — só a **locução por voz** falha.
+Plano:
+1. Corrigir a cobrança/fatura pendente diretamente na conta ElevenLabs conectada (“Luiz's ElevenLabs”).
+2. Depois disso, validar novamente a credencial com uma chamada não destrutiva à API.
+3. Testar a geração de áudio no painel para confirmar que a locução é gerada e salva.
+4. Se ainda falhar, ajustar o tratamento de erro no app para mostrar uma mensagem mais clara quando a ElevenLabs devolver problema de pagamento, em vez de apenas “401”.
 
-## Causa
-
-A função `regenerarAudio` chama `https://api.elevenlabs.io/.../text-to-speech` usando o cabeçalho `xi-api-key: ELEVENLABS_API_KEY`. Quando a chave é rejeitada, a ElevenLabs responde `401` e o app exibe a mensagem de erro. Não é um bug de código — é uma credencial inválida.
-
-## Solução
-
-Existe um conector **"Luiz's ElevenLabs"** disponível no workspace, ainda **não vinculado** a este projeto. Vincular o conector sincroniza uma `ELEVENLABS_API_KEY` válida e atualizada para o ambiente do servidor, substituindo a chave defeituosa atual.
-
-Passos:
-
-1. **Vincular o conector ElevenLabs** ao projeto (sincroniza automaticamente uma `ELEVENLABS_API_KEY` válida no runtime do servidor).
-2. **Validar a credencial** com uma verificação rápida (sem alterar dados), confirmando que a ElevenLabs não responde mais 401.
-3. **Testar a geração de locução** numa obra do painel para confirmar que o áudio é gerado e salvo corretamente.
-
-## Caso a vinculação não resolva
-
-Se, após vincular, a ElevenLabs ainda recusar a chave (ex.: a chave do conector também estiver sem saldo/permissões), o caminho alternativo é gerar uma nova API key na sua conta ElevenLabs e atualizá-la como segredo do projeto. Nesse caso eu aviso e conduzo esse passo.
-
-## Observações
-
-- Nenhuma mudança visual ou de lógica de negócio é necessária — apenas a correção da credencial.
-- A voz feminina atual e os parâmetros de entonação permanecem os mesmos.
+Detalhe técnico:
+- O servidor recebeu da ElevenLabs: `401 payment_required`, `code: payment_issue`, indicando problema de pagamento/assinatura, não chave inválida.
