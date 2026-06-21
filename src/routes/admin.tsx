@@ -80,11 +80,24 @@ function AdminPagina() {
     enabled: Boolean(session) && isAdmin,
   });
 
+  const fetchConsumo = useServerFn(resumoConsumoAudio);
+  const { data: consumo } = useQuery({
+    queryKey: ["consumo-audio"],
+    queryFn: () => fetchConsumo(),
+    enabled: Boolean(session) && isAdmin,
+  });
+
   const mapa = useMemo(() => {
     const m = new Map<number, OverrideObra>();
     (overrides ?? []).forEach((o) => m.set(o.num, o));
     return m;
   }, [overrides]);
+
+  const tituloPorNum = useMemo(() => {
+    const m = new Map<number, string>();
+    obras.forEach((o) => m.set(o.num, o.titulo));
+    return m;
+  }, []);
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<StatusObra | "todas">(
