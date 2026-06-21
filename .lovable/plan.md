@@ -1,24 +1,31 @@
-## Problema
+## Objetivo
 
-No painel `/admin`, o selo de status (ex.: "Texto gerado") é sempre recalculado a partir dos dados do banco (`override`) a cada render, mas os campos de texto (`Descrição` e `Texto da audiodescrição`) usam estado local inicializado **apenas uma vez** na montagem do componente (`useState`).
+Remover do bucket `audios-obras` os arquivos de áudio que **não** estão referenciados em `obra_overrides.audio_fem_path` (nem em `audio_trechos`, que hoje está vazio), mantendo apenas a versão atual de cada obra.
 
-Quando os dados chegam/recarregam depois da montagem (carregamento assíncrono ou refetch após "Salvar"/"Gerar"), há um único `useEffect` que sincroniza somente a versão do áudio — nada sincroniza os textos. Resultado: o selo mostra "Texto gerado" (porque o banco tem `audiodescricao`), enquanto a caixa "Texto da audiodescrição (locução)" continua exibindo o valor antigo/vazio do estado local.
+## Arquivos a manter (referenciados)
+- `obra-1-fem-1781889003385.mp3`
+- `obra-2-fem-1781894092421.mp3`
+- `obra-3-fem-1781894314791.mp3`
+- `obra-4-fem-1781807487798.mp3`
 
-## Correção
+## Arquivos órfãos a remover (8)
+- `obra-1-1780544736397.mp3`
+- `obra-1-fem-1781821039694.mp3`
+- `obra-1-fem-1781879940502.mp3`
+- `obra-1-fem-1781886838952.mp3`
+- `obra-1-fem-1781887375921.mp3`
+- `obra-4-t0-fem-1781805748260.mp3`
+- `obra-4-t1-fem-1781805748261.mp3`
+- `obra-4-t2-fem-1781805748261.mp3`
+- `obra-4-t3-fem-1781805748261.mp3`
 
-Em `src/routes/admin.tsx`, dentro de `ObraEditor`, adicionar sincronização do estado local dos textos com o `override` quando os dados do banco mudarem, sem descartar edições não salvas do usuário.
+(Total a remover: 9 arquivos — recontagem dinâmica no momento da execução; libera ~7 MB.)
 
-### Abordagem
-- Adicionar um `useEffect` que observa a identidade dos dados do banco (`override?.updatedAt`, além de `override?.audiodescricao` e `override?.descricao`).
-- Quando o `override` for atualizado (novo `updatedAt`), reatualizar:
-  - `texto` → `override?.descricao ?? textoEstatico`
-  - `audiodescricao` → `override?.audiodescricao ?? override?.descricao ?? textoEstatico`
-- Guardar a referência do último `updatedAt` aplicado (via `useRef`) para só reescrever os campos quando os dados realmente mudarem (evitando sobrescrever o que o usuário está digitando entre saves).
-
-Isso garante que, sempre que o banco indicar que existe texto gerado, a caixa correspondente passe a exibi-lo, mantendo o selo e o conteúdo coerentes.
+## Como será feito
+- Script único e descartável executado no ambiente do servidor, usando a **API de Storage** com `SUPABASE_SERVICE_ROLE_KEY` + `SUPABASE_URL` (remoção real dos bytes, não apenas metadados).
+- O script lista o conteúdo atual do bucket, lê os caminhos referenciados no banco, calcula o conjunto de órfãos **dinamicamente** (não usa lista fixa) e chama `POST /storage/v1/object/audios-obras` com a ação de remoção apenas para os órfãos.
+- Salvaguarda: nunca remove um arquivo cujo nome conste em `audio_fem_path`/`audio_trechos`.
 
 ## Verificação
-- Build limpo.
-- Abrir `/admin`, conferir que obras com selo "Texto gerado"/"Locução gerada" mostram o texto correto na caixa de audiodescrição ao carregar e após gerar/salvar.
-
-Apenas `src/routes/admin.tsx` é alterado; nenhuma função de servidor, dado ou rota muda.
+- Após a remoção, listar novamente o bucket e confirmar que restam exatamente os 4 arquivos referenciados.
+- Nenhuma alteração de código de aplicação, banco ou rotas — apenas limpeza de arquivos no storage.
