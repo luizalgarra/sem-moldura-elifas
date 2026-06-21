@@ -471,8 +471,7 @@ export const listarOverrides = createServerFn({ method: "GET" })
       aprovada: row.aprovada ?? false,
       updatedAt: row.updated_at,
     }));
-  },
-);
+  });
 
 /** Marca/desmarca uma obra como aprovada (somente admin). */
 export const definirAprovacao = createServerFn({ method: "POST" })
