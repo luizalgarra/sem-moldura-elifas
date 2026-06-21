@@ -429,8 +429,12 @@ async function materializarOrdem(supabaseAdmin: SupabaseAdmin): Promise<void> {
 }
 
 /** Lista todos os overrides salvos no banco. */
-export const listarOverrides = createServerFn({ method: "GET" }).handler(
-  async (): Promise<OverrideObra[]> => {
+export const listarOverrides = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<OverrideObra[]> => {
+    if (!(await ehAdmin(context))) {
+      return [];
+    }
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
