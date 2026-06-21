@@ -63,6 +63,43 @@ const STATUS_ROTULO: Record<StatusObra, string> = {
   aprovada: "Aprovada",
 };
 
+/** Cor (texto + fundo) por status, via tokens escopados em `.admin-theme`. */
+const STATUS_STYLE: Record<StatusObra, { color: string; background: string }> = {
+  "sem-gerar": {
+    color: "var(--admin-status-none)",
+    background: "var(--admin-status-none-bg)",
+  },
+  texto: {
+    color: "var(--admin-status-text)",
+    background: "var(--admin-status-text-bg)",
+  },
+  locucao: {
+    color: "var(--admin-status-audio)",
+    background: "var(--admin-status-audio-bg)",
+  },
+  aprovada: {
+    color: "var(--admin-status-ok)",
+    background: "var(--admin-status-ok-bg)",
+  },
+};
+
+function StatusBadge({ status }: { status: StatusObra }) {
+  const s = STATUS_STYLE[status];
+  return (
+    <span
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
+      style={{ color: s.color, backgroundColor: s.background }}
+    >
+      <span
+        className="size-1.5 rounded-full"
+        style={{ backgroundColor: s.color }}
+        aria-hidden="true"
+      />
+      {STATUS_ROTULO[status]}
+    </span>
+  );
+}
+
 const FILTROS: { valor: StatusObra | "todas"; rotulo: string }[] = [
   { valor: "todas", rotulo: "Todas" },
   { valor: "sem-gerar", rotulo: "Sem gerar" },
