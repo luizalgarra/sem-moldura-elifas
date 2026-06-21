@@ -14,6 +14,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { obras } from "@/data/obras";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   listarOverrides,
   salvarTexto,
