@@ -16,10 +16,9 @@ import {
   BarChart3,
   Coins,
 } from "lucide-react";
-import { obras } from "@/data/obras";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
-  listarOverrides,
+  listarAcervoAdmin,
   salvarTexto,
   salvarAudiodescricao,
   regenerarAudio,
@@ -30,7 +29,7 @@ import {
   restaurarVersaoAudio,
   definirAprovacao,
   resumoConsumoAudio,
-  type OverrideObra,
+  type ObraAcervo,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,10 +51,10 @@ export const Route = createFileRoute("/admin")({
 /** Status de produção de uma obra, derivado da presença de dados. */
 type StatusObra = "sem-gerar" | "texto" | "locucao" | "aprovada";
 
-function statusDaObra(override: OverrideObra | undefined): StatusObra {
-  if (override?.aprovada) return "aprovada";
-  if (override?.audioFemPath) return "locucao";
-  if (override?.audiodescricao && override.audiodescricao.trim()) return "texto";
+function statusDaObra(item: ObraAcervo | undefined): StatusObra {
+  if (item?.aprovada) return "aprovada";
+  if (item?.audioFem) return "locucao";
+  if (item?.temAudiodescricao) return "texto";
   return "sem-gerar";
 }
 
@@ -113,10 +112,10 @@ const FILTROS: { valor: StatusObra | "todas"; rotulo: string }[] = [
 
 function AdminPagina() {
   const { session, isAdmin } = useAdminAuth();
-  const fetchOverrides = useServerFn(listarOverrides);
-  const { data: overrides, refetch } = useQuery({
-    queryKey: ["overrides"],
-    queryFn: () => fetchOverrides(),
+  const fetchAcervo = useServerFn(listarAcervoAdmin);
+  const { data: acervo, refetch } = useQuery({
+    queryKey: ["acervo-admin"],
+    queryFn: () => fetchAcervo(),
     enabled: Boolean(session) && isAdmin,
   });
 
@@ -127,17 +126,14 @@ function AdminPagina() {
     enabled: Boolean(session) && isAdmin,
   });
 
-  const mapa = useMemo(() => {
-    const m = new Map<number, OverrideObra>();
-    (overrides ?? []).forEach((o) => m.set(o.num, o));
-    return m;
-  }, [overrides]);
+  const lista = useMemo(() => acervo ?? [], [acervo]);
 
-  const tituloPorNum = useMemo(() => {
+  // Título por chave interna (usado no detalhamento de consumo, que usa a chave).
+  const tituloPorChave = useMemo(() => {
     const m = new Map<number, string>();
-    obras.forEach((o) => m.set(o.num, o.titulo));
+    lista.forEach((o) => m.set(o.chave, o.titulo));
     return m;
-  }, []);
+  }, [lista]);
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<StatusObra | "todas">(
@@ -158,28 +154,28 @@ function AdminPagina() {
 
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
-    return obras.filter((o) => {
+    return lista.filter((o) => {
       const correspondeBusca =
         !q ||
         String(o.num).includes(q) ||
         o.titulo.toLowerCase().includes(q);
       if (!correspondeBusca) return false;
       if (filtroStatus === "todas") return true;
-      return statusDaObra(mapa.get(o.num)) === filtroStatus;
+      return statusDaObra(o) === filtroStatus;
     });
-  }, [busca, filtroStatus, mapa]);
+  }, [lista, busca, filtroStatus]);
 
 
 
   const handleLote = async () => {
-    const alvos = obras;
+    const alvos = lista;
     setLoteRodando(true);
     setLoteFeito(0);
     setLoteMsg(null);
     let falhas = 0;
     for (let i = 0; i < alvos.length; i++) {
       try {
-        const r = await regenerar({ data: { chave: alvos[i].num } });
+        const r = await regenerar({ data: { chave: alvos[i].chave } });
         if (!r.ok) falhas++;
       } catch {
         falhas++;
@@ -269,7 +265,7 @@ function AdminPagina() {
                   className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
                   role="status"
                 >
-                  Gerando… {loteFeito}/{obras.length}
+                  Gerando… {loteFeito}/{lista.length}
                 </span>
               )}
               {!loteRodando && loteMsg && (
@@ -340,7 +336,7 @@ function AdminPagina() {
                     className="flex items-center justify-between gap-2 py-2"
                   >
                     <span className="text-foreground">
-                      #{o.num} {tituloPorNum.get(o.num) ?? ""}
+                      #{o.num} {tituloPorChave.get(o.num) ?? ""}
                     </span>
                     <span className="text-muted-foreground">
                       {o.caracteres.toLocaleString("pt-BR")} car. ·{" "}
@@ -380,10 +376,8 @@ function AdminPagina() {
             const ativo = filtroStatus === f.valor;
             const total =
               f.valor === "todas"
-                ? obras.length
-                : obras.filter(
-                    (o) => statusDaObra(mapa.get(o.num)) === f.valor,
-                  ).length;
+                ? lista.length
+                : lista.filter((o) => statusDaObra(o) === f.valor).length;
             return (
               <Button
                 key={f.valor}
@@ -404,12 +398,8 @@ function AdminPagina() {
       <ul className="mt-4 space-y-4">
         {filtradas.map((obra) => (
           <ObraEditor
-            key={obra.num}
-            num={obra.num}
-            titulo={obra.titulo}
-            textoEstatico={obra.descricao}
-            audioEstatico={obra.audio}
-            override={mapa.get(obra.num)}
+            key={obra.chave}
+            dados={obra}
             onChanged={() => refetch()}
           />
         ))}
@@ -419,29 +409,26 @@ function AdminPagina() {
   );
 }
 
-/** Versão (cache-buster) derivada do `updatedAt` do override salvo no banco. */
-function versaoDeOverride(override: OverrideObra | undefined): string {
-  return override?.updatedAt
-    ? new Date(override.updatedAt).getTime().toString()
+/** Versão (cache-buster) derivada do `updatedAt` salvo no banco. */
+function versaoDeData(updatedAt: string | null): string {
+  return updatedAt
+    ? new Date(updatedAt).getTime().toString()
     : Date.now().toString();
 }
 
 function ObraEditor({
-
-  num,
-  titulo,
-  textoEstatico,
-  audioEstatico,
-  override,
+  dados,
   onChanged,
 }: {
-  num: number;
-  titulo: string;
-  textoEstatico: string;
-  audioEstatico: string | null;
-  override: OverrideObra | undefined;
+  dados: ObraAcervo;
   onChanged: () => void;
 }) {
+  const chave = dados.chave;
+  const num = dados.num;
+  const titulo = dados.titulo;
+  const textoEstatico = dados.descricao;
+  const audioEstatico = dados.audio;
+
   const salvar = useServerFn(salvarTexto);
   const salvarAudio = useServerFn(salvarAudiodescricao);
   const regenerar = useServerFn(regenerarAudio);
@@ -449,10 +436,8 @@ function ObraEditor({
   const aprovar = useServerFn(definirAprovacao);
   const [aprovando, setAprovando] = useState(false);
 
-  const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
-  const [audiodescricao, setAudiodescricao] = useState(
-    override?.audiodescricao ?? override?.descricao ?? textoEstatico,
-  );
+  const [texto, setTexto] = useState(textoEstatico);
+  const [audiodescricao, setAudiodescricao] = useState(dados.audiodescricao);
   const [salvando, setSalvando] = useState(false);
   const [salvandoAudio, setSalvandoAudio] = useState(false);
   const [gerando, setGerando] = useState(false);
@@ -461,7 +446,7 @@ function ObraEditor({
   const [baixando, setBaixando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioFemPath ? versaoDeOverride(override) : null,
+    dados.audioFem ? versaoDeData(dados.updatedAt) : null,
   );
   const [histKey, setHistKey] = useState(0);
   const recarregarHist = () => setHistKey((k) => k + 1);
@@ -469,39 +454,32 @@ function ObraEditor({
   // Sincroniza com o banco quando os dados recarregam (refetch). Assim a tela
   // reflete o áudio recém-salvo em vez de "voltar ao estado" anterior.
   useEffect(() => {
-    if (override?.audioFemPath) {
-      setVersaoAudio(versaoDeOverride(override));
+    if (dados.audioFem) {
+      setVersaoAudio(versaoDeData(dados.updatedAt));
     }
-  }, [override?.audioFemPath, override?.updatedAt]);
+  }, [dados.audioFem, dados.updatedAt]);
 
-  // Sincroniza os campos de texto com o banco quando o `override` muda
+  // Sincroniza os campos de texto com o banco quando os dados mudam
   // (carregamento assíncrono ou refetch após salvar/gerar). Sem isso, o selo
   // de status reflete o banco mas as caixas continuam com o valor antigo/vazio.
   const ultimoSync = useRef<string | null>(null);
   useEffect(() => {
-    const marca = `${override?.updatedAt ?? ""}|${override?.descricao ?? ""}|${override?.audiodescricao ?? ""}`;
+    const marca = `${dados.updatedAt ?? ""}|${dados.descricao}|${dados.audiodescricao}`;
     if (ultimoSync.current === marca) return;
     ultimoSync.current = marca;
-    setTexto(override?.descricao ?? textoEstatico);
-    setAudiodescricao(
-      override?.audiodescricao ?? override?.descricao ?? textoEstatico,
-    );
-  }, [
-    override?.updatedAt,
-    override?.descricao,
-    override?.audiodescricao,
-    textoEstatico,
-  ]);
+    setTexto(dados.descricao);
+    setAudiodescricao(dados.audiodescricao);
+  }, [dados.updatedAt, dados.descricao, dados.audiodescricao]);
 
-  const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
-  const status = statusDaObra(override);
+  const temAudioRegen = versaoAudio !== null && !!dados.audioFem;
+  const status = statusDaObra(dados);
   const aprovada = status === "aprovada";
 
   const handleAprovar = async () => {
     setAprovando(true);
     setMsg(null);
     try {
-      const r = await aprovar({ data: { chave: num, aprovada: !aprovada } });
+      const r = await aprovar({ data: { chave, aprovada: !aprovada } });
       if (r.ok) {
         setMsg(aprovada ? "Aprovação removida." : "Obra aprovada.");
         onChanged();
@@ -522,7 +500,7 @@ function ObraEditor({
     setSalvando(true);
     setMsg(null);
     try {
-      const r = await salvar({ data: { chave: num, descricao: texto } });
+      const r = await salvar({ data: { chave, descricao: texto } });
       setMsg(r.ok ? "Descrição salva." : (r.erro ?? "Erro ao salvar."));
       if (r.ok) {
         onChanged();
@@ -539,7 +517,7 @@ function ObraEditor({
     setMsg(null);
     try {
       const r = await salvarAudio({
-        data: { chave: num, audiodescricao },
+        data: { chave, audiodescricao },
       });
       setMsg(r.ok ? "Audiodescrição salva." : (r.erro ?? "Erro ao salvar."));
       if (r.ok) {
@@ -557,7 +535,7 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { chave: num, audiodescricao } });
+      const r = await regenerar({ data: { chave, audiodescricao } });
       if (r.ok) {
         setVersaoAudio(r.versao);
         setMsg("Locução gerada e salva.");
@@ -577,7 +555,7 @@ function ObraEditor({
     setGerandoTexto(true);
     setMsg(null);
     try {
-      const r = await gerarTexto({ data: { chave: num } });
+      const r = await gerarTexto({ data: { chave } });
       if (r.ok) {
         setAudiodescricao(r.texto);
         setMsg("Audiodescrição gerada — revise e salve.");
@@ -596,11 +574,11 @@ function ObraEditor({
 
 
   const audioRegenSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
+    ? `/api/public/obra-audio/${chave}?voz=fem&v=${versaoAudio}`
     : null;
 
   const downloadSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=fem&download=1&v=${versaoAudio}`
+    ? `/api/public/obra-audio/${chave}?voz=fem&download=1&v=${versaoAudio}`
     : audioEstatico;
 
   const handleBaixar = async () => {
@@ -800,7 +778,7 @@ function ObraEditor({
       )}
 
       <Historico
-        num={num}
+        chave={chave}
         refreshKey={histKey}
         onRestaurarTexto={(t) => setAudiodescricao(t)}
         onRestaurarAudio={(v) => setVersaoAudio(v)}
@@ -824,12 +802,12 @@ function dataHora(iso: string): string {
 }
 
 function Historico({
-  num,
+  chave,
   refreshKey,
   onRestaurarTexto,
   onRestaurarAudio,
 }: {
-  num: number;
+  chave: number;
   refreshKey: number;
   onRestaurarTexto: (texto: string) => void;
   onRestaurarAudio: (versao: string) => void;
@@ -854,7 +832,7 @@ function Historico({
     setCarregando(true);
     setErro(null);
     try {
-      const r = await listar({ data: { chave: num } });
+      const r = await listar({ data: { chave } });
       if (r.ok) {
         setTextos(r.textos);
         setAudios(r.audios);
@@ -892,7 +870,7 @@ function Historico({
       const r = await restAudio({ data: { id } });
       if (r.ok) {
         onRestaurarAudio(r.versao);
-        setAudioPreview(`/api/public/obra-audio/${num}?voz=fem&v=${r.versao}`);
+        setAudioPreview(`/api/public/obra-audio/${chave}?voz=fem&v=${r.versao}`);
       } else {
         setErro(r.erro ?? "Erro ao restaurar.");
       }

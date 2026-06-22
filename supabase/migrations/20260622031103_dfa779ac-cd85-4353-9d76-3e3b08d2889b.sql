@@ -1,0 +1,1 @@
+ALTER TABLE public.obras_extras ADD COLUMN IF NOT EXISTS aprovada boolean NOT NULL DEFAULT false;

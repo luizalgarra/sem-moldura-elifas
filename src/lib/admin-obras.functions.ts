@@ -59,6 +59,10 @@ export interface ObraAcervo extends Obra {
   audioFem: string | null;
   audioMasc: string | null;
   audioTrechos: TrechoPublico[] | null;
+  aprovada: boolean;
+  updatedAt: string | null;
+  /** Presença real de uma audiodescrição gerada (sem fallback do texto). */
+  temAudiodescricao: boolean;
 }
 
 function versaoDe(updatedAt: string | null | undefined): string {
@@ -286,12 +290,12 @@ async function construirAcervo(
     supabaseAdmin
       .from("obra_overrides")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, aprovada, updated_at",
       ),
     supabaseAdmin
       .from("obras_extras")
       .select(
-        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, updated_at",
+        "num, titulo, ano, autor, tecnica, dimensao, parede, descricao, audiodescricao, imagem_path, audio_url, audio_fem_path, audio_masc_path, audio_trechos, aprovada, updated_at",
       ),
     supabaseAdmin.from("acervo_ordem").select("chave, posicao"),
   ]);
@@ -332,6 +336,9 @@ async function construirAcervo(
       audioFem,
       audioMasc,
       audioTrechos: trechosPublicos(ov?.audio_trechos, obra.num, v),
+      aprovada: ov?.aprovada ?? false,
+      updatedAt: ov?.updated_at ?? null,
+      temAudiodescricao: !!(ov?.audiodescricao && ov.audiodescricao.trim()),
       extra: false,
     });
   }
@@ -364,6 +371,9 @@ async function construirAcervo(
       audioFem,
       audioMasc,
       audioTrechos: trechosPublicos(ex.audio_trechos, ex.num, v),
+      aprovada: ex.aprovada ?? false,
+      updatedAt: ex.updated_at ?? null,
+      temAudiodescricao: !!(ex.audiodescricao && ex.audiodescricao.trim()),
       extra: true,
     });
   }
@@ -492,15 +502,27 @@ export const definirAprovacao = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import(
         "@/integrations/supabase/client.server"
       );
-      const { error } = await supabaseAdmin
-        .from("obra_overrides")
-        .upsert(
-          { num: data.chave, aprovada: data.aprovada, updated_at: new Date().toISOString() },
-          { onConflict: "num" },
-        );
-      if (error) {
-        console.error("definirAprovacao:", error.message);
-        return { ok: false, erro: "Erro ao salvar a aprovação." };
+      const agora = new Date().toISOString();
+      if (ehObraFixa(data.chave)) {
+        const { error } = await supabaseAdmin
+          .from("obra_overrides")
+          .upsert(
+            { num: data.chave, aprovada: data.aprovada, updated_at: agora },
+            { onConflict: "num" },
+          );
+        if (error) {
+          console.error("definirAprovacao:", error.message);
+          return { ok: false, erro: "Erro ao salvar a aprovação." };
+        }
+      } else {
+        const { error } = await supabaseAdmin
+          .from("obras_extras")
+          .update({ aprovada: data.aprovada, updated_at: agora })
+          .eq("num", data.chave);
+        if (error) {
+          console.error("definirAprovacao:", error.message);
+          return { ok: false, erro: "Erro ao salvar a aprovação." };
+        }
       }
       return { ok: true };
     },
@@ -517,6 +539,21 @@ export const listarAcervo = createServerFn({ method: "GET" }).handler(
     return construirAcervo(supabaseAdmin);
   },
 );
+
+/**
+ * Mesmo acervo canônico (fixas − ocultas + extras, renumerado e ordenado),
+ * porém restrito a administradores. É a fonte única da tela /admin, para que
+ * /admin e /editar exibam exatamente a mesma lista.
+ */
+export const listarAcervoAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ObraAcervo[]> => {
+    await garantirAdmin(context);
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    return construirAcervo(supabaseAdmin);
+  });
 
 /** Busca uma única obra pronta para exibição pública pelo número EXIBIDO. */
 export const getObraPublica = createServerFn({ method: "GET" })
