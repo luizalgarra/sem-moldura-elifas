@@ -802,12 +802,12 @@ function dataHora(iso: string): string {
 }
 
 function Historico({
-  num,
+  chave,
   refreshKey,
   onRestaurarTexto,
   onRestaurarAudio,
 }: {
-  num: number;
+  chave: number;
   refreshKey: number;
   onRestaurarTexto: (texto: string) => void;
   onRestaurarAudio: (versao: string) => void;
