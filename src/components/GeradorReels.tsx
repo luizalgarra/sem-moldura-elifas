@@ -53,8 +53,11 @@ async function converterParaMp4(webm: Blob): Promise<Blob> {
     "out.mp4",
   ]);
   const dados = await ffmpeg.readFile("out.mp4");
-  const bytes = dados instanceof Uint8Array ? dados : new TextEncoder().encode(String(dados));
-  return new Blob([bytes], { type: "video/mp4" });
+  const bytes =
+    dados instanceof Uint8Array ? dados : new TextEncoder().encode(String(dados));
+  const ab = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(ab).set(bytes);
+  return new Blob([ab], { type: "video/mp4" });
 }
 
 const LARGURA = 1080;
