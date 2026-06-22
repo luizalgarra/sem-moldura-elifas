@@ -296,10 +296,11 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       // Converte para MP4 no navegador (com fallback para webm em caso de falha).
       setEstado("convertendo");
       setProgresso(100);
+      setConversaoPct(0);
       let blob = webmBlob;
       let ext = "webm";
       try {
-        blob = await converterParaMp4(webmBlob);
+        blob = await converterParaMp4(webmBlob, setConversaoPct);
         ext = "mp4";
       } catch (e) {
         console.error("Falha ao converter para MP4:", e);
