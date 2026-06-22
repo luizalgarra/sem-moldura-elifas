@@ -133,12 +133,25 @@ function ObraPagina() {
         </div>
       )}
 
-      <section className="mt-6" aria-labelledby="descricao-titulo">
-        <h2 id="descricao-titulo" className="font-serif text-xl font-semibold text-foreground">
-          Descrição
-        </h2>
-        <p className="mt-2 max-w-[70ch] leading-relaxed text-foreground">{obra.descricao}</p>
-      </section>
+      {obra.temAudiodescricao && (
+        <section className="mt-6" aria-labelledby="audiodescricao-titulo">
+          <h2
+            id="audiodescricao-titulo"
+            className="font-serif text-xl font-semibold text-foreground"
+          >
+            Audiodescrição
+          </h2>
+          <div className="mt-2 max-w-[70ch] space-y-4 leading-relaxed text-foreground">
+            {obra.audiodescricao
+              .split(/\n\s*\n/)
+              .map((p) => p.trim())
+              .filter(Boolean)
+              .map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+          </div>
+        </section>
+      )}
 
       <div className="mt-10 border-t border-border pt-6">
         <NavegacaoSequencial num={obra.num} total={total} />
