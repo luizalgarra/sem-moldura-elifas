@@ -93,6 +93,17 @@ function ObraPagina() {
           {obra.titulo}
         </h1>
         <p className="mt-1 text-lg text-muted-foreground">{obra.ano}</p>
+
+        {isAdmin && (
+          <div className="mt-4">
+            <Button asChild variant="outline" className="min-h-11">
+              <Link to="/postar/$num" params={{ num: String(obra.num) }}>
+                <Video aria-hidden="true" />
+                <span>Postar</span>
+              </Link>
+            </Button>
+          </div>
+        )}
       </header>
 
       <div className="mt-6">
