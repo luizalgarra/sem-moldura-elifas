@@ -33,9 +33,16 @@ async function obterFFmpeg(): Promise<FFmpegInstance> {
   return ffmpegPromise;
 }
 
-async function converterParaMp4(webm: Blob): Promise<Blob> {
+async function converterParaMp4(
+  webm: Blob,
+  onProgress?: (pct: number) => void,
+): Promise<Blob> {
   const { fetchFile } = await import("@ffmpeg/util");
   const ffmpeg = await obterFFmpeg();
+  const handler = ({ progress }: { progress: number }) => {
+    onProgress?.(Math.max(0, Math.min(100, Math.round(progress * 100))));
+  };
+  ffmpeg.on("progress", handler);
   await ffmpeg.writeFile("in.webm", await fetchFile(webm));
   await ffmpeg.exec([
     "-i",
@@ -43,7 +50,9 @@ async function converterParaMp4(webm: Blob): Promise<Blob> {
     "-c:v",
     "libx264",
     "-preset",
-    "veryfast",
+    "ultrafast",
+    "-crf",
+    "28",
     "-pix_fmt",
     "yuv420p",
     "-c:a",
@@ -52,6 +61,7 @@ async function converterParaMp4(webm: Blob): Promise<Blob> {
     "+faststart",
     "out.mp4",
   ]);
+  ffmpeg.off("progress", handler);
   const dados = await ffmpeg.readFile("out.mp4");
   const bytes =
     dados instanceof Uint8Array ? dados : new TextEncoder().encode(String(dados));
@@ -108,6 +118,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
   >("ocioso");
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState(0);
+  const [conversaoPct, setConversaoPct] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [salvamento, setSalvamento] = useState<
     "ocioso" | "salvando" | "salvo" | "erro"
@@ -285,10 +296,11 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       // Converte para MP4 no navegador (com fallback para webm em caso de falha).
       setEstado("convertendo");
       setProgresso(100);
+      setConversaoPct(0);
       let blob = webmBlob;
       let ext = "webm";
       try {
-        blob = await converterParaMp4(webmBlob);
+        blob = await converterParaMp4(webmBlob, setConversaoPct);
         ext = "mp4";
       } catch (e) {
         console.error("Falha ao converter para MP4:", e);
@@ -397,7 +409,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
             {estado === "gerando"
               ? `Gerando… ${progresso}%`
               : estado === "convertendo"
-                ? "Convertendo para MP4…"
+                ? `Convertendo para MP4… ${conversaoPct}%`
                 : estado === "pronto"
                   ? "Gerar de novo"
                   : "Gerar vídeo"}
