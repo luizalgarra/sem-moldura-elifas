@@ -832,7 +832,7 @@ function Historico({
     setCarregando(true);
     setErro(null);
     try {
-      const r = await listar({ data: { chave: num } });
+      const r = await listar({ data: { chave } });
       if (r.ok) {
         setTextos(r.textos);
         setAudios(r.audios);
@@ -870,7 +870,7 @@ function Historico({
       const r = await restAudio({ data: { id } });
       if (r.ok) {
         onRestaurarAudio(r.versao);
-        setAudioPreview(`/api/public/obra-audio/${num}?voz=fem&v=${r.versao}`);
+        setAudioPreview(`/api/public/obra-audio/${chave}?voz=fem&v=${r.versao}`);
       } else {
         setErro(r.erro ?? "Erro ao restaurar.");
       }
