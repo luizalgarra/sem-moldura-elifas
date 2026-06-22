@@ -14,6 +14,52 @@ function blobParaBase64(blob: Blob): Promise<string> {
   });
 }
 
+type FFmpegInstance = import("@ffmpeg/ffmpeg").FFmpeg;
+let ffmpegPromise: Promise<FFmpegInstance> | null = null;
+
+async function obterFFmpeg(): Promise<FFmpegInstance> {
+  if (ffmpegPromise) return ffmpegPromise;
+  ffmpegPromise = (async () => {
+    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
+    const { toBlobURL } = await import("@ffmpeg/util");
+    const base = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
+    const ffmpeg = new FFmpeg();
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+      wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+    });
+    return ffmpeg;
+  })();
+  return ffmpegPromise;
+}
+
+async function converterParaMp4(webm: Blob): Promise<Blob> {
+  const { fetchFile } = await import("@ffmpeg/util");
+  const ffmpeg = await obterFFmpeg();
+  await ffmpeg.writeFile("in.webm", await fetchFile(webm));
+  await ffmpeg.exec([
+    "-i",
+    "in.webm",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-pix_fmt",
+    "yuv420p",
+    "-c:a",
+    "aac",
+    "-movflags",
+    "+faststart",
+    "out.mp4",
+  ]);
+  const dados = await ffmpeg.readFile("out.mp4");
+  const bytes =
+    dados instanceof Uint8Array ? dados : new TextEncoder().encode(String(dados));
+  const ab = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(ab).set(bytes);
+  return new Blob([ab], { type: "video/mp4" });
+}
+
 const LARGURA = 1080;
 const ALTURA = 1920;
 
@@ -58,7 +104,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
 
   const [escolha, setEscolha] = useState<"sequencia" | "primeiro">("sequencia");
   const [estado, setEstado] = useState<
-    "ocioso" | "gerando" | "pronto" | "erro"
+    "ocioso" | "gerando" | "convertendo" | "pronto" | "erro"
   >("ocioso");
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState(0);
@@ -66,6 +112,8 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
   const [salvamento, setSalvamento] = useState<
     "ocioso" | "salvando" | "salvo" | "erro"
   >("ocioso");
+  const [formato, setFormato] = useState<string>("mp4");
+  const [conversaoFalhou, setConversaoFalhou] = useState(false);
 
   const salvar = useServerFn(salvarPostagemReels);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -146,6 +194,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
     setErro(null);
     setProgresso(0);
     setSalvamento("ocioso");
+    setConversaoFalhou(false);
     if (videoUrl) {
       URL.revokeObjectURL(videoUrl);
       setVideoUrl(null);
@@ -230,12 +279,25 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       await new Promise((r) => setTimeout(r, (duracaoTotal + 0.5) * 1000));
       recorder.stop();
 
-      const blob = await finalizado;
+      const webmBlob = await finalizado;
       await audioCtx.close();
+
+      // Converte para MP4 no navegador (com fallback para webm em caso de falha).
+      setEstado("convertendo");
+      setProgresso(100);
+      let blob = webmBlob;
+      let ext = "webm";
+      try {
+        blob = await converterParaMp4(webmBlob);
+        ext = "mp4";
+      } catch (e) {
+        console.error("Falha ao converter para MP4:", e);
+        setConversaoFalhou(true);
+      }
+      setFormato(ext);
 
       const url = URL.createObjectURL(blob);
       setVideoUrl(url);
-      setProgresso(100);
       setEstado("pronto");
 
       // Salva automaticamente a postagem.
@@ -243,7 +305,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       try {
         const base64 = await blobParaBase64(blob);
         const res = await salvar({
-          data: { num: obra.num, titulo: obra.titulo, base64 },
+          data: { num: obra.num, titulo: obra.titulo, base64, ext },
         });
         setSalvamento(res?.ok ? "salvo" : "erro");
         if (!res?.ok) {
@@ -323,10 +385,10 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       <div className="flex flex-wrap items-center gap-3">
         <Button
           onClick={gerar}
-          disabled={estado === "gerando"}
+          disabled={estado === "gerando" || estado === "convertendo"}
           className="min-h-11"
         >
-          {estado === "gerando" ? (
+          {estado === "gerando" || estado === "convertendo" ? (
             <Loader2 className="animate-spin" aria-hidden="true" />
           ) : (
             <Video aria-hidden="true" />
@@ -334,21 +396,32 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
           <span>
             {estado === "gerando"
               ? `Gerando… ${progresso}%`
-              : estado === "pronto"
-                ? "Gerar de novo"
-                : "Gerar vídeo"}
+              : estado === "convertendo"
+                ? "Convertendo para MP4…"
+                : estado === "pronto"
+                  ? "Gerar de novo"
+                  : "Gerar vídeo"}
           </span>
         </Button>
 
         {videoUrl && (
           <Button asChild variant="outline" className="min-h-11">
-            <a href={videoUrl} download={`obra-${obra.num}-reels.webm`}>
+            <a href={videoUrl} download={`obra-${obra.num}-reels.${formato}`}>
               <Download aria-hidden="true" />
               <span>Baixar vídeo</span>
             </a>
           </Button>
         )}
       </div>
+
+      {conversaoFalhou && estado === "pronto" && (
+        <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          Não foi possível converter para MP4 neste navegador; o vídeo foi
+          mantido em .webm.
+        </p>
+      )}
+
 
       {salvamento === "salvando" && (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">

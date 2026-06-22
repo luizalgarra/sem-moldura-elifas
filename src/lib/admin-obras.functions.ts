@@ -1856,6 +1856,8 @@ export interface PostagemReels {
   criadoEm: string;
   /** URL assinada e temporária para reproduzir/baixar o vídeo. */
   url: string;
+  /** Extensão do arquivo salvo (mp4 ou webm). */
+  ext: string;
 }
 
 /** Salva (faz upload) de um reels gerado no navegador e registra a postagem. */
@@ -1867,6 +1869,7 @@ export const salvarPostagemReels = createServerFn({ method: "POST" })
         num: z.number().int().min(1).max(MAX_CHAVE),
         titulo: z.string().max(300).optional(),
         base64: z.string().min(1).max(200_000_000),
+        ext: z.enum(["mp4", "webm"]).optional(),
       })
       .parse(input),
   )
@@ -1888,10 +1891,12 @@ export const salvarPostagemReels = createServerFn({ method: "POST" })
       return { ok: false as const, erro: "Vídeo inválido." };
     }
 
-    const path = `reels-${data.num}-${Date.now()}.webm`;
+    const ext = data.ext ?? "mp4";
+    const contentType = ext === "mp4" ? "video/mp4" : "video/webm";
+    const path = `reels-${data.num}-${Date.now()}.${ext}`;
     const { error: upErr } = await supabaseAdmin.storage
       .from("reels-obras")
-      .upload(path, bytes, { contentType: "video/webm", upsert: true });
+      .upload(path, bytes, { contentType, upsert: true });
 
     if (upErr) {
       console.error("salvarPostagemReels upload:", upErr.message);
@@ -1949,6 +1954,7 @@ export const listarPostagens = createServerFn({ method: "GET" })
         tamanhoBytes: l.tamanho_bytes,
         criadoEm: l.created_at,
         url: assinada?.signedUrl ?? "",
+        ext: l.video_path.split(".").pop()?.toLowerCase() ?? "mp4",
       });
     }
     return resultado;

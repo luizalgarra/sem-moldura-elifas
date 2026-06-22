@@ -146,7 +146,7 @@ function CartaoPostagem({
           <Button asChild variant="outline" size="sm" className="min-h-10">
             <a
               href={postagem.url}
-              download={`obra-${postagem.num}-reels.webm`}
+              download={`obra-${postagem.num}-reels.${postagem.ext}`}
             >
               <Download aria-hidden="true" />
               <span>Baixar</span>
