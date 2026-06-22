@@ -265,7 +265,7 @@ function AdminPagina() {
                   className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
                   role="status"
                 >
-                  Gerando… {loteFeito}/{obras.length}
+                  Gerando… {loteFeito}/{lista.length}
                 </span>
               )}
               {!loteRodando && loteMsg && (
