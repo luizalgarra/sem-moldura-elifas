@@ -33,9 +33,16 @@ async function obterFFmpeg(): Promise<FFmpegInstance> {
   return ffmpegPromise;
 }
 
-async function converterParaMp4(webm: Blob): Promise<Blob> {
+async function converterParaMp4(
+  webm: Blob,
+  onProgress?: (pct: number) => void,
+): Promise<Blob> {
   const { fetchFile } = await import("@ffmpeg/util");
   const ffmpeg = await obterFFmpeg();
+  const handler = ({ progress }: { progress: number }) => {
+    onProgress?.(Math.max(0, Math.min(100, Math.round(progress * 100))));
+  };
+  ffmpeg.on("progress", handler);
   await ffmpeg.writeFile("in.webm", await fetchFile(webm));
   await ffmpeg.exec([
     "-i",
