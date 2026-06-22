@@ -51,10 +51,10 @@ export const Route = createFileRoute("/admin")({
 /** Status de produção de uma obra, derivado da presença de dados. */
 type StatusObra = "sem-gerar" | "texto" | "locucao" | "aprovada";
 
-function statusDaObra(override: OverrideObra | undefined): StatusObra {
-  if (override?.aprovada) return "aprovada";
-  if (override?.audioFemPath) return "locucao";
-  if (override?.audiodescricao && override.audiodescricao.trim()) return "texto";
+function statusDaObra(item: ObraAcervo | undefined): StatusObra {
+  if (item?.aprovada) return "aprovada";
+  if (item?.audioFem) return "locucao";
+  if (item?.temAudiodescricao) return "texto";
   return "sem-gerar";
 }
 
