@@ -408,7 +408,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
           <Button asChild variant="outline" className="min-h-11">
             <a href={videoUrl} download={`obra-${obra.num}-reels.${formato}`}>
               <Download aria-hidden="true" />
-              <span>Baixar vídeo</span>
+              <span>Baixar {formato.toUpperCase()}</span>
             </a>
           </Button>
         )}
