@@ -376,10 +376,8 @@ function AdminPagina() {
             const ativo = filtroStatus === f.valor;
             const total =
               f.valor === "todas"
-                ? obras.length
-                : obras.filter(
-                    (o) => statusDaObra(mapa.get(o.num)) === f.valor,
-                  ).length;
+                ? lista.length
+                : lista.filter((o) => statusDaObra(o) === f.valor).length;
             return (
               <Button
                 key={f.valor}
