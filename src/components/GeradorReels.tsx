@@ -60,8 +60,8 @@ async function converterParaMp4(webm: Blob): Promise<Blob> {
   return new Blob([ab], { type: "video/mp4" });
 }
 
-const LARGURA = 1080;
-const ALTURA = 1920;
+const LARGURA = 720;
+const ALTURA = 1280;
 
 type FonteAudio =
   | { tipo: "sequencia"; urls: string[] }
