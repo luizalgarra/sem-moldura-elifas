@@ -144,9 +144,9 @@ function ObraPagina() {
           <div className="mt-2 max-w-[70ch] space-y-4 leading-relaxed text-foreground">
             {obra.audiodescricao
               .split(/\n\s*\n/)
-              .map((p) => p.trim())
+              .map((p: string) => p.trim())
               .filter(Boolean)
-              .map((p, i) => (
+              .map((p: string, i: number) => (
                 <p key={i}>{p}</p>
               ))}
           </div>
