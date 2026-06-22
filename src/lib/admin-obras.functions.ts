@@ -1856,6 +1856,8 @@ export interface PostagemReels {
   criadoEm: string;
   /** URL assinada e temporária para reproduzir/baixar o vídeo. */
   url: string;
+  /** Extensão do arquivo salvo (mp4 ou webm). */
+  ext: string;
 }
 
 /** Salva (faz upload) de um reels gerado no navegador e registra a postagem. */
