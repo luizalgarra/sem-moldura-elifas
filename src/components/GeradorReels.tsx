@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Download, Video, Loader2, AlertTriangle } from "lucide-react";
+import { Download, Video, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
-import type { ObraAcervo } from "@/lib/admin-obras.functions";
+import { salvarPostagemReels, type ObraAcervo } from "@/lib/admin-obras.functions";
+
+function blobParaBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result));
+    fr.onerror = () => reject(new Error("Falha ao ler o vídeo."));
+    fr.readAsDataURL(blob);
+  });
+}
 
 const LARGURA = 1080;
 const ALTURA = 1920;
