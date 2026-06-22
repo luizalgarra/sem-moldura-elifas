@@ -1,6 +1,13 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { listarAcervo } from "@/lib/admin-obras.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { Video } from "lucide-react";
+import {
+  listarAcervo,
+  contarPostagensReels,
+} from "@/lib/admin-obras.functions";
 import { GeradorReels } from "@/components/GeradorReels";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export const Route = createFileRoute("/postar/$num")({
   loader: async ({ params }) => {
