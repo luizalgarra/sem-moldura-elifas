@@ -536,6 +536,21 @@ export const listarAcervo = createServerFn({ method: "GET" }).handler(
   },
 );
 
+/**
+ * Mesmo acervo canônico (fixas − ocultas + extras, renumerado e ordenado),
+ * porém restrito a administradores. É a fonte única da tela /admin, para que
+ * /admin e /editar exibam exatamente a mesma lista.
+ */
+export const listarAcervoAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ObraAcervo[]> => {
+    await garantirAdmin(context);
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    return construirAcervo(supabaseAdmin);
+  });
+
 /** Busca uma única obra pronta para exibição pública pelo número EXIBIDO. */
 export const getObraPublica = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
