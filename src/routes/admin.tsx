@@ -500,7 +500,7 @@ function ObraEditor({
     setSalvando(true);
     setMsg(null);
     try {
-      const r = await salvar({ data: { chave: num, descricao: texto } });
+      const r = await salvar({ data: { chave, descricao: texto } });
       setMsg(r.ok ? "Descrição salva." : (r.erro ?? "Erro ao salvar."));
       if (r.ok) {
         onChanged();
@@ -517,7 +517,7 @@ function ObraEditor({
     setMsg(null);
     try {
       const r = await salvarAudio({
-        data: { chave: num, audiodescricao },
+        data: { chave, audiodescricao },
       });
       setMsg(r.ok ? "Audiodescrição salva." : (r.erro ?? "Erro ao salvar."));
       if (r.ok) {
@@ -535,7 +535,7 @@ function ObraEditor({
     setGerando(true);
     setMsg(null);
     try {
-      const r = await regenerar({ data: { chave: num, audiodescricao } });
+      const r = await regenerar({ data: { chave, audiodescricao } });
       if (r.ok) {
         setVersaoAudio(r.versao);
         setMsg("Locução gerada e salva.");
@@ -555,7 +555,7 @@ function ObraEditor({
     setGerandoTexto(true);
     setMsg(null);
     try {
-      const r = await gerarTexto({ data: { chave: num } });
+      const r = await gerarTexto({ data: { chave } });
       if (r.ok) {
         setAudiodescricao(r.texto);
         setMsg("Audiodescrição gerada — revise e salve.");
@@ -574,11 +574,11 @@ function ObraEditor({
 
 
   const audioRegenSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=fem&v=${versaoAudio}`
+    ? `/api/public/obra-audio/${chave}?voz=fem&v=${versaoAudio}`
     : null;
 
   const downloadSrc = temAudioRegen
-    ? `/api/public/obra-audio/${num}?voz=fem&download=1&v=${versaoAudio}`
+    ? `/api/public/obra-audio/${chave}?voz=fem&download=1&v=${versaoAudio}`
     : audioEstatico;
 
   const handleBaixar = async () => {
