@@ -1889,10 +1889,12 @@ export const salvarPostagemReels = createServerFn({ method: "POST" })
       return { ok: false as const, erro: "Vídeo inválido." };
     }
 
-    const path = `reels-${data.num}-${Date.now()}.webm`;
+    const ext = data.ext ?? "mp4";
+    const contentType = ext === "mp4" ? "video/mp4" : "video/webm";
+    const path = `reels-${data.num}-${Date.now()}.${ext}`;
     const { error: upErr } = await supabaseAdmin.storage
       .from("reels-obras")
-      .upload(path, bytes, { contentType: "video/webm", upsert: true });
+      .upload(path, bytes, { contentType, upsert: true });
 
     if (upErr) {
       console.error("salvarPostagemReels upload:", upErr.message);
