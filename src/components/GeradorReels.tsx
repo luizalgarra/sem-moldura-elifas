@@ -144,6 +144,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
     setEstado("gerando");
     setErro(null);
     setProgresso(0);
+    setSalvamento("ocioso");
     if (videoUrl) {
       URL.revokeObjectURL(videoUrl);
       setVideoUrl(null);
