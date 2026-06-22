@@ -48,6 +48,7 @@ function ObraPagina() {
   const { obra, total } = Route.useLoaderData();
   const [ampliada, setAmpliada] = useState(false);
   const corresp = marcoDaObra(obra.ano, anosMarcos);
+  const { isAdmin } = useAdminAuth();
 
 
 
