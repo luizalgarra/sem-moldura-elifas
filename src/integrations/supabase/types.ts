@@ -239,6 +239,33 @@ export type Database = {
         }
         Relationships: []
       }
+      postagens_reels: {
+        Row: {
+          created_at: string
+          id: string
+          num: number
+          tamanho_bytes: number | null
+          titulo: string | null
+          video_path: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          num: number
+          tamanho_bytes?: number | null
+          titulo?: string | null
+          video_path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          num?: number
+          tamanho_bytes?: number | null
+          titulo?: string | null
+          video_path?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1843,3 +1843,149 @@ export const restaurarVersaoAudio = createServerFn({ method: "POST" })
     }
     return { ok: true as const, versao: versaoDe(salvo?.updated_at) };
   });
+
+// ============================================================================
+// Postagens (reels gerados a partir das obras)
+// ============================================================================
+
+export interface PostagemReels {
+  id: string;
+  num: number;
+  titulo: string | null;
+  tamanhoBytes: number | null;
+  criadoEm: string;
+  /** URL assinada e temporária para reproduzir/baixar o vídeo. */
+  url: string;
+}
+
+/** Salva (faz upload) de um reels gerado no navegador e registra a postagem. */
+export const salvarPostagemReels = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        num: z.number().int().min(1).max(MAX_CHAVE),
+        titulo: z.string().max(300).optional(),
+        base64: z.string().min(1).max(200_000_000),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    let bytes: Uint8Array;
+    try {
+      const base = data.base64.includes(",")
+        ? data.base64.split(",")[1]
+        : data.base64;
+      bytes = Uint8Array.from(Buffer.from(base, "base64"));
+    } catch {
+      return { ok: false as const, erro: "Vídeo inválido." };
+    }
+
+    const path = `reels-${data.num}-${Date.now()}.webm`;
+    const { error: upErr } = await supabaseAdmin.storage
+      .from("reels-obras")
+      .upload(path, bytes, { contentType: "video/webm", upsert: true });
+
+    if (upErr) {
+      console.error("salvarPostagemReels upload:", upErr.message);
+      return { ok: false as const, erro: "Não foi possível enviar o vídeo." };
+    }
+
+    const { data: salvo, error: dbErr } = await supabaseAdmin
+      .from("postagens_reels")
+      .insert({
+        num: data.num,
+        titulo: data.titulo ?? null,
+        video_path: path,
+        tamanho_bytes: bytes.byteLength,
+      })
+      .select("id")
+      .single();
+
+    if (dbErr) {
+      console.error("salvarPostagemReels db:", dbErr.message);
+      await supabaseAdmin.storage.from("reels-obras").remove([path]);
+      return { ok: false as const, erro: "Vídeo enviado, mas não registrado." };
+    }
+
+    return { ok: true as const, id: salvo?.id as string };
+  });
+
+/** Lista todas as postagens salvas, já com URL assinada para reprodução. */
+export const listarPostagens = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<PostagemReels[]> => {
+    await garantirAdmin(context);
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data: linhas, error } = await supabaseAdmin
+      .from("postagens_reels")
+      .select("id, num, titulo, video_path, tamanho_bytes, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error || !linhas) {
+      console.error("listarPostagens:", error?.message);
+      return [];
+    }
+
+    const resultado: PostagemReels[] = [];
+    for (const l of linhas) {
+      const { data: assinada } = await supabaseAdmin.storage
+        .from("reels-obras")
+        .createSignedUrl(l.video_path, 60 * 60);
+      resultado.push({
+        id: l.id,
+        num: l.num,
+        titulo: l.titulo,
+        tamanhoBytes: l.tamanho_bytes,
+        criadoEm: l.created_at,
+        url: assinada?.signedUrl ?? "",
+      });
+    }
+    return resultado;
+  });
+
+/** Remove uma postagem: apaga o arquivo do storage e o registro. */
+export const removerPostagem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    if (!(await ehAdmin(context))) {
+      return { ok: false as const, erro: ERRO_NAO_AUTORIZADO };
+    }
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data: linha } = await supabaseAdmin
+      .from("postagens_reels")
+      .select("video_path")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    if (linha?.video_path) {
+      await supabaseAdmin.storage.from("reels-obras").remove([linha.video_path]);
+    }
+
+    const { error } = await supabaseAdmin
+      .from("postagens_reels")
+      .delete()
+      .eq("id", data.id);
+
+    if (error) {
+      console.error("removerPostagem:", error.message);
+      return { ok: false as const, erro: "Não foi possível excluir a postagem." };
+    }
+    return { ok: true as const };
+  });

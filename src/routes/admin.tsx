@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -15,6 +15,7 @@ import {
   FileText,
   BarChart3,
   Coins,
+  Video,
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
@@ -254,6 +255,12 @@ function AdminPagina() {
                   <Images aria-hidden="true" />
                 )}
                 <span>Cadastrar imagens (IA)</span>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11">
+                <Link to="/postagens">
+                  <Video aria-hidden="true" />
+                  <span>Postagens (reels)</span>
+                </Link>
               </Button>
             </div>
           </div>

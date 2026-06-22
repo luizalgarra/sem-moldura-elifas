@@ -1,7 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Download, Video, Loader2, AlertTriangle } from "lucide-react";
+import { Download, Video, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import type { ObraAcervo } from "@/lib/admin-obras.functions";
+import { salvarPostagemReels, type ObraAcervo } from "@/lib/admin-obras.functions";
+
+function blobParaBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result));
+    fr.onerror = () => reject(new Error("Falha ao ler o vídeo."));
+    fr.readAsDataURL(blob);
+  });
+}
 
 const LARGURA = 1080;
 const ALTURA = 1920;
@@ -52,7 +63,11 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [salvamento, setSalvamento] = useState<
+    "ocioso" | "salvando" | "salvo" | "erro"
+  >("ocioso");
 
+  const salvar = useServerFn(salvarPostagemReels);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -130,6 +145,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
     setEstado("gerando");
     setErro(null);
     setProgresso(0);
+    setSalvamento("ocioso");
     if (videoUrl) {
       URL.revokeObjectURL(videoUrl);
       setVideoUrl(null);
@@ -221,6 +237,22 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       setVideoUrl(url);
       setProgresso(100);
       setEstado("pronto");
+
+      // Salva automaticamente a postagem.
+      setSalvamento("salvando");
+      try {
+        const base64 = await blobParaBase64(blob);
+        const res = await salvar({
+          data: { num: obra.num, titulo: obra.titulo, base64 },
+        });
+        setSalvamento(res?.ok ? "salvo" : "erro");
+        if (!res?.ok) {
+          console.error("Falha ao salvar postagem:", res?.erro);
+        }
+      } catch (e) {
+        console.error(e);
+        setSalvamento("erro");
+      }
     } catch (e) {
       console.error(e);
       setErro(
@@ -228,7 +260,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       );
       setEstado("erro");
     }
-  }, [montarFonte, obra.imagem, desenhar, videoUrl]);
+  }, [montarFonte, obra.imagem, obra.num, obra.titulo, desenhar, videoUrl, salvar]);
 
   if (!temAudio) {
     return (
@@ -318,12 +350,37 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
         )}
       </div>
 
+      {salvamento === "salvando" && (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          Salvando postagem…
+        </p>
+      )}
+      {salvamento === "salvo" && (
+        <p className="flex items-center gap-2 text-sm text-foreground">
+          <CheckCircle2 className="size-4 text-accent" aria-hidden="true" />
+          Postagem salva em{" "}
+          <Link to="/postagens" className="font-medium text-accent underline">
+            Postagens
+          </Link>
+          .
+        </p>
+      )}
+      {salvamento === "erro" && (
+        <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          O vídeo foi gerado, mas não foi possível salvá-lo. Você ainda pode
+          baixá-lo acima.
+        </p>
+      )}
+
       {erro && (
         <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>{erro}</span>
         </div>
       )}
+
 
       {/* Canvas oculto usado para a montagem. */}
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
