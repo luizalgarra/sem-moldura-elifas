@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useState } from "react";
 import { Download, Trash2, Loader2, Video, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,12 @@ import {
   type PostagemReels,
 } from "@/lib/admin-obras.functions";
 
+const buscaSchema = z.object({
+  obra: fallback(z.number().int().min(1).optional(), undefined).optional(),
+});
+
 export const Route = createFileRoute("/postagens")({
+  validateSearch: zodValidator(buscaSchema),
   head: () => ({
     meta: [{ title: "Postagens — Reels salvos" }],
   }),
@@ -40,10 +47,11 @@ function formatarData(iso: string): string {
 function PostagensPagina() {
   const buscar = useServerFn(listarPostagens);
   const queryClient = useQueryClient();
+  const { obra } = Route.useSearch();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["postagens"],
-    queryFn: () => buscar(),
+    queryKey: ["postagens", obra ?? null],
+    queryFn: () => buscar(obra ? { data: { num: obra } } : undefined),
   });
 
   return (
@@ -63,7 +71,21 @@ function PostagensPagina() {
           Reels salvos automaticamente ao gerar vídeos nas obras. Reproduza,
           baixe e exclua.
         </p>
+        {obra && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm">
+            <span className="text-foreground">
+              Mostrando apenas a <strong>Obra {obra}</strong>.
+            </span>
+            <Link
+              to="/postagens"
+              className="font-medium text-accent hover:underline"
+            >
+              Ver todas as postagens
+            </Link>
+          </div>
+        )}
       </header>
+
 
       <div className="mt-8">
         {isLoading && (

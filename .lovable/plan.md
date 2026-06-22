@@ -1,40 +1,31 @@
-# Baixar os reels em MP4
+# Vídeos já gerados por obra
 
-Hoje o reels é gravado no navegador via `MediaRecorder`, que só produz `.webm`. Como o backend roda em ambiente edge (sem ffmpeg), a conversão para MP4 será feita no próprio navegador com **ffmpeg.wasm**. O arquivo MP4 resultante será usado tanto no botão **Baixar** quanto no upload para a galeria `/postagens`.
+Quando uma obra já tem reels salvos, mostrar um botão (só para administradores) na página de gerar reels que leva à galeria `/postagens` já filtrada por aquela obra.
 
-## O que muda
+## O que muda para o usuário
 
-### 1. Conversão no navegador (`src/components/GeradorReels.tsx`)
-- Adicionar a dependência `@ffmpeg/ffmpeg` + `@ffmpeg/util` (build single-thread, que não exige isolamento de origem/SharedArrayBuffer).
-- Após gerar o `Blob` webm atual, rodar uma etapa de conversão:
-  - Carregar o ffmpeg.wasm sob demanda (só na 1ª conversão, com cache em ref).
-  - Converter `webm` → `mp4` (codec H.264 + AAC), mantendo 1080x1920.
-- Novo estado de interface entre "gerando" e "pronto": **"Convertendo para MP4…"** com indicador, já que leva alguns segundos e baixa ~30MB na primeira vez.
-- O `videoUrl` do player e o `download` passam a apontar para o blob MP4.
-- Trocar o atributo de download de `obra-${num}-reels.webm` para `obra-${num}-reels.mp4`.
-- O preview `<video>` reproduz o MP4.
-- Tratamento de falha: se a conversão falhar, manter o webm como fallback para download/preview e exibir aviso discreto, sem travar o fluxo.
+- Na página de gerar reels da obra (`/postar/$num`), se já houver vídeos salvos daquela obra, aparece um botão como **"Ver 3 vídeos já gerados desta obra"**.
+- Ao clicar, abre a página **Postagens** mostrando apenas os vídeos daquela obra, com reproduzir, baixar e excluir (como já funciona hoje).
+- A página de Postagens filtrada exibe um aviso de filtro e um link **"Ver todas as postagens"**.
+- O botão só aparece para administradores logados; visitantes comuns não o veem.
 
-### 2. Salvar a galeria em MP4 (`src/lib/admin-obras.functions.ts`)
-- Em `salvarPostagemReels`: o componente passa a enviar o base64 do **MP4**. Ajustar:
-  - `path` de `reels-${num}-${Date.now()}.webm` → `.mp4`.
-  - `contentType` de `video/webm` → `video/mp4`.
-- `listarPostagens` e `removerPostagem` continuam iguais (operam pelo `video_path` gravado).
-- Postagens antigas em `.webm` continuam funcionando normalmente (o caminho fica salvo no banco); apenas as novas serão `.mp4`.
+## Passos técnicos
 
-### 3. Galeria `/postagens` (`src/routes/postagens.tsx`)
-- Ajustar o atributo `download` dos cards para usar extensão `.mp4` (derivada do `video_path`/título), garantindo nome de arquivo correto ao baixar.
+### 1. `src/lib/admin-obras.functions.ts`
+- `listarPostagens`: aceitar um filtro opcional `{ num?: number }` no `inputValidator`. Quando `num` vier, aplicar `.eq("num", num)` na consulta. Sem `num`, comportamento atual (lista tudo). Continua com `requireSupabaseAuth` + `garantirAdmin`.
+- Adicionar `contarPostagensReels` (`createServerFn` POST, `requireSupabaseAuth` + `garantirAdmin`), recebendo `{ num }` e retornando `{ total: number }` via `select("id", { count: "exact", head: true })`. Usada para decidir se mostra o botão sem baixar URLs assinadas.
 
-## Detalhes técnicos
+### 2. `src/routes/postar.$num.tsx` (ou dentro de `GeradorReels`)
+- Usar `useAdminAuth()` para checar `isAdmin`.
+- Quando admin, consultar `contarPostagensReels({ data: { num } })` via `useServerFn` + `useQuery`.
+- Se `total > 0`, renderizar um botão/`Link` para `/postagens` com search param `obra` = num, rótulo "Ver N vídeos já gerados desta obra".
+- Após salvar um novo reels (sucesso), invalidar a query da contagem para o número atualizar.
 
-- **ffmpeg.wasm single-thread**: usa-se o core `@ffmpeg/core` (não o `-mt`) para evitar a exigência de cabeçalhos COOP/COEP no preview. O `load()` aponta para os assets via `toBlobURL` (CDN do unpkg) para não precisar configurar o servidor.
-- **Comando de conversão** (aprox.): entrada `in.webm`, saída `out.mp4` com `-c:v libx264 -preset veryfast -pix_fmt yuv420p -c:a aac`. Resultado amplamente compatível (Instagram/WhatsApp/iOS).
-- **Carregamento sob demanda**: o ffmpeg só é importado/baixado quando o usuário gera o primeiro vídeo, mantendo o restante da página leve.
-- **Sem mudanças de schema/RLS**: a tabela `postagens_reels` e o bucket `reels-obras` permanecem como estão.
+### 3. `src/routes/postagens.tsx`
+- Declarar `validateSearch` para ler `obra?: number`.
+- Passar o filtro para `listarPostagens` (`queryKey: ["postagens", obra]`, `queryFn: () => buscar(obra ? { data: { num: obra } } : undefined)`).
+- Quando `obra` estiver definido, mostrar um aviso "Mostrando apenas a Obra N" e um `Link` "Ver todas as postagens" (para `/postagens` sem filtro).
 
-```text
-Gerar vídeo (canvas+áudio) ─► Blob WEBM ─► ffmpeg.wasm ─► Blob MP4
-                                                          ├─► Baixar (.mp4)
-                                                          ├─► Preview <video>
-                                                          └─► salvarPostagemReels (base64 → storage .mp4)
-```
+## Observações
+- `/postar` e `/postagens` já dependem de funções admin; a contagem e a listagem filtrada mantêm o padrão `requireSupabaseAuth` + `garantirAdmin`.
+- Nenhuma mudança de banco de dados é necessária (a tabela `postagens_reels` já tem a coluna `num`).

@@ -1,6 +1,13 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { listarAcervo } from "@/lib/admin-obras.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { Video } from "lucide-react";
+import {
+  listarAcervo,
+  contarPostagensReels,
+} from "@/lib/admin-obras.functions";
 import { GeradorReels } from "@/components/GeradorReels";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export const Route = createFileRoute("/postar/$num")({
   loader: async ({ params }) => {
@@ -30,6 +37,16 @@ export const Route = createFileRoute("/postar/$num")({
 
 function PostarPagina() {
   const { obra } = Route.useLoaderData();
+  const { isAdmin } = useAdminAuth();
+  const contar = useServerFn(contarPostagensReels);
+
+  const { data: contagem } = useQuery({
+    queryKey: ["contagem-postagens", obra.num],
+    queryFn: () => contar({ data: { num: obra.num } }),
+    enabled: isAdmin,
+  });
+
+  const total = contagem?.total ?? 0;
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8">
@@ -53,6 +70,19 @@ function PostarPagina() {
           baixar e postar nas redes sociais.
         </p>
       </header>
+
+      {isAdmin && total > 0 && (
+        <Link
+          to="/postagens"
+          search={{ obra: obra.num }}
+          className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+        >
+          <Video aria-hidden="true" className="size-4" />
+          Ver {total} {total === 1 ? "vídeo já gerado" : "vídeos já gerados"}{" "}
+          desta obra
+        </Link>
+      )}
+
 
       <div className="mt-6">
         <GeradorReels obra={obra} />
