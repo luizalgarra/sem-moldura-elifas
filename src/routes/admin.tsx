@@ -15,6 +15,7 @@ import {
   FileText,
   BarChart3,
   Coins,
+  Video,
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
