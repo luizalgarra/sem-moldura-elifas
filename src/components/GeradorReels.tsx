@@ -349,12 +349,37 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
         )}
       </div>
 
+      {salvamento === "salvando" && (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          Salvando postagem…
+        </p>
+      )}
+      {salvamento === "salvo" && (
+        <p className="flex items-center gap-2 text-sm text-foreground">
+          <CheckCircle2 className="size-4 text-accent" aria-hidden="true" />
+          Postagem salva em{" "}
+          <Link to="/postagens" className="font-medium text-accent underline">
+            Postagens
+          </Link>
+          .
+        </p>
+      )}
+      {salvamento === "erro" && (
+        <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          O vídeo foi gerado, mas não foi possível salvá-lo. Você ainda pode
+          baixá-lo acima.
+        </p>
+      )}
+
       {erro && (
         <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>{erro}</span>
         </div>
       )}
+
 
       {/* Canvas oculto usado para a montagem. */}
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
