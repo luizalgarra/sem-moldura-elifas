@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useState } from "react";
 import { Download, Trash2, Loader2, Video, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,12 @@ import {
   type PostagemReels,
 } from "@/lib/admin-obras.functions";
 
+const buscaSchema = z.object({
+  obra: fallback(z.number().int().min(1).optional(), undefined).optional(),
+});
+
 export const Route = createFileRoute("/postagens")({
+  validateSearch: zodValidator(buscaSchema),
   head: () => ({
     meta: [{ title: "Postagens — Reels salvos" }],
   }),
