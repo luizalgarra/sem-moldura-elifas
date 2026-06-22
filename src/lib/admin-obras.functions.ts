@@ -373,6 +373,7 @@ async function construirAcervo(
       audioTrechos: trechosPublicos(ex.audio_trechos, ex.num, v),
       aprovada: ex.aprovada ?? false,
       updatedAt: ex.updated_at ?? null,
+      temAudiodescricao: !!(ex.audiodescricao && ex.audiodescricao.trim()),
       extra: true,
     });
   }
