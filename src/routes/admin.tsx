@@ -168,14 +168,14 @@ function AdminPagina() {
 
 
   const handleLote = async () => {
-    const alvos = obras;
+    const alvos = lista;
     setLoteRodando(true);
     setLoteFeito(0);
     setLoteMsg(null);
     let falhas = 0;
     for (let i = 0; i < alvos.length; i++) {
       try {
-        const r = await regenerar({ data: { chave: alvos[i].num } });
+        const r = await regenerar({ data: { chave: alvos[i].chave } });
         if (!r.ok) falhas++;
       } catch {
         falhas++;
