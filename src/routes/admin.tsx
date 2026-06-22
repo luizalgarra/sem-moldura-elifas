@@ -16,10 +16,9 @@ import {
   BarChart3,
   Coins,
 } from "lucide-react";
-import { obras } from "@/data/obras";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
-  listarOverrides,
+  listarAcervoAdmin,
   salvarTexto,
   salvarAudiodescricao,
   regenerarAudio,
@@ -30,7 +29,7 @@ import {
   restaurarVersaoAudio,
   definirAprovacao,
   resumoConsumoAudio,
-  type OverrideObra,
+  type ObraAcervo,
 } from "@/lib/admin-obras.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
