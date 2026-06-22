@@ -47,10 +47,11 @@ function formatarData(iso: string): string {
 function PostagensPagina() {
   const buscar = useServerFn(listarPostagens);
   const queryClient = useQueryClient();
+  const { obra } = Route.useSearch();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["postagens"],
-    queryFn: () => buscar(),
+    queryKey: ["postagens", obra ?? null],
+    queryFn: () => buscar(obra ? { data: { num: obra } } : undefined),
   });
 
   return (
@@ -70,7 +71,21 @@ function PostagensPagina() {
           Reels salvos automaticamente ao gerar vídeos nas obras. Reproduza,
           baixe e exclua.
         </p>
+        {obra && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm">
+            <span className="text-foreground">
+              Mostrando apenas a <strong>Obra {obra}</strong>.
+            </span>
+            <Link
+              to="/postagens"
+              className="font-medium text-accent hover:underline"
+            >
+              Ver todas as postagens
+            </Link>
+          </div>
+        )}
       </header>
+
 
       <div className="mt-8">
         {isLoading && (
