@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { ImageOff, ZoomIn, X, ArrowUpRight } from "lucide-react";
+import { ImageOff, ZoomIn, X, ArrowUpRight, Video } from "lucide-react";
 import { obras } from "@/data/obras";
 import { listarAcervo } from "@/lib/admin-obras.functions";
 import { anosMarcos } from "@/data/timeline";
@@ -8,6 +8,7 @@ import { marcoDaObra } from "@/lib/anos";
 import { AudioDescricao } from "@/components/AudioDescricao";
 import { NavegacaoSequencial } from "@/components/NavegacaoSequencial";
 import { Button } from "@/components/ui/button";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export const Route = createFileRoute("/obras/$num")({
   loader: async ({ params }) => {
