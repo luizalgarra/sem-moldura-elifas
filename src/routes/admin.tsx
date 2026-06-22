@@ -112,10 +112,10 @@ const FILTROS: { valor: StatusObra | "todas"; rotulo: string }[] = [
 
 function AdminPagina() {
   const { session, isAdmin } = useAdminAuth();
-  const fetchOverrides = useServerFn(listarOverrides);
-  const { data: overrides, refetch } = useQuery({
-    queryKey: ["overrides"],
-    queryFn: () => fetchOverrides(),
+  const fetchAcervo = useServerFn(listarAcervoAdmin);
+  const { data: acervo, refetch } = useQuery({
+    queryKey: ["acervo-admin"],
+    queryFn: () => fetchAcervo(),
     enabled: Boolean(session) && isAdmin,
   });
 
@@ -126,17 +126,14 @@ function AdminPagina() {
     enabled: Boolean(session) && isAdmin,
   });
 
-  const mapa = useMemo(() => {
-    const m = new Map<number, OverrideObra>();
-    (overrides ?? []).forEach((o) => m.set(o.num, o));
-    return m;
-  }, [overrides]);
+  const lista = useMemo(() => acervo ?? [], [acervo]);
 
-  const tituloPorNum = useMemo(() => {
+  // Título por chave interna (usado no detalhamento de consumo, que usa a chave).
+  const tituloPorChave = useMemo(() => {
     const m = new Map<number, string>();
-    obras.forEach((o) => m.set(o.num, o.titulo));
+    lista.forEach((o) => m.set(o.chave, o.titulo));
     return m;
-  }, []);
+  }, [lista]);
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<StatusObra | "todas">(
@@ -157,16 +154,16 @@ function AdminPagina() {
 
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
-    return obras.filter((o) => {
+    return lista.filter((o) => {
       const correspondeBusca =
         !q ||
         String(o.num).includes(q) ||
         o.titulo.toLowerCase().includes(q);
       if (!correspondeBusca) return false;
       if (filtroStatus === "todas") return true;
-      return statusDaObra(mapa.get(o.num)) === filtroStatus;
+      return statusDaObra(o) === filtroStatus;
     });
-  }, [busca, filtroStatus, mapa]);
+  }, [lista, busca, filtroStatus]);
 
 
 
