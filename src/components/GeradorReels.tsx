@@ -385,10 +385,10 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       <div className="flex flex-wrap items-center gap-3">
         <Button
           onClick={gerar}
-          disabled={estado === "gerando"}
+          disabled={estado === "gerando" || estado === "convertendo"}
           className="min-h-11"
         >
-          {estado === "gerando" ? (
+          {estado === "gerando" || estado === "convertendo" ? (
             <Loader2 className="animate-spin" aria-hidden="true" />
           ) : (
             <Video aria-hidden="true" />
@@ -396,21 +396,32 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
           <span>
             {estado === "gerando"
               ? `Gerando… ${progresso}%`
-              : estado === "pronto"
-                ? "Gerar de novo"
-                : "Gerar vídeo"}
+              : estado === "convertendo"
+                ? "Convertendo para MP4…"
+                : estado === "pronto"
+                  ? "Gerar de novo"
+                  : "Gerar vídeo"}
           </span>
         </Button>
 
         {videoUrl && (
           <Button asChild variant="outline" className="min-h-11">
-            <a href={videoUrl} download={`obra-${obra.num}-reels.webm`}>
+            <a href={videoUrl} download={`obra-${obra.num}-reels.${formato}`}>
               <Download aria-hidden="true" />
               <span>Baixar vídeo</span>
             </a>
           </Button>
         )}
       </div>
+
+      {conversaoFalhou && estado === "pronto" && (
+        <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          Não foi possível converter para MP4 neste navegador; o vídeo foi
+          mantido em .webm.
+        </p>
+      )}
+
 
       {salvamento === "salvando" && (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
