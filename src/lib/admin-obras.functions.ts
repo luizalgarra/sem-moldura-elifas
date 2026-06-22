@@ -59,6 +59,8 @@ export interface ObraAcervo extends Obra {
   audioFem: string | null;
   audioMasc: string | null;
   audioTrechos: TrechoPublico[] | null;
+  aprovada: boolean;
+  updatedAt: string | null;
 }
 
 function versaoDe(updatedAt: string | null | undefined): string {
