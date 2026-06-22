@@ -336,7 +336,7 @@ function AdminPagina() {
                     className="flex items-center justify-between gap-2 py-2"
                   >
                     <span className="text-foreground">
-                      #{o.num} {tituloPorNum.get(o.num) ?? ""}
+                      #{o.num} {tituloPorChave.get(o.num) ?? ""}
                     </span>
                     <span className="text-muted-foreground">
                       {o.caracteres.toLocaleString("pt-BR")} car. ·{" "}
