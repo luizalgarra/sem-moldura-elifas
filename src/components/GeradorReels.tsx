@@ -104,7 +104,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
 
   const [escolha, setEscolha] = useState<"sequencia" | "primeiro">("sequencia");
   const [estado, setEstado] = useState<
-    "ocioso" | "gerando" | "pronto" | "erro"
+    "ocioso" | "gerando" | "convertendo" | "pronto" | "erro"
   >("ocioso");
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState(0);
