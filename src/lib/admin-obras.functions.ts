@@ -61,6 +61,8 @@ export interface ObraAcervo extends Obra {
   audioTrechos: TrechoPublico[] | null;
   aprovada: boolean;
   updatedAt: string | null;
+  /** Presença real de uma audiodescrição gerada (sem fallback do texto). */
+  temAudiodescricao: boolean;
 }
 
 function versaoDe(updatedAt: string | null | undefined): string {
