@@ -112,6 +112,8 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
   const [salvamento, setSalvamento] = useState<
     "ocioso" | "salvando" | "salvo" | "erro"
   >("ocioso");
+  const [formato, setFormato] = useState<string>("mp4");
+  const [conversaoFalhou, setConversaoFalhou] = useState(false);
 
   const salvar = useServerFn(salvarPostagemReels);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
