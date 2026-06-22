@@ -62,7 +62,11 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [salvamento, setSalvamento] = useState<
+    "ocioso" | "salvando" | "salvo" | "erro"
+  >("ocioso");
 
+  const salvar = useServerFn(salvarPostagemReels);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
