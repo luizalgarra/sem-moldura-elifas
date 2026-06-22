@@ -498,15 +498,27 @@ export const definirAprovacao = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import(
         "@/integrations/supabase/client.server"
       );
-      const { error } = await supabaseAdmin
-        .from("obra_overrides")
-        .upsert(
-          { num: data.chave, aprovada: data.aprovada, updated_at: new Date().toISOString() },
-          { onConflict: "num" },
-        );
-      if (error) {
-        console.error("definirAprovacao:", error.message);
-        return { ok: false, erro: "Erro ao salvar a aprovação." };
+      const agora = new Date().toISOString();
+      if (ehObraFixa(data.chave)) {
+        const { error } = await supabaseAdmin
+          .from("obra_overrides")
+          .upsert(
+            { num: data.chave, aprovada: data.aprovada, updated_at: agora },
+            { onConflict: "num" },
+          );
+        if (error) {
+          console.error("definirAprovacao:", error.message);
+          return { ok: false, erro: "Erro ao salvar a aprovação." };
+        }
+      } else {
+        const { error } = await supabaseAdmin
+          .from("obras_extras")
+          .update({ aprovada: data.aprovada, updated_at: agora })
+          .eq("num", data.chave);
+        if (error) {
+          console.error("definirAprovacao:", error.message);
+          return { ok: false, erro: "Erro ao salvar a aprovação." };
+        }
       }
       return { ok: true };
     },
