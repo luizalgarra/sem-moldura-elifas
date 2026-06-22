@@ -14,6 +14,49 @@ function blobParaBase64(blob: Blob): Promise<string> {
   });
 }
 
+type FFmpegInstance = import("@ffmpeg/ffmpeg").FFmpeg;
+let ffmpegPromise: Promise<FFmpegInstance> | null = null;
+
+async function obterFFmpeg(): Promise<FFmpegInstance> {
+  if (ffmpegPromise) return ffmpegPromise;
+  ffmpegPromise = (async () => {
+    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
+    const { toBlobURL } = await import("@ffmpeg/util");
+    const base = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
+    const ffmpeg = new FFmpeg();
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+      wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+    });
+    return ffmpeg;
+  })();
+  return ffmpegPromise;
+}
+
+async function converterParaMp4(webm: Blob): Promise<Blob> {
+  const { fetchFile } = await import("@ffmpeg/util");
+  const ffmpeg = await obterFFmpeg();
+  await ffmpeg.writeFile("in.webm", await fetchFile(webm));
+  await ffmpeg.exec([
+    "-i",
+    "in.webm",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-pix_fmt",
+    "yuv420p",
+    "-c:a",
+    "aac",
+    "-movflags",
+    "+faststart",
+    "out.mp4",
+  ]);
+  const dados = await ffmpeg.readFile("out.mp4");
+  const bytes = dados instanceof Uint8Array ? dados : new TextEncoder().encode(String(dados));
+  return new Blob([bytes], { type: "video/mp4" });
+}
+
 const LARGURA = 1080;
 const ALTURA = 1920;
 
