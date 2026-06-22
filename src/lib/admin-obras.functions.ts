@@ -368,6 +368,8 @@ async function construirAcervo(
       audioFem,
       audioMasc,
       audioTrechos: trechosPublicos(ex.audio_trechos, ex.num, v),
+      aprovada: ex.aprovada ?? false,
+      updatedAt: ex.updated_at ?? null,
       extra: true,
     });
   }
