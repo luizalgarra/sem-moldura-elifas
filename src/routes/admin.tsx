@@ -398,12 +398,8 @@ function AdminPagina() {
       <ul className="mt-4 space-y-4">
         {filtradas.map((obra) => (
           <ObraEditor
-            key={obra.num}
-            num={obra.num}
-            titulo={obra.titulo}
-            textoEstatico={obra.descricao}
-            audioEstatico={obra.audio}
-            override={mapa.get(obra.num)}
+            key={obra.chave}
+            dados={obra}
             onChanged={() => refetch()}
           />
         ))}
