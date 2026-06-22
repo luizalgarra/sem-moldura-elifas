@@ -182,6 +182,7 @@ function Conteudo() {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/editar") ||
     pathname.startsWith("/postar") ||
+    pathname.startsWith("/postagens") ||
     pathname.startsWith("/qrcodes");
 
   const semSessao = protegida && !carregando && !session;
