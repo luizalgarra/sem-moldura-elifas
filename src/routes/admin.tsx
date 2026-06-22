@@ -409,29 +409,26 @@ function AdminPagina() {
   );
 }
 
-/** Versão (cache-buster) derivada do `updatedAt` do override salvo no banco. */
-function versaoDeOverride(override: OverrideObra | undefined): string {
-  return override?.updatedAt
-    ? new Date(override.updatedAt).getTime().toString()
+/** Versão (cache-buster) derivada do `updatedAt` salvo no banco. */
+function versaoDeData(updatedAt: string | null): string {
+  return updatedAt
+    ? new Date(updatedAt).getTime().toString()
     : Date.now().toString();
 }
 
 function ObraEditor({
-
-  num,
-  titulo,
-  textoEstatico,
-  audioEstatico,
-  override,
+  dados,
   onChanged,
 }: {
-  num: number;
-  titulo: string;
-  textoEstatico: string;
-  audioEstatico: string | null;
-  override: OverrideObra | undefined;
+  dados: ObraAcervo;
   onChanged: () => void;
 }) {
+  const chave = dados.chave;
+  const num = dados.num;
+  const titulo = dados.titulo;
+  const textoEstatico = dados.descricao;
+  const audioEstatico = dados.audio;
+
   const salvar = useServerFn(salvarTexto);
   const salvarAudio = useServerFn(salvarAudiodescricao);
   const regenerar = useServerFn(regenerarAudio);
@@ -439,10 +436,8 @@ function ObraEditor({
   const aprovar = useServerFn(definirAprovacao);
   const [aprovando, setAprovando] = useState(false);
 
-  const [texto, setTexto] = useState(override?.descricao ?? textoEstatico);
-  const [audiodescricao, setAudiodescricao] = useState(
-    override?.audiodescricao ?? override?.descricao ?? textoEstatico,
-  );
+  const [texto, setTexto] = useState(textoEstatico);
+  const [audiodescricao, setAudiodescricao] = useState(dados.audiodescricao);
   const [salvando, setSalvando] = useState(false);
   const [salvandoAudio, setSalvandoAudio] = useState(false);
   const [gerando, setGerando] = useState(false);
@@ -451,7 +446,7 @@ function ObraEditor({
   const [baixando, setBaixando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [versaoAudio, setVersaoAudio] = useState<string | null>(
-    override?.audioFemPath ? versaoDeOverride(override) : null,
+    dados.audioFem ? versaoDeData(dados.updatedAt) : null,
   );
   const [histKey, setHistKey] = useState(0);
   const recarregarHist = () => setHistKey((k) => k + 1);
@@ -459,39 +454,32 @@ function ObraEditor({
   // Sincroniza com o banco quando os dados recarregam (refetch). Assim a tela
   // reflete o áudio recém-salvo em vez de "voltar ao estado" anterior.
   useEffect(() => {
-    if (override?.audioFemPath) {
-      setVersaoAudio(versaoDeOverride(override));
+    if (dados.audioFem) {
+      setVersaoAudio(versaoDeData(dados.updatedAt));
     }
-  }, [override?.audioFemPath, override?.updatedAt]);
+  }, [dados.audioFem, dados.updatedAt]);
 
-  // Sincroniza os campos de texto com o banco quando o `override` muda
+  // Sincroniza os campos de texto com o banco quando os dados mudam
   // (carregamento assíncrono ou refetch após salvar/gerar). Sem isso, o selo
   // de status reflete o banco mas as caixas continuam com o valor antigo/vazio.
   const ultimoSync = useRef<string | null>(null);
   useEffect(() => {
-    const marca = `${override?.updatedAt ?? ""}|${override?.descricao ?? ""}|${override?.audiodescricao ?? ""}`;
+    const marca = `${dados.updatedAt ?? ""}|${dados.descricao}|${dados.audiodescricao}`;
     if (ultimoSync.current === marca) return;
     ultimoSync.current = marca;
-    setTexto(override?.descricao ?? textoEstatico);
-    setAudiodescricao(
-      override?.audiodescricao ?? override?.descricao ?? textoEstatico,
-    );
-  }, [
-    override?.updatedAt,
-    override?.descricao,
-    override?.audiodescricao,
-    textoEstatico,
-  ]);
+    setTexto(dados.descricao);
+    setAudiodescricao(dados.audiodescricao);
+  }, [dados.updatedAt, dados.descricao, dados.audiodescricao]);
 
-  const temAudioRegen = versaoAudio !== null && !!override?.audioFemPath;
-  const status = statusDaObra(override);
+  const temAudioRegen = versaoAudio !== null && !!dados.audioFem;
+  const status = statusDaObra(dados);
   const aprovada = status === "aprovada";
 
   const handleAprovar = async () => {
     setAprovando(true);
     setMsg(null);
     try {
-      const r = await aprovar({ data: { chave: num, aprovada: !aprovada } });
+      const r = await aprovar({ data: { chave, aprovada: !aprovada } });
       if (r.ok) {
         setMsg(aprovada ? "Aprovação removida." : "Obra aprovada.");
         onChanged();
