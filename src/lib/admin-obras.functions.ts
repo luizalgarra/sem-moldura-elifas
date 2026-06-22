@@ -1867,6 +1867,7 @@ export const salvarPostagemReels = createServerFn({ method: "POST" })
         num: z.number().int().min(1).max(MAX_CHAVE),
         titulo: z.string().max(300).optional(),
         base64: z.string().min(1).max(200_000_000),
+        ext: z.enum(["mp4", "webm"]).optional(),
       })
       .parse(input),
   )
