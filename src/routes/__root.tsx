@@ -181,6 +181,7 @@ function Conteudo() {
   const protegida =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/editar") ||
+    pathname.startsWith("/postar") ||
     pathname.startsWith("/qrcodes");
 
   const semSessao = protegida && !carregando && !session;

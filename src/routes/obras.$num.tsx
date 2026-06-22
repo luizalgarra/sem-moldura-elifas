@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { ImageOff, ZoomIn, X, ArrowUpRight } from "lucide-react";
+import { ImageOff, ZoomIn, X, ArrowUpRight, Video } from "lucide-react";
 import { obras } from "@/data/obras";
 import { listarAcervo } from "@/lib/admin-obras.functions";
 import { anosMarcos } from "@/data/timeline";
@@ -8,6 +8,7 @@ import { marcoDaObra } from "@/lib/anos";
 import { AudioDescricao } from "@/components/AudioDescricao";
 import { NavegacaoSequencial } from "@/components/NavegacaoSequencial";
 import { Button } from "@/components/ui/button";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export const Route = createFileRoute("/obras/$num")({
   loader: async ({ params }) => {
@@ -47,6 +48,7 @@ function ObraPagina() {
   const { obra, total } = Route.useLoaderData();
   const [ampliada, setAmpliada] = useState(false);
   const corresp = marcoDaObra(obra.ano, anosMarcos);
+  const { isAdmin } = useAdminAuth();
 
 
 
@@ -102,6 +104,17 @@ function ObraPagina() {
           audioTrechos={obra.audioTrechos}
         />
       </div>
+
+      {isAdmin && (
+        <div className="mt-4">
+          <Button asChild variant="outline" className="min-h-11">
+            <Link to="/postar/$num" params={{ num: String(obra.num) }}>
+              <Video aria-hidden="true" />
+              <span>Postar</span>
+            </Link>
+          </Button>
+        </div>
+      )}
 
       <dl className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
         <FichaItem rotulo="Autor" valor={obra.autor} />
