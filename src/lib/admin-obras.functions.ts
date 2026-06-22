@@ -1923,19 +1923,31 @@ export const salvarPostagemReels = createServerFn({ method: "POST" })
     return { ok: true as const, id: salvo?.id as string };
   });
 
-/** Lista todas as postagens salvas, já com URL assinada para reprodução. */
+/** Lista as postagens salvas, já com URL assinada. Opcionalmente filtra por obra. */
 export const listarPostagens = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<PostagemReels[]> => {
+  .inputValidator((input: unknown) =>
+    z
+      .object({ num: z.number().int().min(1).max(MAX_CHAVE).optional() })
+      .optional()
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<PostagemReels[]> => {
     await garantirAdmin(context);
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
 
-    const { data: linhas, error } = await supabaseAdmin
+    let consulta = supabaseAdmin
       .from("postagens_reels")
       .select("id, num, titulo, video_path, tamanho_bytes, created_at")
       .order("created_at", { ascending: false });
+
+    if (data?.num) {
+      consulta = consulta.eq("num", data.num);
+    }
+
+    const { data: linhas, error } = await consulta;
 
     if (error || !linhas) {
       console.error("listarPostagens:", error?.message);
@@ -1958,6 +1970,28 @@ export const listarPostagens = createServerFn({ method: "GET" })
       });
     }
     return resultado;
+  });
+
+/** Conta quantas postagens (reels) existem para uma obra. */
+export const contarPostagensReels = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ num: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
+  )
+  .handler(async ({ data, context }): Promise<{ total: number }> => {
+    await garantirAdmin(context);
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { count, error } = await supabaseAdmin
+      .from("postagens_reels")
+      .select("id", { count: "exact", head: true })
+      .eq("num", data.num);
+    if (error) {
+      console.error("contarPostagensReels:", error.message);
+      return { total: 0 };
+    }
+    return { total: count ?? 0 };
   });
 
 /** Remove uma postagem: apaga o arquivo do storage e o registro. */
