@@ -118,6 +118,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
   >("ocioso");
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState(0);
+  const [conversaoPct, setConversaoPct] = useState(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [salvamento, setSalvamento] = useState<
     "ocioso" | "salvando" | "salvo" | "erro"
