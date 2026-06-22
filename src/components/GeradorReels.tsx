@@ -276,12 +276,25 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       await new Promise((r) => setTimeout(r, (duracaoTotal + 0.5) * 1000));
       recorder.stop();
 
-      const blob = await finalizado;
+      const webmBlob = await finalizado;
       await audioCtx.close();
+
+      // Converte para MP4 no navegador (com fallback para webm em caso de falha).
+      setEstado("convertendo");
+      setProgresso(100);
+      let blob = webmBlob;
+      let ext = "webm";
+      try {
+        blob = await converterParaMp4(webmBlob);
+        ext = "mp4";
+      } catch (e) {
+        console.error("Falha ao converter para MP4:", e);
+        setConversaoFalhou(true);
+      }
+      setFormato(ext);
 
       const url = URL.createObjectURL(blob);
       setVideoUrl(url);
-      setProgresso(100);
       setEstado("pronto");
 
       // Salva automaticamente a postagem.
@@ -289,7 +302,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       try {
         const base64 = await blobParaBase64(blob);
         const res = await salvar({
-          data: { num: obra.num, titulo: obra.titulo, base64 },
+          data: { num: obra.num, titulo: obra.titulo, base64, ext },
         });
         setSalvamento(res?.ok ? "salvo" : "erro");
         if (!res?.ok) {
