@@ -235,6 +235,22 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       setVideoUrl(url);
       setProgresso(100);
       setEstado("pronto");
+
+      // Salva automaticamente a postagem.
+      setSalvamento("salvando");
+      try {
+        const base64 = await blobParaBase64(blob);
+        const res = await salvar({
+          data: { num: obra.num, titulo: obra.titulo, base64 },
+        });
+        setSalvamento(res?.ok ? "salvo" : "erro");
+        if (!res?.ok) {
+          console.error("Falha ao salvar postagem:", res?.erro);
+        }
+      } catch (e) {
+        console.error(e);
+        setSalvamento("erro");
+      }
     } catch (e) {
       console.error(e);
       setErro(
@@ -242,7 +258,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       );
       setEstado("erro");
     }
-  }, [montarFonte, obra.imagem, desenhar, videoUrl]);
+  }, [montarFonte, obra.imagem, obra.num, obra.titulo, desenhar, videoUrl, salvar]);
 
   if (!temAudio) {
     return (
