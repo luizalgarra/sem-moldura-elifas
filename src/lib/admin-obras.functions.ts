@@ -1954,6 +1954,7 @@ export const listarPostagens = createServerFn({ method: "GET" })
         tamanhoBytes: l.tamanho_bytes,
         criadoEm: l.created_at,
         url: assinada?.signedUrl ?? "",
+        ext: l.video_path.split(".").pop()?.toLowerCase() ?? "mp4",
       });
     }
     return resultado;
