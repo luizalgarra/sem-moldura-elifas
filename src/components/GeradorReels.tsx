@@ -61,6 +61,7 @@ async function converterParaMp4(
     "+faststart",
     "out.mp4",
   ]);
+  ffmpeg.off("progress", handler);
   const dados = await ffmpeg.readFile("out.mp4");
   const bytes =
     dados instanceof Uint8Array ? dados : new TextEncoder().encode(String(dados));
