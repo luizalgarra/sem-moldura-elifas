@@ -409,7 +409,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
             {estado === "gerando"
               ? `Gerando… ${progresso}%`
               : estado === "convertendo"
-                ? "Convertendo para MP4…"
+                ? `Convertendo para MP4… ${conversaoPct}%`
                 : estado === "pronto"
                   ? "Gerar de novo"
                   : "Gerar vídeo"}
