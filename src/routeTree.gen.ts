@@ -31,6 +31,7 @@ import { Route as EspacosDeMemoriaIndexRouteImport } from './routes/espacos-de-m
 import { Route as ElifasAndreatoIndexRouteImport } from './routes/elifas-andreato.index'
 import { Route as AcervoIndexRouteImport } from './routes/acervo.index'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
+import { Route as PostarNumRouteImport } from './routes/postar.$num'
 import { Route as ParticipePatrocineRouteImport } from './routes/participe.patrocine'
 import { Route as ParticipeOficinasRouteImport } from './routes/participe.oficinas'
 import { Route as ParticipeContatoRouteImport } from './routes/participe.contato'
@@ -172,6 +173,11 @@ const QrcodesImprimirRoute = QrcodesImprimirRouteImport.update({
   id: '/imprimir',
   path: '/imprimir',
   getParentRoute: () => QrcodesRoute,
+} as any)
+const PostarNumRoute = PostarNumRouteImport.update({
+  id: '/postar/$num',
+  path: '/postar/$num',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ParticipePatrocineRoute = ParticipePatrocineRouteImport.update({
   id: '/patrocine',
@@ -387,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/participe/contato': typeof ParticipeContatoRoute
   '/participe/oficinas': typeof ParticipeOficinasRoute
   '/participe/patrocine': typeof ParticipePatrocineRoute
+  '/postar/$num': typeof PostarNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo/': typeof AcervoIndexRoute
   '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
@@ -436,6 +443,7 @@ export interface FileRoutesByTo {
   '/participe/contato': typeof ParticipeContatoRoute
   '/participe/oficinas': typeof ParticipeOficinasRoute
   '/participe/patrocine': typeof ParticipePatrocineRoute
+  '/postar/$num': typeof PostarNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo': typeof AcervoIndexRoute
   '/elifas-andreato': typeof ElifasAndreatoIndexRoute
@@ -492,6 +500,7 @@ export interface FileRoutesById {
   '/participe/contato': typeof ParticipeContatoRoute
   '/participe/oficinas': typeof ParticipeOficinasRoute
   '/participe/patrocine': typeof ParticipePatrocineRoute
+  '/postar/$num': typeof PostarNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
   '/acervo/': typeof AcervoIndexRoute
   '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
@@ -549,6 +558,7 @@ export interface FileRouteTypes {
     | '/participe/contato'
     | '/participe/oficinas'
     | '/participe/patrocine'
+    | '/postar/$num'
     | '/qrcodes/imprimir'
     | '/acervo/'
     | '/elifas-andreato/'
@@ -598,6 +608,7 @@ export interface FileRouteTypes {
     | '/participe/contato'
     | '/participe/oficinas'
     | '/participe/patrocine'
+    | '/postar/$num'
     | '/qrcodes/imprimir'
     | '/acervo'
     | '/elifas-andreato'
@@ -653,6 +664,7 @@ export interface FileRouteTypes {
     | '/participe/contato'
     | '/participe/oficinas'
     | '/participe/patrocine'
+    | '/postar/$num'
     | '/qrcodes/imprimir'
     | '/acervo/'
     | '/elifas-andreato/'
@@ -681,6 +693,7 @@ export interface RootRouteChildren {
   QrcodesRoute: typeof QrcodesRouteWithChildren
   SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
+  PostarNumRoute: typeof PostarNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
   ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
   ApiPublicObraImagemNumRoute: typeof ApiPublicObraImagemNumRoute
@@ -841,6 +854,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/qrcodes/imprimir'
       preLoaderRoute: typeof QrcodesImprimirRouteImport
       parentRoute: typeof QrcodesRoute
+    }
+    '/postar/$num': {
+      id: '/postar/$num'
+      path: '/postar/$num'
+      fullPath: '/postar/$num'
+      preLoaderRoute: typeof PostarNumRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/participe/patrocine': {
       id: '/participe/patrocine'
@@ -1207,6 +1227,7 @@ const rootRouteChildren: RootRouteChildren = {
   QrcodesRoute: QrcodesRouteWithChildren,
   SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
+  PostarNumRoute: PostarNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
   ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
   ApiPublicObraImagemNumRoute: ApiPublicObraImagemNumRoute,
