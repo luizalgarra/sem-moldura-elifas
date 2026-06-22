@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, Video, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { salvarPostagemReels, type ObraAcervo } from "@/lib/admin-obras.functions";
 
