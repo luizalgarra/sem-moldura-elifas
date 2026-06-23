@@ -25,6 +25,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcervoRouteImport } from './routes/acervo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QrcodesIndexRouteImport } from './routes/qrcodes.index'
+import { Route as PostarIndexRouteImport } from './routes/postar.index'
 import { Route as ParticipeIndexRouteImport } from './routes/participe.index'
 import { Route as ObrasIndexRouteImport } from './routes/obras.index'
 import { Route as InstitutoIndexRouteImport } from './routes/instituto.index'
@@ -144,6 +145,11 @@ const QrcodesIndexRoute = QrcodesIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => QrcodesRoute,
+} as any)
+const PostarIndexRoute = PostarIndexRouteImport.update({
+  id: '/postar/',
+  path: '/postar/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ParticipeIndexRoute = ParticipeIndexRouteImport.update({
   id: '/',
@@ -408,6 +414,7 @@ export interface FileRoutesByFullPath {
   '/instituto/': typeof InstitutoIndexRoute
   '/obras/': typeof ObrasIndexRoute
   '/participe/': typeof ParticipeIndexRoute
+  '/postar/': typeof PostarIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -459,6 +466,7 @@ export interface FileRoutesByTo {
   '/instituto': typeof InstitutoIndexRoute
   '/obras': typeof ObrasIndexRoute
   '/participe': typeof ParticipeIndexRoute
+  '/postar': typeof PostarIndexRoute
   '/qrcodes': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -517,6 +525,7 @@ export interface FileRoutesById {
   '/instituto/': typeof InstitutoIndexRoute
   '/obras/': typeof ObrasIndexRoute
   '/participe/': typeof ParticipeIndexRoute
+  '/postar/': typeof PostarIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
@@ -576,6 +585,7 @@ export interface FileRouteTypes {
     | '/instituto/'
     | '/obras/'
     | '/participe/'
+    | '/postar/'
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/instituto'
     | '/obras'
     | '/participe'
+    | '/postar'
     | '/qrcodes'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
@@ -684,6 +695,7 @@ export interface FileRouteTypes {
     | '/instituto/'
     | '/obras/'
     | '/participe/'
+    | '/postar/'
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
@@ -708,6 +720,7 @@ export interface RootRouteChildren {
   ObrasNumRoute: typeof ObrasNumRoute
   PostarNumRoute: typeof PostarNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
+  PostarIndexRoute: typeof PostarIndexRoute
   ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
   ApiPublicObraImagemNumRoute: typeof ApiPublicObraImagemNumRoute
 }
@@ -825,6 +838,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/qrcodes/'
       preLoaderRoute: typeof QrcodesIndexRouteImport
       parentRoute: typeof QrcodesRoute
+    }
+    '/postar/': {
+      id: '/postar/'
+      path: '/postar'
+      fullPath: '/postar/'
+      preLoaderRoute: typeof PostarIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/participe/': {
       id: '/participe/'
@@ -1250,6 +1270,7 @@ const rootRouteChildren: RootRouteChildren = {
   ObrasNumRoute: ObrasNumRoute,
   PostarNumRoute: PostarNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
+  PostarIndexRoute: PostarIndexRoute,
   ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
   ApiPublicObraImagemNumRoute: ApiPublicObraImagemNumRoute,
 }
