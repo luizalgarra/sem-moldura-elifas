@@ -1,24 +1,38 @@
-Plano para fazer a página `/postar` realmente gerar e salvar os vídeos:
+## Objetivo
 
-1. Corrigir o carregamento do FFmpeg no navegador
-   - Trocar a URL fixa do core `@ffmpeg/core@0.12.10` por uma versão compatível com o pacote instalado (`@ffmpeg/ffmpeg@0.12.15`).
-   - Incluir também o `workerURL`, que é necessário em alguns navegadores/ambientes para o FFmpeg WASM iniciar corretamente.
-   - Melhorar a mensagem quando o FFmpeg falhar ao carregar, para a tela não parecer travada em “Gerando MP4 0%”.
+Manter a saída em **MP4** (FFmpeg.wasm), mas eliminar o travamento em "Carregando conversor" tornando o carregamento do conversor **estável e local**, sem depender de CDN externo nem de versões incompatíveis.
 
-2. Tornar a geração em lote mais transparente
-   - Adicionar status de etapa por obra: carregando imagem, carregando áudio, carregando FFmpeg, gerando MP4 e salvando.
-   - Exibir erros completos e úteis na lista da obra, em vez de mensagens genéricas.
+## Causa do problema
 
-3. Evitar travamento silencioso
-   - Validar explicitamente se o canvas existe antes de iniciar a geração.
-   - Adicionar tratamento para falha ao baixar imagem/áudio, falha de CORS/asset e falha de encode.
-   - Garantir que, se uma obra falhar, o lote siga para a próxima obra em vez de parar parecendo congelado.
+O `obterFFmpeg()` baixa ~30 MB de WebAssembly de um CDN (`cdn.jsdelivr.net`) toda vez e ainda mistura versões (`@ffmpeg/core@0.12.10` + `worker.js@0.12.15`). Esse download remoto trava de forma intermitente e, quando o servidor de desenvolvimento reinicia (HMR), a aba recarrega no meio do carregamento — exatamente o que você viu.
 
-4. Verificar no navegador
-   - Reproduzir a geração de pelo menos uma obra em `/postar`.
-   - Confirmar se o progresso sai de 0%, se a obra muda para “Salvando/Salvo” ou mostra erro acionável, e se a postagem aparece em `/postagens` quando salva.
+## Solução
 
-Arquivos previstos:
-- `src/lib/gerar-reels.ts`
-- `src/routes/postar.index.tsx`
-- possivelmente `src/components/GeradorReels.tsx` apenas se a correção do FFmpeg também precisar refletir no gerador individual.
+Auto-hospedar os arquivos do FFmpeg dentro do próprio projeto (`public/`), com versões casadas, e carregá-los de URLs locais. Sem rede externa, sem mismatch, carregamento rápido e estável.
+
+### 1. Baixar os arquivos do conversor para dentro do projeto
+Colocar em `public/ffmpeg/` (single-thread, não exige headers especiais), todos da **mesma versão**:
+- `ffmpeg-core.js`
+- `ffmpeg-core.wasm`
+- `814.ffmpeg.js` / `worker.js` (worker correspondente ao pacote `@ffmpeg/ffmpeg` instalado)
+
+Os arquivos virão das versões já instaladas em `node_modules` (`@ffmpeg/core` e `@ffmpeg/ffmpeg`), garantindo compatibilidade exata com o que o app importa.
+
+### 2. Ajustar `src/lib/gerar-reels.ts`
+- Trocar as URLs do CDN por caminhos locais (`/ffmpeg/ffmpeg-core.js`, `/ffmpeg/ffmpeg-core.wasm`, worker local) em `ffmpeg.load()`.
+- Manter `toBlobURL` (necessário para o worker), mas agora apontando para os arquivos locais.
+- Adicionar um **timeout de segurança** (ex.: 60s) no `ffmpeg.load()`: se não inicializar, lança erro claro em vez de ficar preso para sempre, e libera o botão para tentar de novo.
+- Manter `ffmpegPromise` em cache para reaproveitar a instância entre as obras do lote.
+
+### 3. Validar a geração de verdade
+Rodar uma obra real em `/postar`, confirmar que o status sai de "Carregando conversor" para "Gerando MP4 …%" e termina em "Salvo", e que a postagem aparece em `/postagens`.
+
+## Detalhes técnicos
+
+- Usar o core **single-thread** (`@ffmpeg/core`), que não precisa de `SharedArrayBuffer` nem de headers COOP/COEP — portanto funciona no preview e no site publicado sem configuração de servidor.
+- Os `.wasm` ficam como **assets estáticos** em `public/ffmpeg/` e são carregados apenas no cliente (após hidratação), nunca no bundle de servidor/SSR.
+- Nenhuma mudança na lógica de áudio, canvas, salvamento ou na UI de lote — só o carregamento do FFmpeg muda.
+
+## Arquivos afetados
+- `public/ffmpeg/*` (novos — arquivos do conversor)
+- `src/lib/gerar-reels.ts` (editar `obterFFmpeg` para caminhos locais + timeout)
