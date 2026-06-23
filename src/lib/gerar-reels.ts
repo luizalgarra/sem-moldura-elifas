@@ -252,6 +252,7 @@ export async function gerarReelsDaObra(
   });
 
   // 3. Decodifica os áudios e concatena em um único arquivo WAV.
+  onEtapa?.("audio");
   const AudioCtx =
     window.AudioContext ||
     (window as unknown as { webkitAudioContext: typeof AudioContext })
@@ -260,7 +261,10 @@ export async function gerarReelsDaObra(
   const buffers: AudioBuffer[] = [];
   for (const url of fonte.urls) {
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error("Falha ao baixar o áudio.");
+    if (!resp.ok) {
+      await audioCtx.close();
+      throw new Error("Falha ao baixar o áudio da obra.");
+    }
     const arr = await resp.arrayBuffer();
     const buf = await audioCtx.decodeAudioData(arr);
     buffers.push(buf);
@@ -271,13 +275,16 @@ export async function gerarReelsDaObra(
   const wav = audioBufferParaWav(audioFinal);
 
   // 4. Encoda o MP4 direto no ffmpeg (imagem em loop + áudio).
+  onEtapa?.("ffmpeg");
   onProgress?.(0);
   const { fetchFile } = await import("@ffmpeg/util");
   const ffmpeg = await obterFFmpeg();
+  onEtapa?.("encode");
   const handler = ({ progress }: { progress: number }) => {
     onProgress?.(Math.max(0, Math.min(100, Math.round(progress * 100))));
   };
   ffmpeg.on("progress", handler);
+
 
   try {
     await ffmpeg.writeFile("frame.png", await fetchFile(pngBlob));
