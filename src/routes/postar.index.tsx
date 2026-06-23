@@ -497,11 +497,14 @@ function PostarLotePagina() {
                     </span>
                     <span className="shrink-0 text-xs text-muted-foreground">
                       {r.status === "gerando"
-                        ? `${ROTULO_STATUS[r.status]} ${r.pct}%`
+                        ? r.etapa === "encode"
+                          ? `${ROTULO_ETAPA.encode} ${r.pct}%`
+                          : (ROTULO_ETAPA[r.etapa ?? ""] ?? ROTULO_STATUS[r.status])
                         : r.status === "erro"
                           ? r.msg ?? ROTULO_STATUS[r.status]
                           : ROTULO_STATUS[r.status]}
                     </span>
+
                   </li>
                 );
               })}
