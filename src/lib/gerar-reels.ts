@@ -41,15 +41,18 @@ export async function obterFFmpeg(): Promise<FFmpegInstance> {
     // evitando o travamento intermitente na inicialização do conversor.
     const ffmpeg = new FFmpeg();
     try {
-      const [coreURL, wasmURL, classWorkerURL] = await Promise.all([
-        arquivoLocalParaBlobURL("/ffmpeg/ffmpeg-core.js", "text/javascript"),
-        carregarWasmLocal("/ffmpeg/ffmpeg-core.wasm.bin"),
-        arquivoLocalParaBlobURL("/ffmpeg/worker.js", "text/javascript"),
-      ]);
+      // O worker é servido como arquivo real (não blob) para que seus imports
+      // relativos (./const.js, ./errors.js) sejam resolvidos. O WASM vem
+      // compactado e é descompactado em memória, virando uma blob URL.
+      const wasmURL = await carregarWasmLocal("/ffmpeg/ffmpeg-core.wasm.bin");
 
       // Timeout de segurança: se o WASM não inicializar, falha com mensagem
       // clara em vez de ficar preso para sempre.
-      const carregar = ffmpeg.load({ coreURL, wasmURL, classWorkerURL });
+      const carregar = ffmpeg.load({
+        coreURL: "/ffmpeg/ffmpeg-core.js",
+        wasmURL,
+        classWorkerURL: "/ffmpeg/worker.js",
+      });
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(
           () => reject(new Error("Tempo esgotado ao iniciar o conversor (60s).")),
