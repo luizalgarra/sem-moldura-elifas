@@ -321,6 +321,7 @@ export async function gerarReelsDaObra(
       "out.mp4",
     ]);
 
+    onEtapa?.("finalizando");
     const dados = await ffmpeg.readFile("out.mp4");
     const bytes =
       dados instanceof Uint8Array
