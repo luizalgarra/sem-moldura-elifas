@@ -4,120 +4,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { salvarPostagemReels, type ObraAcervo } from "@/lib/admin-obras.functions";
-
-function blobParaBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = () => resolve(String(fr.result));
-    fr.onerror = () => reject(new Error("Falha ao ler o vídeo."));
-    fr.readAsDataURL(blob);
-  });
-}
-
-type FFmpegInstance = import("@ffmpeg/ffmpeg").FFmpeg;
-let ffmpegPromise: Promise<FFmpegInstance> | null = null;
-
-async function obterFFmpeg(): Promise<FFmpegInstance> {
-  if (ffmpegPromise) return ffmpegPromise;
-  ffmpegPromise = (async () => {
-    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
-    const { toBlobURL } = await import("@ffmpeg/util");
-    // Em apps Vite, o worker do @ffmpeg/ffmpeg é do tipo "module".
-    // Por isso o core precisa ser ESM; o UMD carrega no download, mas falha no import
-    // com "failed to import ffmpeg-core.js" no Chrome/Edge.
-    const base = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
-    const ffmpeg = new FFmpeg();
-    try {
-      await ffmpeg.load({
-        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
-      });
-    } catch (e) {
-      ffmpegPromise = null;
-      throw e;
-    }
-    return ffmpeg;
-  })();
-  return ffmpegPromise;
-}
-
-// Converte um AudioBuffer (PCM) num arquivo WAV em memória.
-function audioBufferParaWav(buffer: AudioBuffer): Uint8Array {
-  const numCanais = buffer.numberOfChannels;
-  const taxa = buffer.sampleRate;
-  const amostras = buffer.length;
-  const blocoAlinhamento = numCanais * 2;
-  const tamanhoDados = amostras * blocoAlinhamento;
-  const ab = new ArrayBuffer(44 + tamanhoDados);
-  const dv = new DataView(ab);
-
-  const escreverTexto = (offset: number, texto: string) => {
-    for (let i = 0; i < texto.length; i++) {
-      dv.setUint8(offset + i, texto.charCodeAt(i));
-    }
-  };
-
-  escreverTexto(0, "RIFF");
-  dv.setUint32(4, 36 + tamanhoDados, true);
-  escreverTexto(8, "WAVE");
-  escreverTexto(12, "fmt ");
-  dv.setUint32(16, 16, true);
-  dv.setUint16(20, 1, true); // PCM
-  dv.setUint16(22, numCanais, true);
-  dv.setUint32(24, taxa, true);
-  dv.setUint32(28, taxa * blocoAlinhamento, true);
-  dv.setUint16(32, blocoAlinhamento, true);
-  dv.setUint16(34, 16, true);
-  escreverTexto(36, "data");
-  dv.setUint32(40, tamanhoDados, true);
-
-  let offset = 44;
-  const canais: Float32Array[] = [];
-  for (let c = 0; c < numCanais; c++) {
-    canais.push(buffer.getChannelData(c));
-  }
-  for (let i = 0; i < amostras; i++) {
-    for (let c = 0; c < numCanais; c++) {
-      let amostra = Math.max(-1, Math.min(1, canais[c][i]));
-      amostra = amostra < 0 ? amostra * 0x8000 : amostra * 0x7fff;
-      dv.setInt16(offset, amostra, true);
-      offset += 2;
-    }
-  }
-
-  return new Uint8Array(ab);
-}
-
-// Junta vários AudioBuffers, em sequência, num único AudioBuffer.
-async function concatenarAudios(buffers: AudioBuffer[]): Promise<AudioBuffer> {
-  if (buffers.length === 1) return buffers[0];
-  const numCanais = Math.max(...buffers.map((b) => b.numberOfChannels));
-  const taxa = buffers[0].sampleRate;
-  const total = buffers.reduce((s, b) => s + b.length, 0);
-  const OfflineCtx =
-    window.OfflineAudioContext ||
-    (window as unknown as { webkitOfflineAudioContext: typeof OfflineAudioContext })
-      .webkitOfflineAudioContext;
-  const ctx = new OfflineCtx(numCanais, total, taxa);
-  let quando = 0;
-  for (const buf of buffers) {
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
-    src.start(quando);
-    quando += buf.duration;
-  }
-  return ctx.startRendering();
-}
-
-const LARGURA = 720;
-const ALTURA = 1280;
-
-type FonteAudio =
-  | { tipo: "sequencia"; urls: string[] }
-  | { tipo: "primeiro"; urls: string[] }
-  | { tipo: "unico"; urls: string[] }
-  | { tipo: "nenhum" };
+import {
+  blobParaBase64,
+  gerarReelsDaObra,
+  montarFonteAudio,
+} from "@/lib/gerar-reels";
 
 function suportaGeracao(): boolean {
   if (typeof window === "undefined") return false;
@@ -162,46 +53,8 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
     };
   }, [videoUrl]);
 
-  const montarFonte = useCallback((): FonteAudio => {
-    if (trechosUrls.length > 0) {
-      if (escolha === "primeiro") {
-        return { tipo: "primeiro", urls: [trechosUrls[0]] };
-      }
-      return { tipo: "sequencia", urls: trechosUrls };
-    }
-    if (unicoUrl) return { tipo: "unico", urls: [unicoUrl] };
-    return { tipo: "nenhum" };
-  }, [trechosUrls, unicoUrl, escolha]);
-
-  const desenhar = useCallback(
-    (ctx: CanvasRenderingContext2D, img: HTMLImageElement) => {
-      ctx.clearRect(0, 0, LARGURA, ALTURA);
-      // Fundo: imagem ampliada e borrada cobrindo todo o quadro (cover).
-      const escalaCover = Math.max(LARGURA / img.width, ALTURA / img.height);
-      const lcover = img.width * escalaCover;
-      const acover = img.height * escalaCover;
-      ctx.save();
-      ctx.filter = "blur(40px) brightness(0.75)";
-      ctx.drawImage(
-        img,
-        (LARGURA - lcover) / 2,
-        (ALTURA - acover) / 2,
-        lcover,
-        acover,
-      );
-      ctx.restore();
-
-      // Frente: imagem inteira contida (contain), centralizada.
-      const escalaFit = Math.min(LARGURA / img.width, ALTURA / img.height);
-      const lfit = img.width * escalaFit;
-      const afit = img.height * escalaFit;
-      ctx.drawImage(img, (LARGURA - lfit) / 2, (ALTURA - afit) / 2, lfit, afit);
-    },
-    [],
-  );
-
   const gerar = useCallback(async () => {
-    const fonte = montarFonte();
+    const fonte = montarFonteAudio(obra, escolha);
     if (fonte.tipo === "nenhum") {
       setErro("Esta obra não tem áudio gerado.");
       setEstado("erro");
@@ -223,102 +76,12 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
     }
 
     try {
-      // 1. Carrega a imagem.
-      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-        const el = new Image();
-        el.crossOrigin = "anonymous";
-        el.onload = () => resolve(el);
-        el.onerror = () => reject(new Error("Falha ao carregar a imagem."));
-        el.src = obra.imagem as string;
-      });
-
-      // 2. Renderiza o quadro uma única vez e exporta como PNG.
-      const canvas = canvasRef.current!;
-      canvas.width = LARGURA;
-      canvas.height = ALTURA;
-      const ctx = canvas.getContext("2d")!;
-      desenhar(ctx, img);
-      const pngBlob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob(
-          (b) => (b ? resolve(b) : reject(new Error("Falha ao gerar o quadro."))),
-          "image/png",
-        );
-      });
-
-      // 3. Decodifica os áudios e concatena em um único arquivo WAV.
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      const audioCtx = new AudioCtx();
-      const buffers: AudioBuffer[] = [];
-      for (const url of fonte.urls) {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("Falha ao baixar o áudio.");
-        const arr = await resp.arrayBuffer();
-        const buf = await audioCtx.decodeAudioData(arr);
-        buffers.push(buf);
-      }
-      await audioCtx.close();
-
-      const audioFinal = await concatenarAudios(buffers);
-      const wav = audioBufferParaWav(audioFinal);
-
-      // 4. Encoda o MP4 direto no ffmpeg (imagem em loop + áudio).
       setEstado("convertendo");
-      setConversaoPct(0);
-
-      const { fetchFile } = await import("@ffmpeg/util");
-      const ffmpeg = await obterFFmpeg();
-      const handler = ({ progress }: { progress: number }) => {
-        setConversaoPct(Math.max(0, Math.min(100, Math.round(progress * 100))));
-      };
-      ffmpeg.on("progress", handler);
-
-      await ffmpeg.writeFile("frame.png", await fetchFile(pngBlob));
-      const wavAb = new ArrayBuffer(wav.byteLength);
-      new Uint8Array(wavAb).set(wav);
-      await ffmpeg.writeFile("audio.wav", new Uint8Array(wavAb));
-
-      await ffmpeg.exec([
-        "-loop",
-        "1",
-        "-framerate",
-        "30",
-        "-i",
-        "frame.png",
-        "-i",
-        "audio.wav",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "ultrafast",
-        "-crf",
-        "28",
-        "-tune",
-        "stillimage",
-        "-pix_fmt",
-        "yuv420p",
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
-        "-shortest",
-        "-movflags",
-        "+faststart",
-        "out.mp4",
-      ]);
-
-      ffmpeg.off("progress", handler);
-
-      const dados = await ffmpeg.readFile("out.mp4");
-      const bytes =
-        dados instanceof Uint8Array
-          ? dados
-          : new TextEncoder().encode(String(dados));
-      const mp4Ab = new ArrayBuffer(bytes.byteLength);
-      new Uint8Array(mp4Ab).set(bytes);
-      const blob = new Blob([mp4Ab], { type: "video/mp4" });
+      const blob = await gerarReelsDaObra(obra, {
+        canvas: canvasRef.current!,
+        escolha,
+        onProgress: setConversaoPct,
+      });
 
       const url = URL.createObjectURL(blob);
       setVideoUrl(url);
@@ -351,7 +114,7 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
       );
       setEstado("erro");
     }
-  }, [montarFonte, obra.imagem, obra.num, obra.titulo, desenhar, videoUrl, salvar]);
+  }, [obra, escolha, videoUrl, salvar]);
 
   if (!temAudio) {
     return (
