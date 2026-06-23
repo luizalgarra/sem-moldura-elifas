@@ -210,7 +210,7 @@ export interface OpcoesGeracao {
  */
 export async function gerarReelsDaObra(
   obra: ObraAcervo,
-  { canvas, escolha = "sequencia", onProgress }: OpcoesGeracao,
+  { canvas, escolha = "sequencia", onProgress, onEtapa }: OpcoesGeracao,
 ): Promise<Blob> {
   const fonte = montarFonteAudio(obra, escolha);
   if (fonte.tipo === "nenhum") {
@@ -219,15 +219,25 @@ export async function gerarReelsDaObra(
   if (!obra.imagem) {
     throw new Error("Esta obra não tem imagem.");
   }
+  if (!canvas) {
+    throw new Error("Canvas indisponível para a montagem do vídeo.");
+  }
 
   // 1. Carrega a imagem.
+  onEtapa?.("imagem");
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const el = new Image();
     el.crossOrigin = "anonymous";
     el.onload = () => resolve(el);
-    el.onerror = () => reject(new Error("Falha ao carregar a imagem."));
+    el.onerror = () =>
+      reject(
+        new Error(
+          "Falha ao carregar a imagem da obra (verifique se a imagem existe).",
+        ),
+      );
     el.src = obra.imagem as string;
   });
+
 
   // 2. Renderiza o quadro uma única vez e exporta como PNG.
   canvas.width = LARGURA;
