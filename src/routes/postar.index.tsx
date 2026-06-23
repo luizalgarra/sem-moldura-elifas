@@ -122,10 +122,10 @@ function PostarLotePagina() {
   }, [aptas, lista]);
 
   const setItem = useCallback((num: number, parcial: Partial<ResultadoItem>) => {
-    setResultados((prev) => ({
-      ...prev,
-      [num]: { status: "fila", pct: 0, ...prev[num], ...parcial },
-    }));
+    setResultados((prev) => {
+      const base: ResultadoItem = prev[num] ?? { status: "fila", pct: 0 };
+      return { ...prev, [num]: { ...base, ...parcial } };
+    });
   }, []);
 
   const esperarSeP_ausado = useCallback(async () => {
