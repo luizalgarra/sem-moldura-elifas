@@ -43,7 +43,7 @@ export async function obterFFmpeg(): Promise<FFmpegInstance> {
     try {
       const [coreURL, wasmURL, classWorkerURL] = await Promise.all([
         arquivoLocalParaBlobURL("/ffmpeg/ffmpeg-core.js", "text/javascript"),
-        carregarWasmLocal("/ffmpeg/ffmpeg-core.wasm.gz"),
+        carregarWasmLocal("/ffmpeg/ffmpeg-core.wasm.bin"),
         arquivoLocalParaBlobURL("/ffmpeg/worker.js", "text/javascript"),
       ]);
 
