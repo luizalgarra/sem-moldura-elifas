@@ -343,7 +343,11 @@ export function GeradorReels({ obra }: { obra: ObraAcervo }) {
     } catch (e) {
       console.error(e);
       setErro(
-        e instanceof Error ? e.message : "Erro inesperado ao gerar o vídeo.",
+        e instanceof Error
+          ? e.message
+          : typeof e === "string"
+            ? e
+            : "Erro inesperado ao gerar o vídeo.",
       );
       setEstado("erro");
     }
