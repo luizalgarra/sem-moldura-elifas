@@ -187,12 +187,22 @@ export function obraApta(obra: ObraAcervo): boolean {
   return temImagem && temAudio;
 }
 
+export type EtapaGeracao =
+  | "imagem"
+  | "audio"
+  | "ffmpeg"
+  | "encode"
+  | "finalizando";
+
 export interface OpcoesGeracao {
   canvas: HTMLCanvasElement;
   escolha?: "sequencia" | "primeiro";
   /** Progresso de 0 a 100 durante a fase de encode do ffmpeg. */
   onProgress?: (pct: number) => void;
+  /** Etapa atual da geração, para feedback ao usuário. */
+  onEtapa?: (etapa: EtapaGeracao) => void;
 }
+
 
 /**
  * Monta o reels (MP4) de uma obra inteiramente no navegador: desenha a imagem,
