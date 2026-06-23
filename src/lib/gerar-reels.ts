@@ -6,20 +6,8 @@ export const ALTURA = 1280;
 type FFmpegInstance = import("@ffmpeg/ffmpeg").FFmpeg;
 let ffmpegPromise: Promise<FFmpegInstance> | null = null;
 
-/** Baixa um arquivo local e devolve uma blob URL com o mimeType indicado. */
-async function arquivoLocalParaBlobURL(
-  url: string,
-  mimeType: string,
-): Promise<string> {
-  const resp = await fetch(url);
-  if (!resp.ok) {
-    throw new Error(`Falha ao baixar ${url} (HTTP ${resp.status}).`);
-  }
-  const blob = await resp.blob();
-  return URL.createObjectURL(new Blob([blob], { type: mimeType }));
-}
-
 /** Baixa o WASM compactado (.gz) e descompacta no navegador. */
+
 async function carregarWasmLocal(url: string): Promise<string> {
   const resp = await fetch(url);
   if (!resp.ok || !resp.body) {
