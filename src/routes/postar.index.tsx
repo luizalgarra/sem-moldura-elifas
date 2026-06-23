@@ -45,8 +45,18 @@ type StatusItem =
 interface ResultadoItem {
   status: StatusItem;
   pct: number;
+  etapa?: string;
   msg?: string;
 }
+
+const ROTULO_ETAPA: Record<string, string> = {
+  imagem: "Carregando imagem",
+  audio: "Carregando áudio",
+  ffmpeg: "Carregando conversor",
+  encode: "Gerando MP4",
+  finalizando: "Finalizando",
+};
+
 
 function suportaGeracao(): boolean {
   if (typeof window === "undefined") return false;
