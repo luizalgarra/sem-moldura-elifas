@@ -257,6 +257,12 @@ function AdminPagina() {
                 <span>Cadastrar imagens (IA)</span>
               </Button>
               <Button asChild variant="outline" className="min-h-11">
+                <Link to="/postar">
+                  <Video aria-hidden="true" />
+                  <span>Gerar reels em lote</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11">
                 <Link to="/postagens">
                   <Video aria-hidden="true" />
                   <span>Postagens (reels)</span>
