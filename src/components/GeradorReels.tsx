@@ -22,12 +22,20 @@ async function obterFFmpeg(): Promise<FFmpegInstance> {
   ffmpegPromise = (async () => {
     const { FFmpeg } = await import("@ffmpeg/ffmpeg");
     const { toBlobURL } = await import("@ffmpeg/util");
-    const base = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
+    // Em apps Vite, o worker do @ffmpeg/ffmpeg é do tipo "module".
+    // Por isso o core precisa ser ESM; o UMD carrega no download, mas falha no import
+    // com "failed to import ffmpeg-core.js" no Chrome/Edge.
+    const base = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
     const ffmpeg = new FFmpeg();
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-      wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
-    });
+    try {
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+      });
+    } catch (e) {
+      ffmpegPromise = null;
+      throw e;
+    }
     return ffmpeg;
   })();
   return ffmpegPromise;
