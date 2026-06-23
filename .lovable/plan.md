@@ -1,45 +1,59 @@
-## Diagnóstico
+## Objetivo
 
-Antes de tudo, esclarecendo a sua pergunta: **a criação do vídeo não usa nenhum modelo de IA** (nem Gemini). É montagem mecânica no navegador, em `src/components/GeradorReels.tsx`:
+Permitir gerar reels de **várias obras de uma vez, em sequência**, em vez de obra por obra. Como a montagem do vídeo roda **no navegador** (canvas + ffmpeg WebAssembly — sem IA, sem custo de IA), o lote também roda no navegador: uma página processa as obras uma a uma, gera o MP4 de cada uma e salva automaticamente, mostrando o progresso. A aba precisa ficar aberta até terminar.
 
-1. Desenha a imagem da obra num `<canvas>` (fundo borrado + imagem central).
-2. Toca o áudio e **grava o canvas em tempo real** com `MediaRecorder` → gera `.webm`.
-3. **Converte `.webm` → `.mp4`** com `ffmpeg` em WebAssembly.
+## Como vai funcionar
 
-A lentidão/travamento no desktop vem de **duas causas**, e nenhuma delas é resolvida só reduzindo resolução:
+Nova página de administração `/postar` (lista geral, só admin). Ela carrega o acervo na ordem oficial e mostra a lista de obras com: quais têm **imagem + áudio** (aptas) e quantos reels cada uma já possui.
 
-- **Causa 1 — gravação em tempo real.** O `MediaRecorder` grava pelo tempo exato do áudio. Um áudio de 3 min = 3 min de espera, sempre, independente da máquina.
-- **Causa 2 — redesenho por frame.** Há um `requestAnimationFrame` que redesenha o fundo com `blur(40px)` 30×/segundo, mesmo a imagem sendo **estática**. Isso é o que faz a aba travar no Chrome/Edge.
+Controles do lote, atendendo ao seu pedido ("a partir da 01 Gabriela, gerar 10"):
 
-## Solução proposta
+```text
+Gerar reels em lote
+Começar a partir de:  [ 01 — Gabriela ▾ ]   (dropdown com todas as obras)
+Quantidade:           [ 10 ]                 (ou “até o fim”)
+[x] Pular obras que já têm vídeo
 
-Trocar a abordagem de "gravar em tempo real" por **encodar direto no ffmpeg a partir de uma única imagem + o áudio**. Como o vídeo é só uma imagem parada com áudio, não há motivo para gravar em tempo real — o ffmpeg gera o MP4 em uma fração do tempo do áudio.
+[ Gerar (10 obras) ]   [ Pausar ]   [ Cancelar ]
 
-### O que muda em `GeradorReels.tsx`
+Progresso: ███████░░░░░░  4/10
+✓ 02  Sem título …        salvo
+⏳ 03  Operários …         gerando MP4 62%
+•  04  ...                 na fila
+⚠ 05  ...                  sem áudio (pulada)
+```
 
-1. **Renderizar o quadro uma única vez** no canvas (imagem + fundo borrado), exatamente como hoje, e exportar como PNG (`canvas.toBlob`).
-2. **Concatenar o áudio**: baixar os trechos, escrever cada um no sistema de arquivos do ffmpeg e juntá-los (filtro `concat` do ffmpeg), ou renderizar a sequência num único arquivo de áudio.
-3. **Encodar o MP4 direto no ffmpeg** a partir do PNG em loop + o áudio:
-   - imagem como entrada em loop (`-loop 1`), encerrando no fim do áudio (`-shortest`);
-   - `-preset ultrafast`, `-crf 28`, `-pix_fmt yuv420p`, `-movflags +faststart`, 720×1280, ~30fps.
-4. **Remover totalmente** o `MediaRecorder`, o `captureStream` e o loop `requestAnimationFrame` de redesenho — eliminando a Causa 2 e a Causa 1 de uma vez.
-5. **Progresso real**: usar o evento `progress` do ffmpeg (já existe `conversaoPct`) como única barra de progresso, já que não há mais fase de "gravação".
-6. **Manter o salvamento automático** da postagem e o botão de download inalterados.
-
-### Resultado esperado
-
-- Sem espera de "tempo real" — o vídeo é gerado em segundos a poucos segundos, não no tempo do áudio.
-- Sem travamento da aba (acabou o blur 30×/s).
-- MP4 final idêntico no visual ao atual (mesma composição de imagem e áudio).
-
-### Risco / fallback
-
-- Se a concatenação de áudio no ffmpeg falhar para algum formato específico, mantenho um fallback que renderiza o áudio concatenado via Web Audio (OfflineAudioContext → WAV) antes de entregar ao ffmpeg.
-- A resolução 720×1280 e os parâmetros de encode permanecem ajustáveis caso você queira priorizar qualidade ou tamanho do arquivo depois.
+Comportamento:
+1. A partir da obra escolhida, processa **uma por vez** as próximas N aptas.
+2. Para cada obra: monta a imagem no canvas → concatena o áudio → encoda o MP4 → salva a postagem automaticamente (mesma lógica de hoje).
+3. **Pular as que já têm vídeo** (padrão ligado) evita duplicar; pode desligar para refazer.
+4. Se uma obra falhar, registra o erro e **segue para a próxima** (não trava o lote).
+5. **Pausar** e **Cancelar** disponíveis a qualquer momento.
+6. Resumo final: geradas / puladas / com erro, e botão **"tentar de novo só as que falharam"**.
 
 ## Detalhes técnicos
 
-- Arquivo único afetado: `src/components/GeradorReels.tsx` (lógica de geração).
-- Nenhuma mudança de backend, banco ou rotas.
-- Dependências `@ffmpeg/ffmpeg` e `@ffmpeg/util` já estão no projeto; nada novo a instalar.
-- Opcional (ganho extra de velocidade do ffmpeg via build multi-thread) **não** será usado, pois depende de cabeçalhos de cross-origin isolation no host, fora do nosso controle confiável aqui.
+- **Reaproveitar a lógica existente** de `src/components/GeradorReels.tsx`: extrair a montagem (carregar imagem → desenhar no canvas → PNG → concatenar áudio → ffmpeg → MP4 → base64 → salvar) para um módulo compartilhado `src/lib/gerar-reels.ts`, com uma função tipo `gerarReelsDaObra(obra, { canvas, onProgress })` que retorna o `Blob`/base64. O `GeradorReels` atual passa a usar essa mesma função (sem mudança no uso individual).
+- **Nova rota** `src/routes/postar.index.tsx` (`/postar`):
+  - `useServerFn(listarAcervo)` + `useQuery` para a lista de obras;
+  - estado do lote (fila, índice atual, pausado, cancelado, resultados) em `useState`/`useRef`;
+  - **um único** `<canvas>` oculto e a **mesma instância** de ffmpeg (já cacheada em módulo) reutilizados entre as obras, para não recarregar o WASM a cada item;
+  - loop `for ... await` (sequencial real, nada de `Promise.all`).
+- **Contagem eficiente do que já existe**: nova server function `contarPostagensPorObra` em `src/lib/admin-obras.functions.ts`, admin-only, que retorna `{ [num]: total }` de todas as obras numa só consulta — em vez de uma chamada por obra. Usa o mesmo padrão das funções existentes (`requireSupabaseAuth` + `ehAdmin` + `supabaseAdmin`).
+- **Aptidão**: obra entra na fila se tiver `imagem` e algum áudio (`audioTrechos` ou `audioFem/audio/audioMasc`); as demais aparecem como "sem mídia" e são puladas.
+- **Salvamento**: usa `salvarPostagemReels` já existente (upload no bucket `reels-obras` + registro em `postagens_reels`). Sem mudança de schema; só a função de contagem é nova.
+- **Acesso admin**: a página verifica `useAdminAuth` (como `/postar/$num` já faz) e as server functions já exigem admin.
+
+## Limitações honestas
+
+- O lote roda **no navegador do admin**: a aba precisa ficar aberta e o computador ligado até o fim. Para ~10 obras é rápido (cada vídeo sai em segundos).
+- Navegadores desaceleram abas em segundo plano; recomendo deixar a aba em foco durante o lote (não quebra, só fica mais lento).
+- Continua **sem IA e sem custo de créditos de IA** por vídeo; só uso de armazenamento ao salvar os MP4.
+
+## Arquivos afetados
+
+- Novo: `src/lib/gerar-reels.ts` — lógica de montagem compartilhada.
+- Novo: `src/routes/postar.index.tsx` — página `/postar` com o lote.
+- Editar: `src/components/GeradorReels.tsx` — passa a usar `gerar-reels.ts`.
+- Editar: `src/lib/admin-obras.functions.ts` — nova `contarPostagensPorObra`.
+- Sem migrações (bucket e tabela já existem).
