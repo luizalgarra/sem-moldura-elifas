@@ -12,19 +12,36 @@ export async function obterFFmpeg(): Promise<FFmpegInstance> {
   ffmpegPromise = (async () => {
     const { FFmpeg } = await import("@ffmpeg/ffmpeg");
     const { toBlobURL } = await import("@ffmpeg/util");
-    // Em apps Vite, o worker do @ffmpeg/ffmpeg é do tipo "module".
-    // Por isso o core precisa ser ESM; o UMD carrega no download, mas falha no
-    // import com "failed to import ffmpeg-core.js" no Chrome/Edge.
-    const base = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
+    // Em apps Vite, o worker do @ffmpeg/ffmpeg é resolvido via
+    // `new URL("./worker.js", import.meta.url)`, o que costuma falhar no
+    // bundle (worker fica preso, a barra trava em 0%). Passando o
+    // `classWorkerURL` explicitamente — junto do core ESM — o WASM inicia.
+    const coreBase =
+      "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
+    const workerBase =
+      "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm";
     const ffmpeg = new FFmpeg();
     try {
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+        coreURL: await toBlobURL(
+          `${coreBase}/ffmpeg-core.js`,
+          "text/javascript",
+        ),
+        wasmURL: await toBlobURL(
+          `${coreBase}/ffmpeg-core.wasm`,
+          "application/wasm",
+        ),
+        classWorkerURL: await toBlobURL(
+          `${workerBase}/worker.js`,
+          "text/javascript",
+        ),
       });
     } catch (e) {
       ffmpegPromise = null;
-      throw e;
+      throw new Error(
+        "Não foi possível carregar o conversor de vídeo (FFmpeg). Verifique sua conexão e tente novamente. Detalhe: " +
+          (e instanceof Error ? e.message : String(e)),
+      );
     }
     return ffmpeg;
   })();
