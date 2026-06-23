@@ -6,40 +6,61 @@ export const ALTURA = 1280;
 type FFmpegInstance = import("@ffmpeg/ffmpeg").FFmpeg;
 let ffmpegPromise: Promise<FFmpegInstance> | null = null;
 
+/** Baixa um arquivo local e devolve uma blob URL com o mimeType indicado. */
+async function arquivoLocalParaBlobURL(
+  url: string,
+  mimeType: string,
+): Promise<string> {
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    throw new Error(`Falha ao baixar ${url} (HTTP ${resp.status}).`);
+  }
+  const blob = await resp.blob();
+  return URL.createObjectURL(new Blob([blob], { type: mimeType }));
+}
+
+/** Baixa o WASM compactado (.gz) e descompacta no navegador. */
+async function carregarWasmLocal(url: string): Promise<string> {
+  const resp = await fetch(url);
+  if (!resp.ok || !resp.body) {
+    throw new Error(`Falha ao baixar o WASM (HTTP ${resp.status}).`);
+  }
+  const fluxo = resp.body.pipeThrough(new DecompressionStream("gzip"));
+  const bytes = await new Response(fluxo).arrayBuffer();
+  return URL.createObjectURL(
+    new Blob([bytes], { type: "application/wasm" }),
+  );
+}
+
 /** Carrega (uma única vez) a instância do ffmpeg em WebAssembly. */
 export async function obterFFmpeg(): Promise<FFmpegInstance> {
   if (ffmpegPromise) return ffmpegPromise;
   ffmpegPromise = (async () => {
     const { FFmpeg } = await import("@ffmpeg/ffmpeg");
-    const { toBlobURL } = await import("@ffmpeg/util");
-    // Em apps Vite, o worker do @ffmpeg/ffmpeg é resolvido via
-    // `new URL("./worker.js", import.meta.url)`, o que costuma falhar no
-    // bundle (worker fica preso, a barra trava em 0%). Passando o
-    // `classWorkerURL` explicitamente — junto do core ESM — o WASM inicia.
-    const coreBase =
-      "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
-    const workerBase =
-      "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm";
+    // Tudo é servido localmente (public/ffmpeg), sem depender de CDN externo,
+    // evitando o travamento intermitente na inicialização do conversor.
     const ffmpeg = new FFmpeg();
     try {
-      await ffmpeg.load({
-        coreURL: await toBlobURL(
-          `${coreBase}/ffmpeg-core.js`,
-          "text/javascript",
+      const [coreURL, wasmURL, classWorkerURL] = await Promise.all([
+        arquivoLocalParaBlobURL("/ffmpeg/ffmpeg-core.js", "text/javascript"),
+        carregarWasmLocal("/ffmpeg/ffmpeg-core.wasm.gz"),
+        arquivoLocalParaBlobURL("/ffmpeg/worker.js", "text/javascript"),
+      ]);
+
+      // Timeout de segurança: se o WASM não inicializar, falha com mensagem
+      // clara em vez de ficar preso para sempre.
+      const carregar = ffmpeg.load({ coreURL, wasmURL, classWorkerURL });
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Tempo esgotado ao iniciar o conversor (60s).")),
+          60_000,
         ),
-        wasmURL: await toBlobURL(
-          `${coreBase}/ffmpeg-core.wasm`,
-          "application/wasm",
-        ),
-        classWorkerURL: await toBlobURL(
-          `${workerBase}/worker.js`,
-          "text/javascript",
-        ),
-      });
+      );
+      await Promise.race([carregar, timeout]);
     } catch (e) {
       ffmpegPromise = null;
       throw new Error(
-        "Não foi possível carregar o conversor de vídeo (FFmpeg). Verifique sua conexão e tente novamente. Detalhe: " +
+        "Não foi possível carregar o conversor de vídeo (FFmpeg). Tente novamente. Detalhe: " +
           (e instanceof Error ? e.message : String(e)),
       );
     }
