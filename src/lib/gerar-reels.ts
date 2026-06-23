@@ -12,19 +12,36 @@ export async function obterFFmpeg(): Promise<FFmpegInstance> {
   ffmpegPromise = (async () => {
     const { FFmpeg } = await import("@ffmpeg/ffmpeg");
     const { toBlobURL } = await import("@ffmpeg/util");
-    // Em apps Vite, o worker do @ffmpeg/ffmpeg é do tipo "module".
-    // Por isso o core precisa ser ESM; o UMD carrega no download, mas falha no
-    // import com "failed to import ffmpeg-core.js" no Chrome/Edge.
-    const base = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
+    // Em apps Vite, o worker do @ffmpeg/ffmpeg é resolvido via
+    // `new URL("./worker.js", import.meta.url)`, o que costuma falhar no
+    // bundle (worker fica preso, a barra trava em 0%). Passando o
+    // `classWorkerURL` explicitamente — junto do core ESM — o WASM inicia.
+    const coreBase =
+      "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm";
+    const workerBase =
+      "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm";
     const ffmpeg = new FFmpeg();
     try {
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
+        coreURL: await toBlobURL(
+          `${coreBase}/ffmpeg-core.js`,
+          "text/javascript",
+        ),
+        wasmURL: await toBlobURL(
+          `${coreBase}/ffmpeg-core.wasm`,
+          "application/wasm",
+        ),
+        classWorkerURL: await toBlobURL(
+          `${workerBase}/worker.js`,
+          "text/javascript",
+        ),
       });
     } catch (e) {
       ffmpegPromise = null;
-      throw e;
+      throw new Error(
+        "Não foi possível carregar o conversor de vídeo (FFmpeg). Verifique sua conexão e tente novamente. Detalhe: " +
+          (e instanceof Error ? e.message : String(e)),
+      );
     }
     return ffmpeg;
   })();
@@ -170,12 +187,22 @@ export function obraApta(obra: ObraAcervo): boolean {
   return temImagem && temAudio;
 }
 
+export type EtapaGeracao =
+  | "imagem"
+  | "audio"
+  | "ffmpeg"
+  | "encode"
+  | "finalizando";
+
 export interface OpcoesGeracao {
   canvas: HTMLCanvasElement;
   escolha?: "sequencia" | "primeiro";
   /** Progresso de 0 a 100 durante a fase de encode do ffmpeg. */
   onProgress?: (pct: number) => void;
+  /** Etapa atual da geração, para feedback ao usuário. */
+  onEtapa?: (etapa: EtapaGeracao) => void;
 }
+
 
 /**
  * Monta o reels (MP4) de uma obra inteiramente no navegador: desenha a imagem,
@@ -183,7 +210,7 @@ export interface OpcoesGeracao {
  */
 export async function gerarReelsDaObra(
   obra: ObraAcervo,
-  { canvas, escolha = "sequencia", onProgress }: OpcoesGeracao,
+  { canvas, escolha = "sequencia", onProgress, onEtapa }: OpcoesGeracao,
 ): Promise<Blob> {
   const fonte = montarFonteAudio(obra, escolha);
   if (fonte.tipo === "nenhum") {
@@ -192,15 +219,25 @@ export async function gerarReelsDaObra(
   if (!obra.imagem) {
     throw new Error("Esta obra não tem imagem.");
   }
+  if (!canvas) {
+    throw new Error("Canvas indisponível para a montagem do vídeo.");
+  }
 
   // 1. Carrega a imagem.
+  onEtapa?.("imagem");
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const el = new Image();
     el.crossOrigin = "anonymous";
     el.onload = () => resolve(el);
-    el.onerror = () => reject(new Error("Falha ao carregar a imagem."));
+    el.onerror = () =>
+      reject(
+        new Error(
+          "Falha ao carregar a imagem da obra (verifique se a imagem existe).",
+        ),
+      );
     el.src = obra.imagem as string;
   });
+
 
   // 2. Renderiza o quadro uma única vez e exporta como PNG.
   canvas.width = LARGURA;
@@ -215,6 +252,7 @@ export async function gerarReelsDaObra(
   });
 
   // 3. Decodifica os áudios e concatena em um único arquivo WAV.
+  onEtapa?.("audio");
   const AudioCtx =
     window.AudioContext ||
     (window as unknown as { webkitAudioContext: typeof AudioContext })
@@ -223,7 +261,10 @@ export async function gerarReelsDaObra(
   const buffers: AudioBuffer[] = [];
   for (const url of fonte.urls) {
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error("Falha ao baixar o áudio.");
+    if (!resp.ok) {
+      await audioCtx.close();
+      throw new Error("Falha ao baixar o áudio da obra.");
+    }
     const arr = await resp.arrayBuffer();
     const buf = await audioCtx.decodeAudioData(arr);
     buffers.push(buf);
@@ -234,13 +275,16 @@ export async function gerarReelsDaObra(
   const wav = audioBufferParaWav(audioFinal);
 
   // 4. Encoda o MP4 direto no ffmpeg (imagem em loop + áudio).
+  onEtapa?.("ffmpeg");
   onProgress?.(0);
   const { fetchFile } = await import("@ffmpeg/util");
   const ffmpeg = await obterFFmpeg();
+  onEtapa?.("encode");
   const handler = ({ progress }: { progress: number }) => {
     onProgress?.(Math.max(0, Math.min(100, Math.round(progress * 100))));
   };
   ffmpeg.on("progress", handler);
+
 
   try {
     await ffmpeg.writeFile("frame.png", await fetchFile(pngBlob));
@@ -277,6 +321,7 @@ export async function gerarReelsDaObra(
       "out.mp4",
     ]);
 
+    onEtapa?.("finalizando");
     const dados = await ffmpeg.readFile("out.mp4");
     const bytes =
       dados instanceof Uint8Array

@@ -45,8 +45,18 @@ type StatusItem =
 interface ResultadoItem {
   status: StatusItem;
   pct: number;
+  etapa?: string;
   msg?: string;
 }
+
+const ROTULO_ETAPA: Record<string, string> = {
+  imagem: "Carregando imagem",
+  audio: "Carregando áudio",
+  ffmpeg: "Carregando conversor",
+  encode: "Gerando MP4",
+  finalizando: "Finalizando",
+};
+
 
 function suportaGeracao(): boolean {
   if (typeof window === "undefined") return false;
@@ -180,14 +190,21 @@ function PostarLotePagina() {
         if (canceladoRef.current) break;
 
         setAtual(obra.num);
-        setItem(obra.num, { status: "gerando", pct: 0, msg: undefined });
+        setItem(obra.num, {
+          status: "gerando",
+          pct: 0,
+          etapa: "imagem",
+          msg: undefined,
+        });
 
         try {
           const blob = await gerarReelsDaObra(obra, {
             canvas: canvasRef.current!,
             escolha: "sequencia",
             onProgress: (pct) => setItem(obra.num, { pct }),
+            onEtapa: (etapa) => setItem(obra.num, { etapa }),
           });
+
 
           setItem(obra.num, { status: "salvando", pct: 100 });
           const base64 = await blobParaBase64(blob);
@@ -480,11 +497,14 @@ function PostarLotePagina() {
                     </span>
                     <span className="shrink-0 text-xs text-muted-foreground">
                       {r.status === "gerando"
-                        ? `${ROTULO_STATUS[r.status]} ${r.pct}%`
+                        ? r.etapa === "encode"
+                          ? `${ROTULO_ETAPA.encode} ${r.pct}%`
+                          : (ROTULO_ETAPA[r.etapa ?? ""] ?? ROTULO_STATUS[r.status])
                         : r.status === "erro"
                           ? r.msg ?? ROTULO_STATUS[r.status]
                           : ROTULO_STATUS[r.status]}
                     </span>
+
                   </li>
                 );
               })}
