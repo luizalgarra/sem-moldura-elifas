@@ -1994,6 +1994,30 @@ export const contarPostagensReels = createServerFn({ method: "POST" })
     return { total: count ?? 0 };
   });
 
+/** Conta as postagens (reels) de TODAS as obras numa só consulta. */
+export const contarPostagensPorObra = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<Record<number, number>> => {
+    await garantirAdmin(context);
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { data, error } = await supabaseAdmin
+      .from("postagens_reels")
+      .select("num");
+    if (error || !data) {
+      console.error("contarPostagensPorObra:", error?.message);
+      return {};
+    }
+    const contagem: Record<number, number> = {};
+    for (const linha of data) {
+      contagem[linha.num] = (contagem[linha.num] ?? 0) + 1;
+    }
+    return contagem;
+  });
+
+
+
 /** Remove uma postagem: apaga o arquivo do storage e o registro. */
 export const removerPostagem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
