@@ -60,58 +60,56 @@ function Index() {
   const destaques = obras.filter((o) => o.imagem).slice(0, 6);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-24 px-4 py-12 sm:px-6 sm:py-16 sm:space-y-32">
-      {/* Hero */}
-      <section className="relative grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
-        <div className="z-10 space-y-8 lg:col-span-7">
-          <div className="flex flex-wrap gap-3">
-            <span className="border border-accent px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
-              Catálogo virtual
-            </span>
-            <span className="border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              Exposição acessível
-            </span>
-          </div>
+    <div className="space-y-24 pb-12 sm:pb-16 sm:space-y-32">
+      {/* Hero com imagem de fundo */}
+      <section className="relative flex min-h-[80vh] items-center overflow-hidden">
+        <img
+          src={marca.heroElifasArte}
+          alt="Retrato de Elifas Andreato sobre uma de suas pinturas a óleo."
+          className="pointer-events-none absolute inset-0 size-full object-cover"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"
+          aria-hidden="true"
+        />
 
-          <div className="space-y-5">
-            <p className="font-semibold uppercase tracking-[0.3em] text-brand-yellow">
-              Exposição · 80 anos
-            </p>
-            <h1 className="text-5xl font-bold leading-[0.95] tracking-tight text-foreground sm:text-6xl md:text-7xl">
-              Elifas Andreato
-              <span className="block text-accent">Além da Moldura</span>
-            </h1>
-            <p className="max-w-xl text-lg font-light leading-relaxed text-muted-foreground">
-              Um catálogo virtual para percorrer as{" "}
-              <span className="font-semibold text-foreground">{obras.length} obras</span>{" "}
-              da exposição, com áudio-descrição.
-            </p>
-          </div>
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
+          <div className="max-w-2xl space-y-8">
+            <div className="flex flex-wrap gap-3">
+              <span className="border border-accent px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+                Catálogo virtual
+              </span>
+              <span className="border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                Exposição acessível
+              </span>
+            </div>
 
-          <Button asChild size="lg" className="min-h-12 px-8 text-base uppercase tracking-widest">
-            <Link to="/obras">
-              Explorar obras
-              <ArrowRight className="ml-2 size-5" aria-hidden="true" />
-            </Link>
-          </Button>
-        </div>
+            <div className="space-y-5">
+              <p className="font-semibold uppercase tracking-[0.3em] text-brand-yellow">
+                Exposição · 80 anos
+              </p>
+              <h1 className="text-5xl font-bold leading-[0.95] tracking-tight text-foreground sm:text-6xl md:text-7xl">
+                Elifas Andreato
+                <span className="block text-accent">Além da Moldura</span>
+              </h1>
+              <p className="max-w-xl text-lg font-light leading-relaxed text-muted-foreground">
+                Um catálogo virtual para percorrer as{" "}
+                <span className="font-semibold text-foreground">{obras.length} obras</span>{" "}
+                da exposição, com áudio-descrição.
+              </p>
+            </div>
 
-        <div className="relative lg:col-span-5">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-sm border border-border shadow-2xl">
-            <img
-              src={marca.heroElifasArte}
-              alt="Retrato de Elifas Andreato sobre uma de suas pinturas a óleo."
-              className="size-full object-cover"
-            />
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
-              aria-hidden="true"
-            />
+            <Button asChild size="lg" className="min-h-12 px-8 text-base uppercase tracking-widest">
+              <Link to="/obras">
+                Explorar obras
+                <ArrowRight className="ml-2 size-5" aria-hidden="true" />
+              </Link>
+            </Button>
           </div>
-          <div
-            className="absolute -bottom-5 -left-5 size-24 border-b-2 border-l-2 border-accent opacity-60"
-            aria-hidden="true"
-          />
         </div>
       </section>
 
