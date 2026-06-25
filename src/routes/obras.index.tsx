@@ -1,25 +1,80 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Route as RouteIcon, Search } from "lucide-react";
+import { useMemo } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, Route as RouteIcon, Search, X } from "lucide-react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { paredesOrdem } from "@/data/obras";
 import { listarAcervo, type ObraAcervo } from "@/lib/admin-obras.functions";
+import {
+  classificar,
+  type Classificacao,
+  TIPOS,
+  FUNCOES,
+  PERIODOS,
+  type Tipo,
+  type Funcao,
+  type Periodo,
+} from "@/lib/categorias";
 import { ObraCard } from "@/components/ObraCard";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+const tipoSchema = z.enum([
+  "pinturas",
+  "ilustracao",
+  "colagens",
+  "madeira",
+  "fotografia",
+  "audiovisual",
+]);
+const funcaoSchema = z.enum([
+  "mpb",
+  "imprensa",
+  "cartazes",
+  "autoral",
+  "audiovisual",
+]);
+const periodoSchema = z.enum([
+  "1960-70",
+  "1980",
+  "1990-2000",
+  "2010+",
+  "sem-data",
+]);
+
+const searchSchema = z.object({
+  tipo: fallback(tipoSchema.or(z.literal("todos")), "todos").default("todos"),
+  funcao: fallback(funcaoSchema.or(z.literal("todos")), "todos").default(
+    "todos",
+  ),
+  periodo: fallback(periodoSchema.or(z.literal("todos")), "todos").default(
+    "todos",
+  ),
+  busca: fallback(z.string(), "").default(""),
+});
 
 export const Route = createFileRoute("/obras/")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
       { title: "Acervo — Elifas Andreato: Além da Moldura" },
       {
         name: "description",
         content:
-          "Navegue pelas obras da exposição Elifas Andreato: Além da Moldura, organizadas por parede.",
+          "Navegue pelas obras da exposição Elifas Andreato: Além da Moldura por tipo, função e período.",
       },
     ],
   }),
   loader: () => listarAcervo(),
   component: Acervo,
 });
+
+type BuscaParams = z.infer<typeof searchSchema>;
+
+interface ItemClassificado {
+  obra: ObraAcervo;
+  cat: Classificacao;
+}
 
 function agruparPorParede(
   lista: ObraAcervo[],
@@ -30,7 +85,6 @@ function agruparPorParede(
     arr.push(obra);
     grupos.set(obra.parede, arr);
   }
-  // Ordena: primeiro as paredes conhecidas, depois quaisquer outras (A→Z).
   const conhecidas = paredesOrdem.filter((p) => grupos.has(p));
   const extras = [...grupos.keys()]
     .filter((p) => !paredesOrdem.includes(p))
@@ -43,26 +97,63 @@ function agruparPorParede(
 
 function Acervo() {
   const lista = Route.useLoaderData();
-  const [busca, setBusca] = useState("");
-  const grupos = useMemo(() => agruparPorParede(lista), [lista]);
+  const { tipo, funcao, periodo, busca } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+
+  // Pré-classifica todas as obras uma vez.
+  const classificadas = useMemo(
+    () => lista.map((o: ObraAcervo) => ({ obra: o, cat: classificar(o) })),
+    [lista],
+  );
+
+  // Contagens por Tipo (respeitando os demais filtros e busca).
   const termo = busca.trim().toLowerCase();
+  const casaBusca = (o: ObraAcervo) =>
+    !termo ||
+    o.titulo.toLowerCase().includes(termo) ||
+    o.ano.toLowerCase().includes(termo) ||
+    String(o.num) === termo;
 
-  const gruposFiltrados = useMemo(() => {
-    if (!termo) return grupos;
-    return grupos
-      .map((g) => ({
-        ...g,
-        obras: g.obras.filter(
-          (o) =>
-            o.titulo.toLowerCase().includes(termo) ||
-            o.ano.toLowerCase().includes(termo) ||
-            String(o.num) === termo,
-        ),
-      }))
-      .filter((g) => g.obras.length > 0);
-  }, [grupos, termo]);
+  const contagemTipos = useMemo(() => {
+    const mapa = new Map<Tipo | "todos", number>();
+    let total = 0;
+    for (const { obra, cat } of classificadas) {
+      if (!casaBusca(obra)) continue;
+      if (funcao !== "todos" && cat.funcao !== funcao) continue;
+      if (periodo !== "todos" && cat.periodo !== periodo) continue;
+      total += 1;
+      mapa.set(cat.tipo, (mapa.get(cat.tipo) ?? 0) + 1);
+    }
+    mapa.set("todos", total);
+    return mapa;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [classificadas, funcao, periodo, termo]);
 
-  const total = gruposFiltrados.reduce((s, g) => s + g.obras.length, 0);
+  const obrasFiltradas = useMemo(
+    () =>
+      classificadas
+        .filter(({ obra, cat }: ItemClassificado) => {
+          if (!casaBusca(obra)) return false;
+          if (tipo !== "todos" && cat.tipo !== tipo) return false;
+          if (funcao !== "todos" && cat.funcao !== funcao) return false;
+          if (periodo !== "todos" && cat.periodo !== periodo) return false;
+          return true;
+        })
+        .map(({ obra }: ItemClassificado) => obra),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [classificadas, tipo, funcao, periodo, termo],
+  );
+
+  const grupos = useMemo(
+    () => agruparPorParede(obrasFiltradas),
+    [obrasFiltradas],
+  );
+  const total = obrasFiltradas.length;
+  const filtrosAtivos =
+    tipo !== "todos" || funcao !== "todos" || periodo !== "todos" || !!termo;
+
+  const set = (patch: Partial<BuscaParams>) =>
+    navigate({ to: "/obras", search: (prev: BuscaParams) => ({ ...prev, ...patch }) });
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
@@ -87,12 +178,12 @@ function Acervo() {
         />
       </Link>
 
-      <header className="mb-8">
+      <header className="mb-6">
         <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
           Acervo da exposição
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {lista.length} obras organizadas pelas paredes da exposição.
+          {lista.length} obras — navegue por tipo, função e período.
         </p>
         <div className="relative mt-5 max-w-md">
           <Search
@@ -102,27 +193,107 @@ function Acervo() {
           <Input
             type="search"
             value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+            onChange={(e) => set({ busca: e.target.value })}
             placeholder="Buscar por título, ano ou número"
             aria-label="Buscar obras por título, ano ou número"
             className="h-12 pl-10 text-base"
           />
         </div>
-        {termo && (
-          <p className="mt-3 text-sm text-muted-foreground" role="status">
-            {total} {total === 1 ? "obra encontrada" : "obras encontradas"}.
-          </p>
-        )}
       </header>
 
-      {gruposFiltrados.length === 0 ? (
+      {/* Abas por Tipo */}
+      <div
+        role="tablist"
+        aria-label="Filtrar por tipo de obra"
+        className="mb-4 flex flex-wrap gap-2 border-b border-border pb-3"
+      >
+        <TabBtn
+          ativo={tipo === "todos"}
+          onClick={() => set({ tipo: "todos" })}
+          rotulo="Todos"
+          contagem={contagemTipos.get("todos") ?? 0}
+        />
+        {TIPOS.map((t) => (
+          <TabBtn
+            key={t.valor}
+            ativo={tipo === t.valor}
+            onClick={() => set({ tipo: t.valor })}
+            rotulo={t.rotulo}
+            contagem={contagemTipos.get(t.valor) ?? 0}
+          />
+        ))}
+      </div>
 
-        <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          Nenhuma obra encontrada para “{busca}”.
-        </p>
+      {/* Filtros: Função e Período */}
+      <div className="mb-8 space-y-3">
+        <FiltroLinha
+          legenda="Função"
+          atual={funcao}
+          opcoes={FUNCOES}
+          onPick={(v) => set({ funcao: v as Funcao | "todos" })}
+        />
+        <FiltroLinha
+          legenda="Período"
+          atual={periodo}
+          opcoes={PERIODOS}
+          onPick={(v) => set({ periodo: v as Periodo | "todos" })}
+        />
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-sm text-muted-foreground" role="status">
+            {total} {total === 1 ? "obra" : "obras"}
+          </p>
+          {filtrosAtivos && (
+            <button
+              type="button"
+              onClick={() =>
+                navigate({
+                  to: "/obras",
+                  search: {
+                    tipo: "todos",
+                    funcao: "todos",
+                    periodo: "todos",
+                    busca: "",
+                  },
+                })
+              }
+              className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+            >
+              <X className="size-4" aria-hidden="true" />
+              Limpar filtros
+            </button>
+          )}
+        </div>
+      </div>
+
+      {grupos.length === 0 ? (
+        <div className="rounded-lg border border-border bg-card p-8 text-center">
+          <p className="text-muted-foreground">
+            Nenhuma obra para esta combinação de filtros.
+          </p>
+          {filtrosAtivos && (
+            <button
+              type="button"
+              onClick={() =>
+                navigate({
+                  to: "/obras",
+                  search: {
+                    tipo: "todos",
+                    funcao: "todos",
+                    periodo: "todos",
+                    busca: "",
+                  },
+                })
+              }
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+            >
+              <X className="size-4" aria-hidden="true" />
+              Limpar filtros
+            </button>
+          )}
+        </div>
       ) : (
         <div className="space-y-12">
-          {gruposFiltrados.map((grupo) => (
+          {grupos.map((grupo) => (
             <section key={grupo.parede} aria-labelledby={`parede-${grupo.parede}`}>
               <h2
                 id={`parede-${grupo.parede}`}
@@ -143,5 +314,93 @@ function Acervo() {
         </div>
       )}
     </div>
+  );
+}
+
+function TabBtn({
+  ativo,
+  onClick,
+  rotulo,
+  contagem,
+}: {
+  ativo: boolean;
+  onClick: () => void;
+  rotulo: string;
+  contagem: number;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={ativo}
+      onClick={onClick}
+      className={cn(
+        "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+        ativo
+          ? "bg-accent text-accent-foreground"
+          : "bg-muted text-muted-foreground hover:bg-accent/10 hover:text-accent",
+      )}
+    >
+      {rotulo}
+      <span className="ml-1.5 opacity-70">{contagem}</span>
+    </button>
+  );
+}
+
+function FiltroLinha({
+  legenda,
+  atual,
+  opcoes,
+  onPick,
+}: {
+  legenda: string;
+  atual: string;
+  opcoes: { valor: string; rotulo: string }[];
+  onPick: (valor: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="mr-1 w-16 shrink-0 text-sm font-semibold text-foreground">
+        {legenda}
+      </span>
+      <Chip ativo={atual === "todos"} onClick={() => onPick("todos")}>
+        Todas
+      </Chip>
+      {opcoes.map((o) => (
+        <Chip
+          key={o.valor}
+          ativo={atual === o.valor}
+          onClick={() => onPick(o.valor)}
+        >
+          {o.rotulo}
+        </Chip>
+      ))}
+    </div>
+  );
+}
+
+function Chip({
+  ativo,
+  onClick,
+  children,
+}: {
+  ativo: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={ativo}
+      onClick={onClick}
+      className={cn(
+        "rounded-full border px-3 py-1 text-sm transition-colors",
+        ativo
+          ? "border-accent bg-accent/15 text-accent"
+          : "border-border text-muted-foreground hover:border-accent hover:text-accent",
+      )}
+    >
+      {children}
+    </button>
   );
 }
