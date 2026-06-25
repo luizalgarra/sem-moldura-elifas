@@ -152,10 +152,8 @@ function Acervo() {
   const filtrosAtivos =
     tipo !== "todos" || funcao !== "todos" || periodo !== "todos" || !!termo;
 
-  const set = (patch: Partial<BuscaParams>) => {
-    console.log("SET_FILTRO", patch);
+  const set = (patch: Partial<BuscaParams>) =>
     navigate({ to: "/obras", search: (prev: BuscaParams) => ({ ...prev, ...patch }) });
-  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
