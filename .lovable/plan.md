@@ -1,35 +1,26 @@
 ## Objetivo
-Duplicar a caixa de destaque "Linha do Tempo" (atualmente em `/obras`) e exibi-la na página inicial, logo acima da seção "Algumas obras".
+Reformular a diagramação da home (`src/routes/index.tsx`) seguindo a direção escolhida "Grid modernista sóbrio", melhorando hierarquia, ritmo vertical e equilíbrio entre os elementos — mantendo o conteúdo e os dados reais do projeto.
 
-## Mudanças
-Arquivo único: `src/routes/index.tsx`
+## Mudanças (somente `src/routes/index.tsx`)
 
-1. **Imports**: adicionar `Route as RouteIcon` de `lucide-react` (o `ArrowRight` e `Link` já existem).
-2. **Inserir a caixa** entre o fim da `<section>` do hero (linha 90) e o início do bloco `{destaques.length > 0 && (...)}`:
+### 1. Hero em duas colunas (12-col grid)
+- Coluna esquerda (7/12): chips "Catálogo Virtual" e "Exposição Acessível", título `Elifas Andreato / Além da Moldura`, subtítulo real (117 obras com áudio-descrição) e um botão CTA "Explorar obras" → `/obras`.
+- Coluna direita (5/12): o retrato/arte (`marca.heroElifasArte`) num cartão `aspect-[4/5]` com moldura, gradiente e detalhe decorativo em âmbar.
+- Elimina o grande vazio vertical/horizontal atual ancorando a imagem ao lado do texto, em vez de fundo esmaecido.
 
-```tsx
-<section className="mx-auto max-w-5xl px-4 pt-10">
-  <Link
-    to="/linhas-da-vida"
-    className="group flex items-center gap-4 rounded-lg border border-accent bg-card p-5 transition-colors hover:bg-accent/10"
-  >
-    <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-      <RouteIcon className="size-6" aria-hidden="true" />
-    </span>
-    <span className="flex-1">
-      <span className="block font-serif text-lg font-semibold text-accent">
-        Linha do Tempo
-      </span>
-      <span className="block text-sm text-muted-foreground">
-        Percorra a trajetória de Elifas Andreato e as histórias por trás das obras.
-      </span>
-    </span>
-    <ArrowRight
-      className="size-5 shrink-0 text-accent transition-transform group-hover:translate-x-1"
-      aria-hidden="true"
-    />
-  </Link>
-</section>
-```
+### 2. Banner "Linha do Tempo"
+- Mantém o `Link to="/linhas-da-vida"`, com padding maior, título 4xl, descrição e indicador "Ver cronologia" com seta/linha em âmbar no hover.
 
-A caixa é idêntica à de `/obras`, apenas envolvida numa `<section>` própria com espaçamento adequado à home. Nenhuma lógica de backend é alterada.
+### 3. Grid "Algumas obras"
+- Cabeçalho com título + subtítulo e rótulo "Galeria digital", com borda inferior separadora.
+- Mantém os 6 destaques reais (`obras.filter(o => o.imagem).slice(0,6)`) com `Link to="/obras/$num"`, imagem real, título e ano reais.
+- Botão final centralizado "Ver todas as 117 obras" → `/obras` (substitui/realça o link "Ver todas").
+
+## Regras técnicas
+- **Sem cores hardcoded**: o protótipo usa `#EA9E0E`, `bg-[#0a0a0a]`, `text-zinc-*`. Na implementação uso os tokens semânticos já existentes (`bg-background`, `text-foreground`, `text-accent`, `border-border`, `text-muted-foreground`, `bg-card`) para preservar tema escuro, alto contraste e dark mode.
+- **Acessibilidade**: foco visível (já global), `alt` descritivo nas imagens, um único `<h1>`, ícone decorativo com `aria-hidden`.
+- Mantém imports reais (`obras`, `marca`, `Link`, ícones lucide) e o componente `EmConstrucao` intacto.
+- Sem mudanças de dados, rotas ou lógica de backend — apenas apresentação.
+
+## Verificação
+- Build/typecheck automático e screenshot via Playwright da home para conferir o equilíbrio do hero, banner e grid.
