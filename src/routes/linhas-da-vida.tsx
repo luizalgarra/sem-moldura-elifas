@@ -7,13 +7,13 @@ export const Route = createFileRoute("/linhas-da-vida")({
   loader: () => listarAcervo(),
   head: () => ({
     meta: [
-      { title: "Linhas da Vida — Elifas Andreato: Além da Moldura" },
+      { title: "Linha do Tempo — Elifas Andreato: Além da Moldura" },
       {
         name: "description",
         content:
           "Linha do tempo da trajetória de Elifas Andreato (1946–2022): da infância no Paraná à consagração como artista, designer e ativista.",
       },
-      { property: "og:title", content: "Linhas da Vida — Elifas Andreato" },
+      { property: "og:title", content: "Linha do Tempo — Elifas Andreato" },
       {
         property: "og:description",
         content:
