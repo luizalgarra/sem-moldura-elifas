@@ -60,92 +60,137 @@ function Index() {
   const destaques = obras.filter((o) => o.imagem).slice(0, 6);
 
   return (
-    <div>
-      <section className="relative overflow-hidden bg-background">
-        {/* Arte sangrando ao fundo + overlay para legibilidade */}
-        <img
-          src={marca.heroElifasArte}
-          alt="Retrato de Elifas Andreato sobre uma de suas pinturas a óleo."
-          className="pointer-events-none absolute inset-0 size-full object-cover opacity-50"
-          aria-hidden="true"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40"
-          aria-hidden="true"
-        />
-        <div className="relative mx-auto max-w-5xl px-4 py-20 sm:py-28">
-          <p className="font-semibold uppercase tracking-[0.3em] text-brand-yellow">
-            Exposição · 80 anos
-          </p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight text-foreground sm:text-6xl">
-            Elifas Andreato
-            <span className="block text-accent">Além da Moldura</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-foreground/80">
-            Um catálogo virtual para percorrer as {obras.length} obras da exposição, com áudio-descrição.
-          </p>
+    <div className="mx-auto max-w-7xl space-y-24 px-4 py-12 sm:px-6 sm:py-16 sm:space-y-32">
+      {/* Hero */}
+      <section className="relative grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="z-10 space-y-8 lg:col-span-7">
+          <div className="flex flex-wrap gap-3">
+            <span className="border border-accent px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+              Catálogo virtual
+            </span>
+            <span className="border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Exposição acessível
+            </span>
+          </div>
+
+          <div className="space-y-5">
+            <p className="font-semibold uppercase tracking-[0.3em] text-brand-yellow">
+              Exposição · 80 anos
+            </p>
+            <h1 className="text-5xl font-bold leading-[0.95] tracking-tight text-foreground sm:text-6xl md:text-7xl">
+              Elifas Andreato
+              <span className="block text-accent">Além da Moldura</span>
+            </h1>
+            <p className="max-w-xl text-lg font-light leading-relaxed text-muted-foreground">
+              Um catálogo virtual para percorrer as{" "}
+              <span className="font-semibold text-foreground">{obras.length} obras</span>{" "}
+              da exposição, com áudio-descrição.
+            </p>
+          </div>
+
+          <Button asChild size="lg" className="min-h-12 px-8 text-base uppercase tracking-widest">
+            <Link to="/obras">
+              Explorar obras
+              <ArrowRight className="ml-2 size-5" aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
+
+        <div className="relative lg:col-span-5">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-sm border border-border shadow-2xl">
+            <img
+              src={marca.heroElifasArte}
+              alt="Retrato de Elifas Andreato sobre uma de suas pinturas a óleo."
+              className="size-full object-cover"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
+              aria-hidden="true"
+            />
+          </div>
+          <div
+            className="absolute -bottom-5 -left-5 size-24 border-b-2 border-l-2 border-accent opacity-60"
+            aria-hidden="true"
+          />
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 pt-10">
+      {/* Banner Linha do Tempo */}
+      <section>
         <Link
           to="/linhas-da-vida"
-          className="group flex items-center gap-4 rounded-lg border border-accent bg-card p-5 transition-colors hover:bg-accent/10"
+          className="group flex flex-col gap-6 rounded-lg border border-border bg-card p-8 transition-colors hover:border-accent sm:flex-row sm:items-center sm:justify-between sm:p-12"
         >
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-            <RouteIcon className="size-6" aria-hidden="true" />
-          </span>
-          <span className="flex-1">
-            <span className="block font-serif text-lg font-semibold text-accent">
-              Linha do Tempo
+          <div className="flex items-center gap-5">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+              <RouteIcon className="size-6" aria-hidden="true" />
             </span>
-            <span className="block text-sm text-muted-foreground">
-              Percorra a trajetória de Elifas Andreato e as histórias por trás das obras.
-            </span>
-          </span>
-          <ArrowRight
-            className="size-5 shrink-0 text-accent transition-transform group-hover:translate-x-1"
-            aria-hidden="true"
-          />
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">
+                Linha do Tempo
+              </h2>
+              <p className="text-base font-light text-muted-foreground">
+                Percorra a trajetória de Elifas Andreato e as histórias por trás das obras.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 text-sm font-bold uppercase tracking-widest text-accent">
+            Ver cronologia
+            <span className="h-[2px] w-12 bg-accent transition-all group-hover:w-16" aria-hidden="true" />
+          </div>
         </Link>
       </section>
 
-
-
+      {/* Grid de obras */}
       {destaques.length > 0 && (
-        <section className="mx-auto max-w-5xl px-4 pb-16">
-          <div className="flex items-end justify-between gap-4">
-            <h2 className="text-2xl font-semibold text-foreground">
-              Algumas obras
-            </h2>
-            <Link to="/obras" className="text-sm font-medium text-accent hover:underline">
-              Ver todas
-            </Link>
+        <section className="space-y-12">
+          <div className="flex flex-col justify-between gap-4 border-b border-border pb-8 sm:flex-row sm:items-end">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">
+                Algumas obras
+              </h2>
+              <p className="font-light text-muted-foreground">
+                Destaques selecionados da exposição
+              </p>
+            </div>
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-accent">
+              Galeria digital
+            </span>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:gap-10">
             {destaques.map((obra) => (
               <Link
                 key={obra.num}
                 to="/obras/$num"
                 params={{ num: String(obra.num) }}
-                className="group overflow-hidden rounded-lg border border-border bg-card"
+                className="group"
               >
-                <div className="aspect-square bg-muted">
+                <div className="relative mb-4 aspect-square overflow-hidden rounded-sm bg-muted ring-1 ring-border transition-all group-hover:ring-accent">
                   <img
                     src={obra.imagem!}
                     alt={`Obra ${obra.num}: ${obra.titulo}, de Elifas Andreato, ${obra.ano}.`}
                     loading="lazy"
-                    className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <div className="p-3">
-                  <h3 className="line-clamp-1 font-serif font-semibold text-card-foreground">
-                    {obra.titulo}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">{obra.ano}</p>
-                </div>
+                <h3 className="line-clamp-1 font-serif text-lg font-semibold text-card-foreground transition-colors group-hover:text-accent">
+                  {obra.titulo}
+                </h3>
+                <p className="text-sm font-light text-muted-foreground">{obra.ano}</p>
               </Link>
             ))}
+          </div>
+
+          <div className="flex justify-center pt-2">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="min-h-12 px-12 text-base uppercase tracking-[0.2em]"
+            >
+              <Link to="/obras">Ver todas as {obras.length} obras</Link>
+            </Button>
           </div>
         </section>
       )}
