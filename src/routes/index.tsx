@@ -60,9 +60,9 @@ function Index() {
   const destaques = obras.filter((o) => o.imagem).slice(0, 6);
 
   return (
-    <div className="space-y-24 pb-12 sm:pb-16 sm:space-y-32">
+    <div className="space-y-12 pb-12 sm:pb-16 sm:space-y-16">
       {/* Hero com imagem de fundo */}
-      <section className="relative flex min-h-[80vh] items-center overflow-hidden">
+      <section className="relative flex min-h-[60vh] items-center overflow-hidden">
         <img
           src={marca.heroElifasArte}
           alt="Retrato de Elifas Andreato sobre uma de suas pinturas a óleo."
