@@ -31,7 +31,7 @@ export function SiteFooter() {
             </li>
             <li>
               <Link to="/linhas-da-vida" className="hover:text-accent">
-                Linhas da Vida
+                Linha do Tempo
               </Link>
             </li>
             <li>
