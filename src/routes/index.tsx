@@ -82,9 +82,7 @@ function Index() {
             <span className="block text-accent">Além da Moldura</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-foreground/80">
-            Um catálogo virtual para percorrer as {obras.length} obras da exposição.
-            Cada obra pode ser ouvida em áudio-descrição e acessada pelo QR Code
-            impresso na galeria.
+            Um catálogo virtual para percorrer as {obras.length} obras da exposição, com áudio-descrição.
           </p>
         </div>
       </section>
