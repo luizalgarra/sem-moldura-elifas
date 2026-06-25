@@ -86,17 +86,6 @@ function Index() {
             Cada obra pode ser ouvida em áudio-descrição e acessada pelo QR Code
             impresso na galeria.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="min-h-12 border border-primary-foreground/20 text-base">
-              <Link to="/obras">
-                Ver as cenas
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="min-h-12 bg-background/40 text-base">
-              <Link to="/como-usar">Como usar o QR Code</Link>
-            </Button>
-          </div>
         </div>
       </section>
 
