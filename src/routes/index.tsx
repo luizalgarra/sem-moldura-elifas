@@ -113,6 +113,7 @@ function Index() {
         </div>
       </section>
 
+      <div className="mx-auto max-w-7xl space-y-24 px-4 sm:px-6 sm:space-y-32">
       {/* Banner Linha do Tempo */}
       <section>
         <Link
