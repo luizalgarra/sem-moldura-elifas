@@ -75,7 +75,7 @@ function Acervo() {
         </span>
         <span className="flex-1">
           <span className="block font-serif text-lg font-semibold text-accent">
-            Linhas da Vida
+            Linha do Tempo
           </span>
           <span className="block text-sm text-muted-foreground">
             Percorra a trajetória de Elifas Andreato e as histórias por trás das obras.
