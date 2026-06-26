@@ -43,7 +43,6 @@ export const PERIODOS: { valor: Periodo; rotulo: string }[] = [
   { valor: "1980", rotulo: "Anos 1980" },
   { valor: "1990-2000", rotulo: "Anos 1990–2000" },
   { valor: "2010+", rotulo: "2010 em diante" },
-  { valor: "sem-data", rotulo: "Sem data" },
 ];
 
 // ---------------------------------------------------------------------------
