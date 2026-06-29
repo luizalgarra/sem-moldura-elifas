@@ -343,11 +343,19 @@ function Acervo() {
                   ({grupo.obras.length})
                 </span>
               </h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {grupo.obras.map((obra) => (
-                  <ObraCard key={obra.num} obra={obra} />
-                ))}
-              </div>
+              {vista === "grade" ? (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {grupo.obras.map((obra) => (
+                    <ObraCard key={obra.num} obra={obra} />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {grupo.obras.map((obra) => (
+                    <ObraLinha key={obra.num} obra={obra} />
+                  ))}
+                </div>
+              )}
             </section>
           ))}
         </div>
