@@ -87,6 +87,29 @@ function ObraPagina() {
         </div>
       </div>
 
+      {video?.url && (
+        <section className="mt-6" aria-labelledby="video-titulo">
+          <h2
+            id="video-titulo"
+            className="font-serif text-xl font-semibold text-foreground"
+          >
+            Vídeo
+          </h2>
+          <div className="mx-auto mt-3 w-full max-w-xs overflow-hidden rounded-lg border border-border bg-black">
+            <video
+              src={video.url}
+              controls
+              playsInline
+              preload="metadata"
+              className="aspect-[9/16] w-full"
+            >
+              <track kind="captions" />
+            </video>
+          </div>
+        </section>
+      )}
+
+
       <header className="mt-6">
         <p className="text-sm font-medium uppercase tracking-wide text-accent">
           Obra {obra.num} · {obra.parede}
