@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Route as RouteIcon, Search, X } from "lucide-react";
+import { ArrowRight, Route as RouteIcon, Search, X, LayoutGrid, List } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { paredesOrdem } from "@/data/obras";
@@ -16,6 +16,7 @@ import {
   type Periodo,
 } from "@/lib/categorias";
 import { ObraCard } from "@/components/ObraCard";
+import { ObraLinha } from "@/components/ObraLinha";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +52,7 @@ const searchSchema = z.object({
     "todos",
   ),
   busca: fallback(z.string(), "").default(""),
+  vista: fallback(z.enum(["grade", "lista"]), "grade").default("grade"),
 });
 
 export const Route = createFileRoute("/obras/")({
