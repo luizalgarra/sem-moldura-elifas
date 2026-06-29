@@ -273,8 +273,3 @@ html {
   filter: saturate(1.18) contrast(1.06) brightness(1.03);
   transition: filter 300ms ease;
 }
-@utility img-realce-hover {
-  &:hover {
-    filter: saturate(1.28) contrast(1.08) brightness(1.04);
-  }
-}
