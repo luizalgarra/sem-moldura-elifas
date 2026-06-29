@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ImageOff, ZoomIn, X, ArrowUpRight, Video } from "lucide-react";
 import { obras } from "@/data/obras";
-import { listarAcervo } from "@/lib/admin-obras.functions";
+import { listarAcervo, getVideoObra } from "@/lib/admin-obras.functions";
 import { anosMarcos } from "@/data/timeline";
 import { marcoDaObra } from "@/lib/anos";
 import { AudioDescricao } from "@/components/AudioDescricao";
