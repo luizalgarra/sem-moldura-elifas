@@ -19,7 +19,9 @@ export const Route = createFileRoute("/obras/$num")({
     const obra = acervo.find((o) => o.num === num);
     if (!obra) throw notFound();
 
-    return { obra, total: acervo.length };
+    const video = await getVideoObra({ data: { num } }).catch(() => null);
+
+    return { obra, total: acervo.length, video };
   },
 
 
