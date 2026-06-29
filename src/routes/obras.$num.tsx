@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ImageOff, ZoomIn, X, ArrowUpRight, Video } from "lucide-react";
 import { obras } from "@/data/obras";
-import { listarAcervo } from "@/lib/admin-obras.functions";
+import { listarAcervo, getVideoObra } from "@/lib/admin-obras.functions";
 import { anosMarcos } from "@/data/timeline";
 import { marcoDaObra } from "@/lib/anos";
 import { AudioDescricao } from "@/components/AudioDescricao";
@@ -19,7 +19,9 @@ export const Route = createFileRoute("/obras/$num")({
     const obra = acervo.find((o) => o.num === num);
     if (!obra) throw notFound();
 
-    return { obra, total: acervo.length };
+    const video = await getVideoObra({ data: { num } }).catch(() => null);
+
+    return { obra, total: acervo.length, video };
   },
 
 
@@ -45,7 +47,7 @@ export const Route = createFileRoute("/obras/$num")({
 });
 
 function ObraPagina() {
-  const { obra, total } = Route.useLoaderData();
+  const { obra, total, video } = Route.useLoaderData();
   const [ampliada, setAmpliada] = useState(false);
   const corresp = marcoDaObra(obra.ano, anosMarcos);
   const { isAdmin } = useAdminAuth();
@@ -84,6 +86,29 @@ function ObraPagina() {
           )}
         </div>
       </div>
+
+      {video?.url && (
+        <section className="mt-6" aria-labelledby="video-titulo">
+          <h2
+            id="video-titulo"
+            className="font-serif text-xl font-semibold text-foreground"
+          >
+            Vídeo
+          </h2>
+          <div className="mx-auto mt-3 w-full max-w-xs overflow-hidden rounded-lg border border-border bg-black">
+            <video
+              src={video.url}
+              controls
+              playsInline
+              preload="metadata"
+              className="aspect-[9/16] w-full"
+            >
+              <track kind="captions" />
+            </video>
+          </div>
+        </section>
+      )}
+
 
       <header className="mt-6">
         <p className="text-sm font-medium uppercase tracking-wide text-accent">

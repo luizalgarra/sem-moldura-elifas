@@ -2053,3 +2053,43 @@ export const removerPostagem = createServerFn({ method: "POST" })
     }
     return { ok: true as const };
   });
+
+/** Leitura PÚBLICA: retorna a URL assinada do reels mais recente de uma obra (ou null). */
+export interface VideoObra {
+  url: string;
+  ext: string;
+}
+
+export const getVideoObra = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z.object({ num: z.number().int().min(1).max(MAX_CHAVE) }).parse(input),
+  )
+  .handler(async ({ data }): Promise<VideoObra | null> => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const { data: linha, error } = await supabaseAdmin
+      .from("postagens_reels")
+      .select("video_path")
+      .eq("num", data.num)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !linha?.video_path) {
+      if (error) console.error("getVideoObra:", error.message);
+      return null;
+    }
+
+    const { data: assinada } = await supabaseAdmin.storage
+      .from("reels-obras")
+      .createSignedUrl(linha.video_path, 60 * 60);
+
+    if (!assinada?.signedUrl) return null;
+
+    return {
+      url: assinada.signedUrl,
+      ext: linha.video_path.split(".").pop()?.toLowerCase() ?? "mp4",
+    };
+  });
