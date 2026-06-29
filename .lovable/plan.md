@@ -1,48 +1,39 @@
 ## Objetivo
+Exibir, na página pública de cada obra (`/obras/$num`), o vídeo (reels) gerado para ela — quando existir. Hoje os reels só aparecem na área admin `/postagens`; a página da obra mostra apenas imagem, áudio e audiodescrição.
 
-Adicionar à página `/obras` uma navegação por **abas (Tipo)** combinada com **filtros (Função e Período)**, mantendo a busca atual e o agrupamento por parede como visão alternativa. Tudo no frontend — os dados de categoria são derivados das obras existentes, sem mudança de banco.
+## Situação atual
+- Os vídeos ficam no bucket privado `reels-obras` e registrados em `postagens_reels`.
+- As únicas funções que leem reels (`listarPostagens`, etc.) exigem admin (`requireSupabaseAuth` + `garantirAdmin`), então não podem ser usadas em rota pública/SSR.
+- Existem reels para as obras 1–20; as demais simplesmente não terão vídeo (e a seção não aparece).
 
-## Como as categorias são derivadas
+## Mudanças
 
-As obras não têm campos "tipo/função/período" no banco. Em vez de migração, crio um módulo de classificação que deriva tudo de `tecnica`, `ano` e `titulo`.
+### 1. Nova função pública de leitura — `src/lib/admin-obras.functions.ts`
+Adicionar `getVideoObra` (`createServerFn`, GET, **sem** `requireSupabaseAuth` — é leitura pública):
+- Recebe `{ num }` validado por Zod.
+- Carrega `supabaseAdmin` dentro do handler.
+- Busca em `postagens_reels` a postagem mais recente daquela obra (`order created_at desc, limit 1`), selecionando só `video_path` e `titulo`.
+- Gera uma URL assinada do bucket `reels-obras` (validade ~1h).
+- Retorna `{ url, ext } | null`. Nenhuma coluna sensível é exposta — apenas a URL assinada do vídeo.
 
-**Tipo** (a partir de `tecnica`, com tabela de normalização para a grafia inconsistente da planilha — "plapis", "lapis/lápis", "acriloica"):
-- Pinturas · Ilustração gráfica · Colagens & recortes · Madeira · Fotografia & mídia mista · Audiovisual
+Observação de segurança: a função é pública de propósito (mesma lógica de `getObraPublica`/`listarAcervo` que já alimentam o site). Continua usando `supabaseAdmin` só para gerar a URL assinada, sem expor o bucket nem dados privados.
 
-**Período** (a partir dos 4 primeiros dígitos de `ano`):
-- 1960–70 · Anos 1980 · 1990–2000 · 2010+ · (Sem data)
+### 2. Carregar o vídeo no loader — `src/routes/obras.$num.tsx`
+- No `loader`, além de `listarAcervo()`, chamar `getVideoObra({ data: { num } })` em paralelo.
+- Incluir `video` no retorno do loader (`{ obra, total, video }`).
 
-**Função** (heurística por palavras-chave no `titulo` + técnica audiovisual, com um mapa manual de exceções para casos conhecidos):
-- MPB / Capas de disco · Imprensa & editorial · Cartazes & teatro · Arte autoral · Audiovisual
-- Quando nenhuma regra casar, cai em "Arte autoral" como padrão.
-
-## Plano de implementação
-
-### 1. `src/lib/categorias.ts` (novo)
-- `type Tipo`, `type Funcao`, `type Periodo` + listas ordenadas com rótulos.
-- `normalizarTecnica(t)` → tabela de mapeamento técnica→Tipo.
-- `tipoDaObra(obra)`, `periodoDaObra(obra)`, `funcaoDaObra(obra)` recebendo `ObraAcervo`.
-- `MAPA_FUNCAO_EXCECOES: Record<number, Funcao>` para sobrescrever obras específicas onde a heurística erra.
-- Helper `classificar(obra)` que retorna `{ tipo, funcao, periodo }`.
-
-### 2. `src/routes/obras.index.tsx` (editar)
-- Adicionar `validateSearch` (zod + `fallback`) com `tipo`, `funcao`, `periodo` (cada um aceitando `"todos"` como padrão) e manter `busca` se desejado em URL.
-- **Abas (Tipo)**: barra de abas no topo — "Todos" + um por Tipo, com contagem por aba. Selecionar aba atualiza `search.tipo`.
-- **Filtros (Função e Período)**: dois grupos de chips/selects abaixo das abas, atualizando `search.funcao` / `search.periodo`. Botão "Limpar filtros" quando algo estiver ativo.
-- Aplicar os filtros sobre `listarAcervo()` antes do agrupamento.
-- **Resultado**: manter o agrupamento por parede como layout dos cards (já existente), agora exibindo só as obras filtradas; cabeçalho mostra o total filtrado.
-- Preservar a caixa "Linha do Tempo" e a busca textual já existentes.
-
-### 3. Acessibilidade e UX
-- Abas com `role="tablist"`/`aria-selected`; filtros com `aria-pressed`; `role="status"` anunciando a contagem.
-- Estado vazio ("Nenhuma obra para esta combinação") com ação de limpar filtros.
+### 3. Renderizar o player na página da obra
+- Quando `video?.url` existir, exibir uma nova seção "Vídeo" (reels 9:16) logo abaixo da imagem/ficha, com um `<video controls playsInline>` apontando para a URL assinada, em um contêiner com largura limitada (formato vertical) e cantos arredondados seguindo os tokens do tema.
+- Quando não houver vídeo, nada é renderizado (sem placeholder).
 
 ## Detalhes técnicos
+- `getVideoObra` segue a ordem do builder: `createServerFn` → `.inputValidator()` → `.handler()`; sem middleware (leitura pública), import dinâmico de `client.server` dentro do handler.
+- O `num` usado é o número exibido da obra (mesmo critério usado ao gerar o reels em `/postar`), garantindo correspondência.
+- Player nativo HTML5; sem dependências novas.
 
-- Sem alterações de banco nem de funções de servidor; classificação 100% client-side a partir de `ObraAcervo`.
-- Estado dos filtros vive nos **search params** (compartilhável por URL, SSR-friendly) usando `zodValidator` + `fallback`.
-- A tabela de normalização de técnica e o mapa de exceções de função ficam centralizados em `categorias.ts` para ajuste fácil de curadoria.
-
-## Fora de escopo (pode ser próxima etapa)
-- Persistir categorias no banco / editá-las pela tela `/editar`.
-- Filtros nas telas `/admin` e `/editar`.
+## Fora de escopo
+- Tornar o bucket público (mantemos privado, servindo via URL assinada).
+- Gerar reels para as obras 21–117 (estas continuam sem vídeo até serem geradas).
+</content>
+<summary>Exibir o reels de cada obra na página pública /obras/$num via uma função de leitura pública que gera URL assinada do bucket privado.</summary>
+</invoke>
