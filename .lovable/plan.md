@@ -1,36 +1,39 @@
-# Subir os 4 vídeos e aplicar nas obras
+# Importar vídeos do Google Drive para as obras
 
-## O que são os arquivos
-São 4 vídeos horizontais (1920×1080, ~1m30 cada, com áudio) do próprio Elifas Andreato narrando e apresentando cada obra. Identifiquei o assunto de cada um pelo conteúdo (os nomes dos arquivos enviados eram genéricos: `20852`, `20854`, `20856`).
+Trazer os 9 vídeos MP4 recentes do Google Drive (Luiz's Google Drive), otimizá-los para web e vinculá-los às obras correspondentes do acervo, reaproveitando toda a infraestrutura de vídeo já existente (bucket `reels-obras`, tabela `postagens_reels`, player dinâmico em `/obras/$num`).
 
-## Mapeamento proposto (obra de destino)
-| Arquivo | Assunto identificado | Obra de destino |
-|---|---|---|
-| `Bandalhismo - João Bosco.mov` | Bandalhismo | **106 — Video 3, Bandalhismo** |
-| `20854` | João Nogueira (escultura entalhada) | **113 — Video 10, João Nogueira** |
-| `20852` | Beth Carvalho (capa "Alma do Brasil", bonecos de papel) | **54 — Alma do Brasil, Beth Carvalho** |
-| `20856` | Paulinho da Viola (capa com violão) | **65 — Paulinho da Viola** |
+## Vídeos a importar
 
-> Se algum destino estiver errado, é só me avisar o número correto antes de eu aplicar — o restante do fluxo é idêntico.
+| Arquivo no Drive | Música / Capa |
+|---|---|
+| Almanaque - Chico Buarque.mp4 | Almanaque (Chico Buarque) |
+| Ópera do Malandro.mp4 | Ópera do Malandro (Chico Buarque) |
+| Arca de Noé.mp4 | Arca de Noé |
+| Bebadosamba.mp4 | Bebadosamba (Paulinho da Viola) |
+| Clara - Clara Nunes.mp4 | Clara (Clara Nunes) |
+| Clementina - Clementina de Jesus.mp4 | Clementina de Jesus |
+| Hoje é dia de festa - Zeca.mp4 | Hoje é dia de festa (Zeca Pagodinho) |
+| Tendinha - Martinho da Vila.mp4 | Tendinha (Martinho da Vila) |
+| Terreiro - Martinho da Vila.mp4 | Terreiro (Martinho da Vila) |
 
-## Passos
+## Etapas
 
-1. **Transcodificar** os 4 vídeos para MP4 web-friendly (H.264 + AAC, ~720p, bitrate moderado). Os originais têm ~200 MB cada; após a compressão ficam bem menores, carregam rápido no site e cabem no fluxo de upload. O `.mov` também passa a MP4.
+1. **Mapear vídeo → obra**: cruzar o título de cada vídeo com o acervo (tabelas `obra_overrides` / `obras_extras`) para descobrir o `num` de cada obra. Antes de enviar, apresento a tabela final de mapeamento (vídeo → número da obra) para você confirmar; reaponto qualquer item trocado.
 
-2. **Enviar** cada MP4 para o bucket `reels-obras` (privado, igual aos reels atuais) e **registrar** uma linha em `postagens_reels` com o número da obra, título e o caminho do arquivo. A partir daí a função pública `getVideoObra` já passa a servir o vídeo na página da obra — sem novo código de leitura.
+2. **Baixar do Drive**: baixar cada arquivo via gateway do conector Google Drive (`alt=media`), usando o `id` de cada arquivo já listado.
 
-3. **Ajustar o player para 16:9** (sua escolha). Como os reels já existentes (obras 1–20) são verticais 9:16, vou:
-   - Guardar a largura/altura de cada vídeo ao registrá-lo (duas colunas novas em `postagens_reels`, opcionais).
-   - Fazer `getVideoObra` devolver essa proporção.
-   - No player de `src/routes/obras.$num.tsx`, escolher automaticamente o formato: **16:9 em contêiner largo** para os vídeos horizontais e **9:16 estreito** para os reels verticais já existentes. Vídeos antigos sem essa informação continuam como vertical (comportamento atual).
+3. **Otimizar para web**: transcodificar com `ffmpeg` para MP4 H.264 720p (~15 MB cada), como fizemos com os 4 vídeos anteriores. Detectar a proporção real (16:9 ou 9:16) para gravar `largura`/`altura`.
 
-## Detalhes técnicos
-- Migração: adicionar `largura int` e `altura int` (nullable) em `public.postagens_reels`.
-- Atualizar `getVideoObra` e a interface `VideoObra` para incluir `largura`/`altura`.
-- No player, derivar `aspect-[16/9]`/largura `max-w-2xl` quando horizontal e manter `aspect-[9/16]`/`max-w-xs` quando vertical ou desconhecido.
-- Upload via storage com a chave de serviço (mesmo bucket e padrão de nome `reels-{num}-{timestamp}.mp4` já usado).
-- Os arquivos enviados não ficam no repositório — só vão para o storage.
+4. **Enviar ao bucket**: upload de cada vídeo para o bucket privado `reels-obras` (mesmo padrão dos vídeos atuais).
 
-## Fora do escopo
-- Não vou alterar o gerador de reels nem a galeria `/postagens` (continuam funcionando).
-- Não vou regenerar áudio/audiodescrição dessas obras.
+5. **Registrar no banco**: inserir/atualizar em `postagens_reels` (`num`, `titulo`, `video_path`, `tamanho_bytes`, `largura`, `altura`) para cada obra. Se já houver registro para a obra, substituo o vídeo.
+
+6. **Verificar**: abrir `/obras/$num` de algumas obras para confirmar que o player exibe o vídeo com a proporção correta, e revisar a galeria `/postagens`.
+
+## Observações técnicas
+
+- Os vídeos são privados: a página pública já usa `getVideoObra` (URL assinada de 1h) — nada muda na UI, só passa a existir vídeo para mais obras.
+- O upload é feito direto na API de Storage (contornando limite de tamanho do repositório), exatamente como na importação anterior.
+- Nenhuma mudança de schema é necessária (`largura`/`altura` já existem em `postagens_reels`).
+
+Confirme que devo prosseguir; na primeira etapa eu volto com a tabela de mapeamento vídeo → número da obra para seu aval antes de qualquer upload.
