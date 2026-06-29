@@ -302,27 +302,6 @@ function Acervo() {
             </div>
           </div>
         </div>
-          {filtrosAtivos && (
-            <button
-              type="button"
-              onClick={() =>
-                navigate({
-                  to: "/obras",
-                  search: {
-                    tipo: "todos",
-                    funcao: "todos",
-                    periodo: "todos",
-                    busca: "",
-                  },
-                })
-              }
-              className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
-            >
-              <X className="size-4" aria-hidden="true" />
-              Limpar filtros
-            </button>
-          )}
-        </div>
       </div>
 
       {grupos.length === 0 ? (
