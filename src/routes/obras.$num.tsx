@@ -47,7 +47,7 @@ export const Route = createFileRoute("/obras/$num")({
 });
 
 function ObraPagina() {
-  const { obra, total } = Route.useLoaderData();
+  const { obra, total, video } = Route.useLoaderData();
   const [ampliada, setAmpliada] = useState(false);
   const corresp = marcoDaObra(obra.ano, anosMarcos);
   const { isAdmin } = useAdminAuth();
