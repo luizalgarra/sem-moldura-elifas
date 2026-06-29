@@ -2058,6 +2058,8 @@ export const removerPostagem = createServerFn({ method: "POST" })
 export interface VideoObra {
   url: string;
   ext: string;
+  largura: number | null;
+  altura: number | null;
 }
 
 export const getVideoObra = createServerFn({ method: "GET" })
@@ -2071,7 +2073,7 @@ export const getVideoObra = createServerFn({ method: "GET" })
 
     const { data: linha, error } = await supabaseAdmin
       .from("postagens_reels")
-      .select("video_path")
+      .select("video_path, largura, altura")
       .eq("num", data.num)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -2091,5 +2093,7 @@ export const getVideoObra = createServerFn({ method: "GET" })
     return {
       url: assinada.signedUrl,
       ext: linha.video_path.split(".").pop()?.toLowerCase() ?? "mp4",
+      largura: linha.largura ?? null,
+      altura: linha.altura ?? null,
     };
   });

@@ -95,17 +95,29 @@ function ObraPagina() {
           >
             Vídeo
           </h2>
-          <div className="mx-auto mt-3 w-full max-w-xs overflow-hidden rounded-lg border border-border bg-black">
-            <video
-              src={video.url}
-              controls
-              playsInline
-              preload="metadata"
-              className="aspect-[9/16] w-full"
-            >
-              <track kind="captions" />
-            </video>
-          </div>
+          {(() => {
+            const horizontal =
+              !!video.largura && !!video.altura && video.largura > video.altura;
+            return (
+              <div
+                className={`mx-auto mt-3 w-full overflow-hidden rounded-lg border border-border bg-black ${
+                  horizontal ? "max-w-2xl" : "max-w-xs"
+                }`}
+              >
+                <video
+                  src={video.url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className={`w-full ${
+                    horizontal ? "aspect-video" : "aspect-[9/16]"
+                  }`}
+                >
+                  <track kind="captions" />
+                </video>
+              </div>
+            );
+          })()}
         </section>
       )}
 

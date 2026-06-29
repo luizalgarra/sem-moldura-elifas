@@ -241,24 +241,30 @@ export type Database = {
       }
       postagens_reels: {
         Row: {
+          altura: number | null
           created_at: string
           id: string
+          largura: number | null
           num: number
           tamanho_bytes: number | null
           titulo: string | null
           video_path: string
         }
         Insert: {
+          altura?: number | null
           created_at?: string
           id?: string
+          largura?: number | null
           num: number
           tamanho_bytes?: number | null
           titulo?: string | null
           video_path: string
         }
         Update: {
+          altura?: number | null
           created_at?: string
           id?: string
+          largura?: number | null
           num?: number
           tamanho_bytes?: number | null
           titulo?: string | null
