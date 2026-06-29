@@ -1,27 +1,24 @@
-## Objetivo
+# Realçar as capas esmaecidas em /obras
 
-Aprimorar a página pública **/obras** (Catálogo Virtual) adicionando uma alternância entre **grade** (cards, como hoje) e **lista** (linhas compactas), sem login. A busca, os filtros (tipo/função/período) e a navegação anterior/próxima dentro de cada obra continuam funcionando.
+## Contexto
+As miniaturas em `/obras` não têm nenhum filtro de CSS — o "esmaecido" vem das próprias imagens de origem, que em vários casos são scans de baixa saturação (quase em tons de cinza). A 97 e a 100 parecem vivas porque seus arquivos já são coloridos. Como você escolheu **realce visual por CSS**, vamos aplicar um leve ajuste de imagem nas miniaturas para uniformizar e dar mais vida ao conjunto.
+
+> Observação honesta: o filtro CSS aumenta saturação/contraste/brilho do que já existe. Imagens praticamente em preto-e-branco vão ficar um pouco mais nítidas e contrastadas, mas **não ganham cor que não está no arquivo**. Para essas, só a substituição da imagem resolveria de fato.
 
 ## O que será feito
 
-### 1. Alternância grade/lista em `src/routes/obras.index.tsx`
-- Adicionar um controle (dois botões com ícones `LayoutGrid` / `List` do lucide-react) no cabeçalho, ao lado da contagem de obras.
-- Persistir a escolha na URL via o `searchSchema` existente, novo parâmetro `vista: "grade" | "lista"` (padrão `"grade"`), seguindo o mesmo padrão dos filtros atuais (TanStack Router + zod). Assim o estado é compartilhável e sobrevive a refresh.
-- Quando `vista === "grade"`: renderiza o grid atual com `ObraCard` (sem mudanças).
-- Quando `vista === "lista"`: renderiza cada obra como uma linha compacta — miniatura pequena, número da obra, título, ano e técnica — agrupadas pelas mesmas paredes/seções já existentes.
+1. **Criar uma utility de realce** em `src/styles.css` (Tailwind v4 `@utility`), por exemplo `img-realce`, aplicando algo como `filter: saturate(1.18) contrast(1.06) brightness(1.03)` com uma transição suave.
 
-### 2. Novo componente `src/components/ObraLinha.tsx`
-- Item de lista enxuto (Link para `/obras/$num`), com miniatura (`obra.imagem` ou ícone `ImageOff`), número, título, ano e técnica.
-- Reusa os tokens de design já em uso (border, card, accent, brand-yellow), sem cores hardcoded.
+2. **Aplicar nas miniaturas**:
+   - `src/components/ObraCard.tsx` — na `<img>` da grade.
+   - `src/components/ObraLinha.tsx` — na `<img>` da lista.
+   - O realce fica **apenas nas miniaturas do acervo**; a imagem grande na página da obra (`/obras/$num`) não é alterada, para preservar a fidelidade ao ver a obra em detalhe.
 
-### 3. Navegação anterior/próxima
-- Já existe via `NavegacaoSequencial` em `/obras/$num`. Nenhuma mudança necessária — apenas confirmar que continua público.
+3. **Preservar o hover existente**: na grade já há `group-hover:scale-[1.03]`. O filtro será combinado sem remover esse efeito (e opcionalmente um leve aumento extra de saturação no hover).
 
 ## Detalhes técnicos
-- `vista` entra no `searchSchema` com `fallback(...).default("grade")`; não entra em `loaderDeps` (não afeta o carregamento de dados, é só apresentação).
-- Toggle atualiza a URL via `navigate({ to: "/obras", search: (prev) => ({ ...prev, vista }) })`, igual aos filtros atuais.
-- Agrupamento por parede (`agruparPorParede`) é reaproveitado para ambas as visualizações.
-- Acessibilidade: o toggle usa `aria-pressed` e rótulos claros ("Ver em grade" / "Ver em lista").
+- A utility será definida no nível superior de `src/styles.css` com `@utility img-realce { ... }` (padrão Tailwind v4 — nada de `tailwind.config`).
+- Valores conservadores para evitar cores "estouradas" nas obras que já são vivas (97, 100). Posso ajustar a intensidade depois que você ver o resultado.
 
-## Fora de escopo
-- Nenhuma mudança de backend, dados ou autenticação. O site permanece totalmente público.
+## Validação
+- Conferir no preview a grade e a lista, comparando obras esmaecidas (ex.: 96, 99, 101) com as vivas (97, 100), garantindo que o conjunto fique mais homogêneo sem distorcer as coloridas.
