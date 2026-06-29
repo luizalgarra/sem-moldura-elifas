@@ -1,39 +1,27 @@
-# Importar vídeos do Google Drive para as obras
+## Objetivo
 
-Trazer os 9 vídeos MP4 recentes do Google Drive (Luiz's Google Drive), otimizá-los para web e vinculá-los às obras correspondentes do acervo, reaproveitando toda a infraestrutura de vídeo já existente (bucket `reels-obras`, tabela `postagens_reels`, player dinâmico em `/obras/$num`).
+Aprimorar a página pública **/obras** (Catálogo Virtual) adicionando uma alternância entre **grade** (cards, como hoje) e **lista** (linhas compactas), sem login. A busca, os filtros (tipo/função/período) e a navegação anterior/próxima dentro de cada obra continuam funcionando.
 
-## Vídeos a importar
+## O que será feito
 
-| Arquivo no Drive | Música / Capa |
-|---|---|
-| Almanaque - Chico Buarque.mp4 | Almanaque (Chico Buarque) |
-| Ópera do Malandro.mp4 | Ópera do Malandro (Chico Buarque) |
-| Arca de Noé.mp4 | Arca de Noé |
-| Bebadosamba.mp4 | Bebadosamba (Paulinho da Viola) |
-| Clara - Clara Nunes.mp4 | Clara (Clara Nunes) |
-| Clementina - Clementina de Jesus.mp4 | Clementina de Jesus |
-| Hoje é dia de festa - Zeca.mp4 | Hoje é dia de festa (Zeca Pagodinho) |
-| Tendinha - Martinho da Vila.mp4 | Tendinha (Martinho da Vila) |
-| Terreiro - Martinho da Vila.mp4 | Terreiro (Martinho da Vila) |
+### 1. Alternância grade/lista em `src/routes/obras.index.tsx`
+- Adicionar um controle (dois botões com ícones `LayoutGrid` / `List` do lucide-react) no cabeçalho, ao lado da contagem de obras.
+- Persistir a escolha na URL via o `searchSchema` existente, novo parâmetro `vista: "grade" | "lista"` (padrão `"grade"`), seguindo o mesmo padrão dos filtros atuais (TanStack Router + zod). Assim o estado é compartilhável e sobrevive a refresh.
+- Quando `vista === "grade"`: renderiza o grid atual com `ObraCard` (sem mudanças).
+- Quando `vista === "lista"`: renderiza cada obra como uma linha compacta — miniatura pequena, número da obra, título, ano e técnica — agrupadas pelas mesmas paredes/seções já existentes.
 
-## Etapas
+### 2. Novo componente `src/components/ObraLinha.tsx`
+- Item de lista enxuto (Link para `/obras/$num`), com miniatura (`obra.imagem` ou ícone `ImageOff`), número, título, ano e técnica.
+- Reusa os tokens de design já em uso (border, card, accent, brand-yellow), sem cores hardcoded.
 
-1. **Mapear vídeo → obra**: cruzar o título de cada vídeo com o acervo (tabelas `obra_overrides` / `obras_extras`) para descobrir o `num` de cada obra. Antes de enviar, apresento a tabela final de mapeamento (vídeo → número da obra) para você confirmar; reaponto qualquer item trocado.
+### 3. Navegação anterior/próxima
+- Já existe via `NavegacaoSequencial` em `/obras/$num`. Nenhuma mudança necessária — apenas confirmar que continua público.
 
-2. **Baixar do Drive**: baixar cada arquivo via gateway do conector Google Drive (`alt=media`), usando o `id` de cada arquivo já listado.
+## Detalhes técnicos
+- `vista` entra no `searchSchema` com `fallback(...).default("grade")`; não entra em `loaderDeps` (não afeta o carregamento de dados, é só apresentação).
+- Toggle atualiza a URL via `navigate({ to: "/obras", search: (prev) => ({ ...prev, vista }) })`, igual aos filtros atuais.
+- Agrupamento por parede (`agruparPorParede`) é reaproveitado para ambas as visualizações.
+- Acessibilidade: o toggle usa `aria-pressed` e rótulos claros ("Ver em grade" / "Ver em lista").
 
-3. **Otimizar para web**: transcodificar com `ffmpeg` para MP4 H.264 720p (~15 MB cada), como fizemos com os 4 vídeos anteriores. Detectar a proporção real (16:9 ou 9:16) para gravar `largura`/`altura`.
-
-4. **Enviar ao bucket**: upload de cada vídeo para o bucket privado `reels-obras` (mesmo padrão dos vídeos atuais).
-
-5. **Registrar no banco**: inserir/atualizar em `postagens_reels` (`num`, `titulo`, `video_path`, `tamanho_bytes`, `largura`, `altura`) para cada obra. Se já houver registro para a obra, substituo o vídeo.
-
-6. **Verificar**: abrir `/obras/$num` de algumas obras para confirmar que o player exibe o vídeo com a proporção correta, e revisar a galeria `/postagens`.
-
-## Observações técnicas
-
-- Os vídeos são privados: a página pública já usa `getVideoObra` (URL assinada de 1h) — nada muda na UI, só passa a existir vídeo para mais obras.
-- O upload é feito direto na API de Storage (contornando limite de tamanho do repositório), exatamente como na importação anterior.
-- Nenhuma mudança de schema é necessária (`largura`/`altura` já existem em `postagens_reels`).
-
-Confirme que devo prosseguir; na primeira etapa eu volto com a tabela de mapeamento vídeo → número da obra para seu aval antes de qualquer upload.
+## Fora de escopo
+- Nenhuma mudança de backend, dados ou autenticação. O site permanece totalmente público.

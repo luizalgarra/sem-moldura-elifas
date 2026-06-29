@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Route as RouteIcon, Search, X } from "lucide-react";
+import { ArrowRight, Route as RouteIcon, Search, X, LayoutGrid, List } from "lucide-react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { paredesOrdem } from "@/data/obras";
@@ -16,6 +16,7 @@ import {
   type Periodo,
 } from "@/lib/categorias";
 import { ObraCard } from "@/components/ObraCard";
+import { ObraLinha } from "@/components/ObraLinha";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +52,7 @@ const searchSchema = z.object({
     "todos",
   ),
   busca: fallback(z.string(), "").default(""),
+  vista: fallback(z.enum(["grade", "lista"]), "grade").default("grade"),
 });
 
 export const Route = createFileRoute("/obras/")({
@@ -97,7 +99,7 @@ function agruparPorParede(
 
 function Acervo() {
   const lista = Route.useLoaderData();
-  const { tipo, funcao, periodo, busca } = Route.useSearch();
+  const { tipo, funcao, periodo, busca, vista } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
   // Pré-classifica todas as obras uma vez.
@@ -242,26 +244,63 @@ function Acervo() {
           <p className="text-sm text-muted-foreground" role="status">
             {total} {total === 1 ? "obra" : "obras"}
           </p>
-          {filtrosAtivos && (
-            <button
-              type="button"
-              onClick={() =>
-                navigate({
-                  to: "/obras",
-                  search: {
-                    tipo: "todos",
-                    funcao: "todos",
-                    periodo: "todos",
-                    busca: "",
-                  },
-                })
-              }
-              className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+          <div className="flex items-center gap-2">
+            {filtrosAtivos && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate({
+                    to: "/obras",
+                    search: (prev: BuscaParams) => ({
+                      ...prev,
+                      tipo: "todos",
+                      funcao: "todos",
+                      periodo: "todos",
+                      busca: "",
+                    }),
+                  })
+                }
+                className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+              >
+                <X className="size-4" aria-hidden="true" />
+                Limpar filtros
+              </button>
+            )}
+            <div
+              className="flex items-center gap-1 rounded-full border border-border p-1"
+              role="group"
+              aria-label="Modo de visualização"
             >
-              <X className="size-4" aria-hidden="true" />
-              Limpar filtros
-            </button>
-          )}
+              <button
+                type="button"
+                aria-pressed={vista === "grade"}
+                onClick={() => set({ vista: "grade" })}
+                aria-label="Ver em grade"
+                className={cn(
+                  "inline-flex size-8 items-center justify-center rounded-full transition-colors",
+                  vista === "grade"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-accent",
+                )}
+              >
+                <LayoutGrid className="size-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-pressed={vista === "lista"}
+                onClick={() => set({ vista: "lista" })}
+                aria-label="Ver em lista"
+                className={cn(
+                  "inline-flex size-8 items-center justify-center rounded-full transition-colors",
+                  vista === "lista"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-accent",
+                )}
+              >
+                <List className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -304,11 +343,19 @@ function Acervo() {
                   ({grupo.obras.length})
                 </span>
               </h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {grupo.obras.map((obra) => (
-                  <ObraCard key={obra.num} obra={obra} />
-                ))}
-              </div>
+              {vista === "grade" ? (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {grupo.obras.map((obra) => (
+                    <ObraCard key={obra.num} obra={obra} />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {grupo.obras.map((obra) => (
+                    <ObraLinha key={obra.num} obra={obra} />
+                  ))}
+                </div>
+              )}
             </section>
           ))}
         </div>
