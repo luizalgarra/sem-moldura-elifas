@@ -1,39 +1,36 @@
-## Objetivo
-Exibir, na página pública de cada obra (`/obras/$num`), o vídeo (reels) gerado para ela — quando existir. Hoje os reels só aparecem na área admin `/postagens`; a página da obra mostra apenas imagem, áudio e audiodescrição.
+# Subir os 4 vídeos e aplicar nas obras
 
-## Situação atual
-- Os vídeos ficam no bucket privado `reels-obras` e registrados em `postagens_reels`.
-- As únicas funções que leem reels (`listarPostagens`, etc.) exigem admin (`requireSupabaseAuth` + `garantirAdmin`), então não podem ser usadas em rota pública/SSR.
-- Existem reels para as obras 1–20; as demais simplesmente não terão vídeo (e a seção não aparece).
+## O que são os arquivos
+São 4 vídeos horizontais (1920×1080, ~1m30 cada, com áudio) do próprio Elifas Andreato narrando e apresentando cada obra. Identifiquei o assunto de cada um pelo conteúdo (os nomes dos arquivos enviados eram genéricos: `20852`, `20854`, `20856`).
 
-## Mudanças
+## Mapeamento proposto (obra de destino)
+| Arquivo | Assunto identificado | Obra de destino |
+|---|---|---|
+| `Bandalhismo - João Bosco.mov` | Bandalhismo | **106 — Video 3, Bandalhismo** |
+| `20854` | João Nogueira (escultura entalhada) | **113 — Video 10, João Nogueira** |
+| `20852` | Beth Carvalho (capa "Alma do Brasil", bonecos de papel) | **54 — Alma do Brasil, Beth Carvalho** |
+| `20856` | Paulinho da Viola (capa com violão) | **65 — Paulinho da Viola** |
 
-### 1. Nova função pública de leitura — `src/lib/admin-obras.functions.ts`
-Adicionar `getVideoObra` (`createServerFn`, GET, **sem** `requireSupabaseAuth` — é leitura pública):
-- Recebe `{ num }` validado por Zod.
-- Carrega `supabaseAdmin` dentro do handler.
-- Busca em `postagens_reels` a postagem mais recente daquela obra (`order created_at desc, limit 1`), selecionando só `video_path` e `titulo`.
-- Gera uma URL assinada do bucket `reels-obras` (validade ~1h).
-- Retorna `{ url, ext } | null`. Nenhuma coluna sensível é exposta — apenas a URL assinada do vídeo.
+> Se algum destino estiver errado, é só me avisar o número correto antes de eu aplicar — o restante do fluxo é idêntico.
 
-Observação de segurança: a função é pública de propósito (mesma lógica de `getObraPublica`/`listarAcervo` que já alimentam o site). Continua usando `supabaseAdmin` só para gerar a URL assinada, sem expor o bucket nem dados privados.
+## Passos
 
-### 2. Carregar o vídeo no loader — `src/routes/obras.$num.tsx`
-- No `loader`, além de `listarAcervo()`, chamar `getVideoObra({ data: { num } })` em paralelo.
-- Incluir `video` no retorno do loader (`{ obra, total, video }`).
+1. **Transcodificar** os 4 vídeos para MP4 web-friendly (H.264 + AAC, ~720p, bitrate moderado). Os originais têm ~200 MB cada; após a compressão ficam bem menores, carregam rápido no site e cabem no fluxo de upload. O `.mov` também passa a MP4.
 
-### 3. Renderizar o player na página da obra
-- Quando `video?.url` existir, exibir uma nova seção "Vídeo" (reels 9:16) logo abaixo da imagem/ficha, com um `<video controls playsInline>` apontando para a URL assinada, em um contêiner com largura limitada (formato vertical) e cantos arredondados seguindo os tokens do tema.
-- Quando não houver vídeo, nada é renderizado (sem placeholder).
+2. **Enviar** cada MP4 para o bucket `reels-obras` (privado, igual aos reels atuais) e **registrar** uma linha em `postagens_reels` com o número da obra, título e o caminho do arquivo. A partir daí a função pública `getVideoObra` já passa a servir o vídeo na página da obra — sem novo código de leitura.
+
+3. **Ajustar o player para 16:9** (sua escolha). Como os reels já existentes (obras 1–20) são verticais 9:16, vou:
+   - Guardar a largura/altura de cada vídeo ao registrá-lo (duas colunas novas em `postagens_reels`, opcionais).
+   - Fazer `getVideoObra` devolver essa proporção.
+   - No player de `src/routes/obras.$num.tsx`, escolher automaticamente o formato: **16:9 em contêiner largo** para os vídeos horizontais e **9:16 estreito** para os reels verticais já existentes. Vídeos antigos sem essa informação continuam como vertical (comportamento atual).
 
 ## Detalhes técnicos
-- `getVideoObra` segue a ordem do builder: `createServerFn` → `.inputValidator()` → `.handler()`; sem middleware (leitura pública), import dinâmico de `client.server` dentro do handler.
-- O `num` usado é o número exibido da obra (mesmo critério usado ao gerar o reels em `/postar`), garantindo correspondência.
-- Player nativo HTML5; sem dependências novas.
+- Migração: adicionar `largura int` e `altura int` (nullable) em `public.postagens_reels`.
+- Atualizar `getVideoObra` e a interface `VideoObra` para incluir `largura`/`altura`.
+- No player, derivar `aspect-[16/9]`/largura `max-w-2xl` quando horizontal e manter `aspect-[9/16]`/`max-w-xs` quando vertical ou desconhecido.
+- Upload via storage com a chave de serviço (mesmo bucket e padrão de nome `reels-{num}-{timestamp}.mp4` já usado).
+- Os arquivos enviados não ficam no repositório — só vão para o storage.
 
-## Fora de escopo
-- Tornar o bucket público (mantemos privado, servindo via URL assinada).
-- Gerar reels para as obras 21–117 (estas continuam sem vídeo até serem geradas).
-</content>
-<summary>Exibir o reels de cada obra na página pública /obras/$num via uma função de leitura pública que gera URL assinada do bucket privado.</summary>
-</invoke>
+## Fora do escopo
+- Não vou alterar o gerador de reels nem a galeria `/postagens` (continuam funcionando).
+- Não vou regenerar áudio/audiodescrição dessas obras.
