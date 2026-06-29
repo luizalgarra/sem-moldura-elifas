@@ -266,3 +266,15 @@ html {
     0 0 0 1px var(--primary) inset,
     0 12px 30px -12px oklch(0 0 0 / 0.7);
 }
+
+/* Realce das miniaturas do acervo: dá mais vida a scans esmaecidos
+   sem distorcer demais as obras que já são coloridas. */
+@utility img-realce {
+  filter: saturate(1.18) contrast(1.06) brightness(1.03);
+  transition: filter 300ms ease;
+}
+@utility img-realce-hover {
+  &:hover {
+    filter: saturate(1.28) contrast(1.08) brightness(1.04);
+  }
+}
