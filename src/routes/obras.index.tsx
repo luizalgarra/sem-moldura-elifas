@@ -99,7 +99,7 @@ function agruparPorParede(
 
 function Acervo() {
   const lista = Route.useLoaderData();
-  const { tipo, funcao, periodo, busca } = Route.useSearch();
+  const { tipo, funcao, periodo, busca, vista } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
   // Pré-classifica todas as obras uma vez.
@@ -244,6 +244,64 @@ function Acervo() {
           <p className="text-sm text-muted-foreground" role="status">
             {total} {total === 1 ? "obra" : "obras"}
           </p>
+          <div className="flex items-center gap-2">
+            {filtrosAtivos && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate({
+                    to: "/obras",
+                    search: (prev: BuscaParams) => ({
+                      ...prev,
+                      tipo: "todos",
+                      funcao: "todos",
+                      periodo: "todos",
+                      busca: "",
+                    }),
+                  })
+                }
+                className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+              >
+                <X className="size-4" aria-hidden="true" />
+                Limpar filtros
+              </button>
+            )}
+            <div
+              className="flex items-center gap-1 rounded-full border border-border p-1"
+              role="group"
+              aria-label="Modo de visualização"
+            >
+              <button
+                type="button"
+                aria-pressed={vista === "grade"}
+                onClick={() => set({ vista: "grade" })}
+                aria-label="Ver em grade"
+                className={cn(
+                  "inline-flex size-8 items-center justify-center rounded-full transition-colors",
+                  vista === "grade"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-accent",
+                )}
+              >
+                <LayoutGrid className="size-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-pressed={vista === "lista"}
+                onClick={() => set({ vista: "lista" })}
+                aria-label="Ver em lista"
+                className={cn(
+                  "inline-flex size-8 items-center justify-center rounded-full transition-colors",
+                  vista === "lista"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-accent",
+                )}
+              >
+                <List className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
           {filtrosAtivos && (
             <button
               type="button"
