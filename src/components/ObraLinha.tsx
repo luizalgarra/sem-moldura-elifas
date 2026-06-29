@@ -15,7 +15,7 @@ export function ObraLinha({ obra }: { obra: Obra }) {
             src={obra.imagem}
             alt={`Obra ${obra.num}: ${obra.titulo}, de Elifas Andreato, ${obra.ano}.`}
             loading="lazy"
-            className="size-full object-cover"
+            className="size-full object-cover img-realce"
           />
         ) : (
           <div className="flex size-full items-center justify-center text-muted-foreground">

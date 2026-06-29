@@ -16,7 +16,7 @@ export function ObraCard({ obra }: { obra: Obra }) {
               src={obra.imagem}
               alt={`Obra ${obra.num}: ${obra.titulo}, de Elifas Andreato, ${obra.ano}.`}
               loading="lazy"
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              className="size-full object-cover img-realce transition-transform duration-300 group-hover:scale-[1.03] group-hover:[filter:saturate(1.28)_contrast(1.08)_brightness(1.04)]"
             />
           ) : (
             <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center text-muted-foreground">
