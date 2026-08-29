@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as RedeAlemDaMolduraRouteImport } from './routes/rede-alem-da-moldura'
 import { Route as QrcodesRouteImport } from './routes/qrcodes'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PostagensRouteImport } from './routes/postagens'
@@ -69,6 +70,11 @@ import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/o
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedeAlemDaMolduraRoute = RedeAlemDaMolduraRouteImport.update({
+  id: '/rede-alem-da-moldura',
+  path: '/rede-alem-da-moldura',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrcodesRoute = QrcodesRouteImport.update({
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
+  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRoute
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
   '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
@@ -428,6 +435,7 @@ export interface FileRoutesByTo {
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRoute
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
   '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
@@ -487,6 +495,7 @@ export interface FileRoutesById {
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
+  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRoute
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
   '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
@@ -547,6 +556,7 @@ export interface FileRouteTypes {
     | '/postagens'
     | '/privacidade'
     | '/qrcodes'
+    | '/rede-alem-da-moldura'
     | '/sobre'
     | '/acervo/busca'
     | '/acervo/cadernos-e-manuscritos'
@@ -599,6 +609,7 @@ export interface FileRouteTypes {
     | '/linhas-da-vida'
     | '/postagens'
     | '/privacidade'
+    | '/rede-alem-da-moldura'
     | '/sobre'
     | '/acervo/busca'
     | '/acervo/cadernos-e-manuscritos'
@@ -657,6 +668,7 @@ export interface FileRouteTypes {
     | '/postagens'
     | '/privacidade'
     | '/qrcodes'
+    | '/rede-alem-da-moldura'
     | '/sobre'
     | '/acervo/busca'
     | '/acervo/cadernos-e-manuscritos'
@@ -716,6 +728,7 @@ export interface RootRouteChildren {
   PostagensRoute: typeof PostagensRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   QrcodesRoute: typeof QrcodesRouteWithChildren
+  RedeAlemDaMolduraRoute: typeof RedeAlemDaMolduraRoute
   SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
   PostarNumRoute: typeof PostarNumRoute
@@ -732,6 +745,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rede-alem-da-moldura': {
+      id: '/rede-alem-da-moldura'
+      path: '/rede-alem-da-moldura'
+      fullPath: '/rede-alem-da-moldura'
+      preLoaderRoute: typeof RedeAlemDaMolduraRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qrcodes': {
@@ -1266,6 +1286,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostagensRoute: PostagensRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   QrcodesRoute: QrcodesRouteWithChildren,
+  RedeAlemDaMolduraRoute: RedeAlemDaMolduraRoute,
   SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
   PostarNumRoute: PostarNumRoute,
