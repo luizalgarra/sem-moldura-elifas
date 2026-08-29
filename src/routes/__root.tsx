@@ -18,6 +18,7 @@ import { AcessibilidadeProvider } from "../hooks/useAcessibilidade";
 import { AdminAuthProvider, useAdminAuth } from "../hooks/useAdminAuth";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
+import { DicaInstalacaoIos } from "../components/DicaInstalacaoIos";
 import { marca } from "../assets/marca";
 
 function NotFoundComponent() {
@@ -80,12 +81,44 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+// Telas de abertura do iOS. Cada aparelho exige um PNG do tamanho exato — não há
+// fallback: um tamanho faltando só significa um flash branco na abertura.
+// Os arquivos ficam em /public/splash e seguem o padrão splash-<W>x<H>.png.
+const SPLASH: Array<[number, number, number]> = [
+  [430, 932, 3], // 15/16 Pro Max, 14 Pro Max
+  [402, 874, 3], // 16 Pro
+  [393, 852, 3], // 15/16, 14 Pro
+  [428, 926, 3], // 12/13/14 Pro Max
+  [390, 844, 3], // 12/13/14, 15
+  [414, 896, 3], // XS Max, 11 Pro Max
+  [414, 896, 2], // XR, 11
+  [375, 812, 3], // X, XS, 11 Pro, 12/13 mini
+  [375, 667, 2], // SE 2ª/3ª geração, 8
+  [414, 736, 3], // 8 Plus
+  [820, 1180, 2], // iPad Air
+  [1024, 1366, 2], // iPad Pro 12.9"
+];
+
+const splashLinks = SPLASH.map(([w, h, dpr]) => ({
+  rel: "apple-touch-startup-image",
+  media: `(device-width: ${w}px) and (device-height: ${h}px) and (-webkit-device-pixel-ratio: ${dpr}) and (orientation: portrait)`,
+  href: `/splash/splash-${w * dpr}x${h * dpr}.png`,
+}));
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover",
+      },
       { title: "Elifas Andreato — Além da Moldura · Catálogo Virtual" },
+      { name: "theme-color", content: "#0c0c0e" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Elifas" },
       {
         name: "description",
         content:
@@ -113,7 +146,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: marca.favicon },
-      { rel: "apple-touch-icon", href: marca.favicon },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/icons/apple-touch-icon-180.png",
+      },
+      ...splashLinks,
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -149,6 +188,15 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // Service worker: guarda as obras e os áudios já visitados, para o catálogo
+  // continuar de pé quando o wi-fi da Caixa Cultural cai no meio da visita.
+  // Falha em silêncio de propósito — offline é bônus, não requisito.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    if (import.meta.env.DEV) return;
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AdminAuthProvider>
@@ -160,6 +208,7 @@ function RootComponent() {
             Pular para o conteúdo
           </a>
           <Conteudo />
+          <DicaInstalacaoIos />
         </AcessibilidadeProvider>
       </AdminAuthProvider>
     </QueryClientProvider>

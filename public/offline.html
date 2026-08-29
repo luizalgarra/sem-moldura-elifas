@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Sem conexão — Além da Moldura</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600&display=swap" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 2rem calc(1.5rem + env(safe-area-inset-left, 0px));
+    background: #0c0c0e;
+    color: #ecece9;
+    font-family: "Source Sans 3", system-ui, -apple-system, sans-serif;
+    font-weight: 300;
+    text-align: center;
+  }
+  img { width: min(220px, 60vw); height: auto; margin-bottom: 2.5rem; }
+  h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 0.75rem; letter-spacing: 0.01em; }
+  p { margin: 0 auto; max-width: 34ch; line-height: 1.6; color: #ecece9b3; }
+  .rule { width: 44px; height: 2px; background: #ec9e0e; margin: 2rem auto; border: 0; }
+  a {
+    display: inline-block;
+    margin-top: 2rem;
+    min-height: 44px;
+    padding: 0.7rem 1.5rem;
+    border: 1px solid #ffffff26;
+    border-radius: 999px;
+    color: #ecece9;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+</style>
+</head>
+<body>
+  <main>
+    <img src="/icons/icon-512.png" alt="Elifas Andreato" />
+    <h1>Esta obra ainda não foi carregada</h1>
+    <hr class="rule" />
+    <p>
+      O catálogo guarda as obras que você já visitou, e elas continuam disponíveis sem
+      internet. Esta ainda não passou por aqui. Reconecte e ela fica guardada também.
+    </p>
+    <a href="/">Voltar ao início</a>
+  </main>
+</body>
+</html>

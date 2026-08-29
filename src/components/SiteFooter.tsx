@@ -3,7 +3,10 @@ import { marca } from "@/assets/marca";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-border bg-secondary/40">
+    <footer
+      className="mt-16 border-t border-border bg-secondary/40"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
       <div className="mx-auto max-w-5xl px-4 py-8 text-sm text-muted-foreground">
         <img
           src={marca.logoFirmaBranco}
