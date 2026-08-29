@@ -18,7 +18,7 @@ import { AcessibilidadeProvider } from "../hooks/useAcessibilidade";
 import { AdminAuthProvider, useAdminAuth } from "../hooks/useAdminAuth";
 import { SiteHeader } from "../components/SiteHeader";
 import { SiteFooter } from "../components/SiteFooter";
-import { DicaInstalacaoIos } from "../components/DicaInstalacaoIos";
+import { DicaInstalacao } from "../components/DicaInstalacao";
 import { marca } from "../assets/marca";
 
 function NotFoundComponent() {
@@ -208,7 +208,7 @@ function RootComponent() {
             Pular para o conteúdo
           </a>
           <Conteudo />
-          <DicaInstalacaoIos />
+          <DicaInstalacao />
         </AcessibilidadeProvider>
       </AdminAuthProvider>
     </QueryClientProvider>
