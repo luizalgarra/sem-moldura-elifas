@@ -274,12 +274,13 @@ function Formulario({ aoAbrir }: { aoAbrir: (estado: EstadoConversa) => void }) 
 
         <button
           type="submit"
-          disabled={estado === "enviando"}
+          disabled={enviando}
           className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md bg-primary px-6 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
-          {estado === "enviando" && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-          {estado === "enviando" ? "Enviando…" : "Quero participar"}
+          {enviando && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+          {enviando ? "Abrindo…" : "Começar a conversa"}
         </button>
+
 
         <p className="text-sm text-muted-foreground">
           Seus dados ficam apenas com o Instituto Elifas Andreato e servem só para o convite à Rede.
