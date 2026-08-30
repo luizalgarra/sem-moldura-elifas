@@ -49,9 +49,20 @@ export const Route = createFileRoute("/rede-alem-da-moldura")({
   component: Rede,
 });
 
+type EstadoConversa = {
+  conversaId: string;
+  sessao: string;
+  turnos: Turno[];
+  faltam: number;
+  ferramentas: string[];
+};
+
 function Rede() {
+  const [conversa, setConversa] = useState<EstadoConversa | null>(null);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
+
       <p className="font-semibold tracking-[0.18em] text-accent uppercase">
         Venha conversar sobre Elifas Andreato
       </p>
