@@ -12,16 +12,29 @@ import { inscreverNaListaDeEspera } from "@/lib/rede.functions";
  * página fora das buscas — sem isso, "Rede Além da Moldura" no Google abriria
  * um convite que era para ser fechado.
  */
+const TITULO = "Rede Além da Moldura — Instituto Elifas Andreato";
+const RESUMO =
+  "Conversas livres sobre arte, cultura, música e liberdade na vida de Elifas Andreato. Lançamento por convite, com lista de espera aberta.";
+
 export const Route = createFileRoute("/rede-alem-da-moldura")({
   head: () => ({
     meta: [
-      { title: "Rede Além da Moldura — Instituto Elifas Andreato" },
+      { title: TITULO },
       { name: "robots", content: "noindex, nofollow" },
-      {
-        name: "description",
-        content:
-          "Conversas livres sobre arte, cultura, música e liberdade na vida de Elifas Andreato. Lista de espera da Rede Além da Moldura.",
-      },
+      { name: "description", content: RESUMO },
+
+      /*
+       * Sem estes, a página herda o preview da exposição do __root e o link
+       * compartilhado no WhatsApp anuncia "Catálogo virtual da exposição" —
+       * outra coisa. Como esta página existe justamente para circular por link
+       * entre convidados, o cartão de preview é a primeira coisa que a pessoa lê.
+       * O `noindex` não resolve isso: ele fala com buscadores, não com
+       * WhatsApp, Telegram ou Slack.
+       */
+      { property: "og:title", content: TITULO },
+      { property: "og:description", content: RESUMO },
+      { name: "twitter:title", content: TITULO },
+      { name: "twitter:description", content: RESUMO },
     ],
   }),
   component: Rede,
