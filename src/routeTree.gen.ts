@@ -18,8 +18,10 @@ import { Route as ParticipeRouteImport } from './routes/participe'
 import { Route as LinhasDaVidaRouteImport } from './routes/linhas-da-vida'
 import { Route as InstitutoRouteImport } from './routes/instituto'
 import { Route as EspacosDeMemoriaRouteImport } from './routes/espacos-de-memoria'
+import { Route as EntrarNaRedeRouteImport } from './routes/entrar-na-rede'
 import { Route as ElifasAndreatoRouteImport } from './routes/elifas-andreato'
 import { Route as EditarRouteImport } from './routes/editar'
+import { Route as ContinuarRouteImport } from './routes/continuar'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -112,6 +114,11 @@ const EspacosDeMemoriaRoute = EspacosDeMemoriaRouteImport.update({
   path: '/espacos-de-memoria',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarNaRedeRoute = EntrarNaRedeRouteImport.update({
+  id: '/entrar-na-rede',
+  path: '/entrar-na-rede',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ElifasAndreatoRoute = ElifasAndreatoRouteImport.update({
   id: '/elifas-andreato',
   path: '/elifas-andreato',
@@ -120,6 +127,11 @@ const ElifasAndreatoRoute = ElifasAndreatoRouteImport.update({
 const EditarRoute = EditarRouteImport.update({
   id: '/editar',
   path: '/editar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContinuarRoute = ContinuarRouteImport.update({
+  id: '/continuar',
+  path: '/continuar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComoUsarRoute = ComoUsarRouteImport.update({
@@ -373,8 +385,10 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
+  '/continuar': typeof ContinuarRoute
   '/editar': typeof EditarRoute
   '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
+  '/entrar-na-rede': typeof EntrarNaRedeRoute
   '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
@@ -431,7 +445,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
+  '/continuar': typeof ContinuarRoute
   '/editar': typeof EditarRoute
+  '/entrar-na-rede': typeof EntrarNaRedeRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -486,8 +502,10 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
+  '/continuar': typeof ContinuarRoute
   '/editar': typeof EditarRoute
   '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
+  '/entrar-na-rede': typeof EntrarNaRedeRoute
   '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
@@ -547,8 +565,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/como-usar'
+    | '/continuar'
     | '/editar'
     | '/elifas-andreato'
+    | '/entrar-na-rede'
     | '/espacos-de-memoria'
     | '/instituto'
     | '/linhas-da-vida'
@@ -605,7 +625,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/como-usar'
+    | '/continuar'
     | '/editar'
+    | '/entrar-na-rede'
     | '/linhas-da-vida'
     | '/postagens'
     | '/privacidade'
@@ -659,8 +681,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/como-usar'
+    | '/continuar'
     | '/editar'
     | '/elifas-andreato'
+    | '/entrar-na-rede'
     | '/espacos-de-memoria'
     | '/instituto'
     | '/linhas-da-vida'
@@ -719,8 +743,10 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ComoUsarRoute: typeof ComoUsarRoute
+  ContinuarRoute: typeof ContinuarRoute
   EditarRoute: typeof EditarRoute
   ElifasAndreatoRoute: typeof ElifasAndreatoRouteWithChildren
+  EntrarNaRedeRoute: typeof EntrarNaRedeRoute
   EspacosDeMemoriaRoute: typeof EspacosDeMemoriaRouteWithChildren
   InstitutoRoute: typeof InstitutoRouteWithChildren
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
@@ -803,6 +829,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EspacosDeMemoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar-na-rede': {
+      id: '/entrar-na-rede'
+      path: '/entrar-na-rede'
+      fullPath: '/entrar-na-rede'
+      preLoaderRoute: typeof EntrarNaRedeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/elifas-andreato': {
       id: '/elifas-andreato'
       path: '/elifas-andreato'
@@ -815,6 +848,13 @@ declare module '@tanstack/react-router' {
       path: '/editar'
       fullPath: '/editar'
       preLoaderRoute: typeof EditarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/continuar': {
+      id: '/continuar'
+      path: '/continuar'
+      fullPath: '/continuar'
+      preLoaderRoute: typeof ContinuarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/como-usar': {
@@ -1277,8 +1317,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ComoUsarRoute: ComoUsarRoute,
+  ContinuarRoute: ContinuarRoute,
   EditarRoute: EditarRoute,
   ElifasAndreatoRoute: ElifasAndreatoRouteWithChildren,
+  EntrarNaRedeRoute: EntrarNaRedeRoute,
   EspacosDeMemoriaRoute: EspacosDeMemoriaRouteWithChildren,
   InstitutoRoute: InstitutoRouteWithChildren,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
