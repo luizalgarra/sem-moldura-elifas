@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { inscreverNaListaDeEspera } from "@/lib/rede.functions";
+import { inscreverNaListaDeEspera, PERFIS, type Inscricao } from "@/lib/rede.functions";
 
 /**
  * Página de lançamento da Rede Além da Moldura.
@@ -114,7 +114,8 @@ function Formulario() {
           nome: String(form.get("nome") ?? ""),
           email: String(form.get("email") ?? ""),
           vinculo: String(form.get("vinculo") ?? ""),
-          convidadoPor: String(form.get("convidadoPor") ?? ""),
+          // Nenhuma opção marcada envia undefined, e o zod deixa passar.
+          perfil: (form.get("perfil") as Inscricao["perfil"]) ?? undefined,
         },
       });
       setEstado("pronto");
@@ -200,12 +201,30 @@ function Formulario() {
           />
         </div>
 
-        <div>
-          <label htmlFor="convidadoPor" className="font-medium text-foreground">
-            Quem convidou você?
-          </label>
-          <input id="convidadoPor" name="convidadoPor" maxLength={120} className={CAMPO} />
-        </div>
+        {/*
+          fieldset + legend é a marcação correta para um grupo de opções: o
+          leitor de tela anuncia "Quero um convite" antes de cada alternativa,
+          em vez de ler quatro frases soltas sem saber a que pergunta respondem.
+        */}
+        <fieldset>
+          <legend className="font-medium text-foreground">Quero um convite</legend>
+          <div className="mt-2 space-y-1">
+            {PERFIS.map((opcao) => (
+              <label
+                key={opcao}
+                className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-md px-2 text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
+              >
+                <input
+                  type="radio"
+                  name="perfil"
+                  value={opcao}
+                  className="size-4 shrink-0 accent-[var(--accent)]"
+                />
+                <span>{opcao}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
         {erro && (
           <p role="alert" className="text-sm text-destructive">

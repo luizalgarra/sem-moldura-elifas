@@ -3,11 +3,23 @@ import { z } from "zod";
 
 const TABELA = "rede_lista_espera";
 
+/**
+ * As quatro respostas de "Quero um convite". O texto do rótulo é o que vai para
+ * o banco: quem for ler a lista depois lê uma frase, não um código.
+ */
+export const PERFIS = [
+  "Visitei a exposição da CAIXA",
+  "Tenho interesse ou curiosidade sobre Elifas",
+  "Participo de outras atividades do Instituto",
+  "Sou estudante, pesquisador ou colecionador",
+] as const;
+
 const esquema = z.object({
   nome: z.string().trim().min(2, "Diga seu nome.").max(120),
   email: z.string().trim().toLowerCase().email("Confira o e-mail.").max(200),
   vinculo: z.string().trim().max(400).optional().default(""),
-  convidadoPor: z.string().trim().max(120).optional().default(""),
+  // Validado contra a lista fechada: só entra no banco o que a página oferece.
+  perfil: z.enum(PERFIS).optional(),
 });
 
 export type Inscricao = z.infer<typeof esquema>;
@@ -58,7 +70,7 @@ async function gravar(data: Inscricao) {
       nome: data.nome,
       email: data.email,
       vinculo: data.vinculo || null,
-      convidado_por: data.convidadoPor || null,
+      perfil: data.perfil || null,
       origem: "site/rede-alem-da-moldura",
     });
 
