@@ -110,7 +110,17 @@ function Rede() {
         <p className="text-foreground">Recebam nossas boas vindas.</p>
       </div>
 
-      <Formulario />
+      {conversa ? (
+        <Conversa
+          conversaId={conversa.conversaId}
+          sessao={conversa.sessao}
+          turnosIniciais={conversa.turnos}
+          faltamIniciais={conversa.faltam}
+          ferramentasIniciais={conversa.ferramentas}
+        />
+      ) : (
+        <Formulario aoAbrir={setConversa} />
+      )}
     </div>
   );
 }
@@ -119,57 +129,67 @@ const CAMPO =
   "mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2.5 text-foreground " +
   "placeholder:text-muted-foreground/60 focus-visible:border-accent focus-visible:outline-none";
 
-function Formulario() {
-  const [estado, setEstado] = useState<"aberto" | "enviando" | "pronto">("aberto");
+function Formulario({ aoAbrir }: { aoAbrir: (estado: EstadoConversa) => void }) {
+  const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
+  /**
+   * Uma inscrição, um registro. Quem grava é a `rede-inscrever`: ela valida,
+   * limita por IP e, se a pessoa já estiver na lista (índice único por
+   * lower(email)), devolve o id existente com `ja_inscrito`. Voltar não é erro.
+   * Em seguida abrimos a conversa com esse mesmo id.
+   */
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    setEstado("enviando");
+    setEnviando(true);
     setErro(null);
     try {
-      await inscreverNaListaDeEspera({
-        data: {
-          nome: String(form.get("nome") ?? ""),
-          email: String(form.get("email") ?? ""),
-          vinculo: String(form.get("vinculo") ?? ""),
-          // Nenhuma opção marcada envia undefined, e o zod deixa passar.
-          perfil: (form.get("perfil") as Inscricao["perfil"]) ?? undefined,
-        },
+      const inscricao = await chamarRede<RespostaInscrever>("rede-inscrever", {
+        nome: String(form.get("nome") ?? "").trim(),
+        email: String(form.get("email") ?? "").trim(),
+        vinculo: String(form.get("vinculo") ?? "").trim(),
+        perfil: (form.get("perfil") as Perfil | null) ?? undefined,
+        origem: "site/rede-alem-da-moldura",
       });
-      setEstado("pronto");
-    } catch (err) {
-      setEstado("aberto");
-      setErro(err instanceof Error ? err.message : "Não foi possível registrar agora.");
-    }
-  }
 
-  if (estado === "pronto") {
-    return (
-      <section
-        aria-live="polite"
-        className="mt-12 rounded-lg border border-accent/40 bg-secondary/40 p-6"
-      >
-        <h2 className="font-serif text-xl font-semibold text-foreground">
-          Sua inscrição está registrada
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Assim que a Rede abrir novas vagas, o Instituto entra em contato pelo e-mail que você
-          deixou. Obrigado por querer conversar com a gente.
-        </p>
-      </section>
-    );
+      const aberta = await chamarRede<RespostaConversa>("rede-conversa", {
+        action: "abrir",
+        lista_espera_id: inscricao.lista_espera_id,
+        email: inscricao.email,
+        base_url: window.location.origin,
+      });
+
+      guardarSessao(aberta.conversa_id, aberta.sessao);
+      aoAbrir({
+        conversaId: aberta.conversa_id,
+        sessao: aberta.sessao,
+        turnos: [{ de: "anfitriao", texto: aberta.mensagem }],
+        faltam: aberta.faltam?.length ?? 1,
+        ferramentas: aberta.ferramentas ?? [],
+      });
+    } catch (err) {
+      setEnviando(false);
+      setErro(err instanceof Error ? err.message : "Não foi possível começar agora.");
+    }
   }
 
   return (
     <section className="mt-12 rounded-lg border border-border bg-secondary/40 p-6">
       <h2 className="font-serif text-2xl font-semibold text-foreground">
-        Entrar na lista de espera
+        Entrar na Rede
       </h2>
       <p className="mt-2 text-muted-foreground">
-        O lançamento é por convite. Deixe seus dados e o Instituto avisa quando abrir novas vagas.
+        São duas perguntas e, logo depois, uma conversa curta com o Anfitrião — aqui mesmo
+        nesta página, do seu jeito e no seu tempo.
       </p>
+
+      {!redeConfigurada && (
+        <p role="alert" className="mt-4 text-sm text-destructive">
+          A chave publicável do back-end da Rede ainda não foi configurada.
+        </p>
+      )}
+
 
       <form onSubmit={enviar} className="mt-6 space-y-4">
         <div>
