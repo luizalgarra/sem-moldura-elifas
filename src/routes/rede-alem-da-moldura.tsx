@@ -2,7 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { inscreverNaListaDeEspera, PERFIS, type Inscricao } from "@/lib/rede.functions";
+import {
+  chamarRede,
+  redeConfigurada,
+  PERFIS,
+  type Perfil,
+  type RespostaConversa,
+  type RespostaInscrever,
+} from "@/lib/rede-backend";
+import { Conversa, guardarSessao, type Turno } from "@/components/rede/Conversa";
+
 
 /**
  * Página de lançamento da Rede Além da Moldura.
