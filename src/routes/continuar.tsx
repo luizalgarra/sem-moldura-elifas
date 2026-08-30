@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EntrarNaRede } from "@/components/rede/EntrarNaRede";
+import { Retomar } from "@/components/rede/Retomar";
 
 const TITULO = "Continuar a conversa — Rede Além da Moldura";
 const DESC =
@@ -18,5 +18,5 @@ export const Route = createFileRoute("/continuar")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: EntrarNaRede,
+  component: Retomar,
 });
