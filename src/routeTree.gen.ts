@@ -17,6 +17,7 @@ import { Route as PostagensRouteImport } from './routes/postagens'
 import { Route as ParticipeRouteImport } from './routes/participe'
 import { Route as LinhasDaVidaRouteImport } from './routes/linhas-da-vida'
 import { Route as InstitutoRouteImport } from './routes/instituto'
+import { Route as GuardiaoRouteImport } from './routes/guardiao'
 import { Route as EspacosDeMemoriaRouteImport } from './routes/espacos-de-memoria'
 import { Route as EntrarNaRedeRouteImport } from './routes/entrar-na-rede'
 import { Route as ElifasAndreatoRouteImport } from './routes/elifas-andreato'
@@ -107,6 +108,11 @@ const LinhasDaVidaRoute = LinhasDaVidaRouteImport.update({
 const InstitutoRoute = InstitutoRouteImport.update({
   id: '/instituto',
   path: '/instituto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuardiaoRoute = GuardiaoRouteImport.update({
+  id: '/guardiao',
+  path: '/guardiao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EspacosDeMemoriaRoute = EspacosDeMemoriaRouteImport.update({
@@ -390,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
   '/entrar-na-rede': typeof EntrarNaRedeRoute
   '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
+  '/guardiao': typeof GuardiaoRoute
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/participe': typeof ParticipeRouteWithChildren
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/continuar': typeof ContinuarRoute
   '/editar': typeof EditarRoute
   '/entrar-na-rede': typeof EntrarNaRedeRoute
+  '/guardiao': typeof GuardiaoRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -507,6 +515,7 @@ export interface FileRoutesById {
   '/elifas-andreato': typeof ElifasAndreatoRouteWithChildren
   '/entrar-na-rede': typeof EntrarNaRedeRoute
   '/espacos-de-memoria': typeof EspacosDeMemoriaRouteWithChildren
+  '/guardiao': typeof GuardiaoRoute
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/participe': typeof ParticipeRouteWithChildren
@@ -570,6 +579,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato'
     | '/entrar-na-rede'
     | '/espacos-de-memoria'
+    | '/guardiao'
     | '/instituto'
     | '/linhas-da-vida'
     | '/participe'
@@ -628,6 +638,7 @@ export interface FileRouteTypes {
     | '/continuar'
     | '/editar'
     | '/entrar-na-rede'
+    | '/guardiao'
     | '/linhas-da-vida'
     | '/postagens'
     | '/privacidade'
@@ -686,6 +697,7 @@ export interface FileRouteTypes {
     | '/elifas-andreato'
     | '/entrar-na-rede'
     | '/espacos-de-memoria'
+    | '/guardiao'
     | '/instituto'
     | '/linhas-da-vida'
     | '/participe'
@@ -748,6 +760,7 @@ export interface RootRouteChildren {
   ElifasAndreatoRoute: typeof ElifasAndreatoRouteWithChildren
   EntrarNaRedeRoute: typeof EntrarNaRedeRoute
   EspacosDeMemoriaRoute: typeof EspacosDeMemoriaRouteWithChildren
+  GuardiaoRoute: typeof GuardiaoRoute
   InstitutoRoute: typeof InstitutoRouteWithChildren
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
   ParticipeRoute: typeof ParticipeRouteWithChildren
@@ -820,6 +833,13 @@ declare module '@tanstack/react-router' {
       path: '/instituto'
       fullPath: '/instituto'
       preLoaderRoute: typeof InstitutoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guardiao': {
+      id: '/guardiao'
+      path: '/guardiao'
+      fullPath: '/guardiao'
+      preLoaderRoute: typeof GuardiaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/espacos-de-memoria': {
@@ -1322,6 +1342,7 @@ const rootRouteChildren: RootRouteChildren = {
   ElifasAndreatoRoute: ElifasAndreatoRouteWithChildren,
   EntrarNaRedeRoute: EntrarNaRedeRoute,
   EspacosDeMemoriaRoute: EspacosDeMemoriaRouteWithChildren,
+  GuardiaoRoute: GuardiaoRoute,
   InstitutoRoute: InstitutoRouteWithChildren,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
   ParticipeRoute: ParticipeRouteWithChildren,
