@@ -49,16 +49,18 @@ export async function chamarRede<T>(funcao: string, corpo: unknown): Promise<T> 
   return dados as T;
 }
 
-let _cliente: SupabaseClient | undefined;
+function criarClienteRede() {
+  return createClient(REDE_URL, REDE_CHAVE_PUBLICAVEL, {
+    db: { schema: "rede" },
+    auth: { persistSession: true, autoRefreshToken: true, storageKey: "rede-auth" },
+  });
+}
+
+let _cliente: ReturnType<typeof criarClienteRede> | undefined;
 
 /** Cliente Supabase da Rede, apontando para o schema `rede`. */
-export function clienteRede(): SupabaseClient {
-  if (!_cliente) {
-    _cliente = createClient(REDE_URL, REDE_CHAVE_PUBLICAVEL, {
-      db: { schema: "rede" },
-      auth: { persistSession: true, autoRefreshToken: true, storageKey: "rede-auth" },
-    });
-  }
+export function clienteRede() {
+  if (!_cliente) _cliente = criarClienteRede();
   return _cliente;
 }
 
