@@ -69,7 +69,20 @@ export function clienteRede() {
 export type RespostaInscrever = {
   lista_espera_id: string;
   email: string;
+  /** A pessoa já estava na lista. Não é erro: é alguém que voltou. */
+  ja_inscrito?: boolean;
 };
+
+/** As quatro respostas de "Quero um convite", enviadas no campo `perfil`. */
+export const PERFIS = [
+  "Visitei a exposição da CAIXA",
+  "Tenho interesse ou curiosidade sobre Elifas",
+  "Participo de outras atividades do Instituto",
+  "Sou estudante, pesquisador ou colecionador",
+] as const;
+
+export type Perfil = (typeof PERFIS)[number];
+
 
 export type RespostaConversa = {
   conversa_id: string;
