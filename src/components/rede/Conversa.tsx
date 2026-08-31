@@ -32,13 +32,14 @@ export function limparSessao() {
   }
 }
 
-/** Renderiza URLs soltas no texto como links clicáveis. */
+/** Renderiza URLs soltas no texto como links clicáveis — inclusive o link
+ *  relativo /continuar?t=... gravado antes de o servidor mandar a URL cheia. */
 function TextoComLinks({ texto }: { texto: string }) {
-  const partes = texto.split(/(https?:\/\/[^\s<>()]+)/g);
+  const partes = texto.split(/(https?:\/\/[^\s<>()]+|\/continuar\?t=[a-f0-9]+)/g);
   return (
     <>
       {partes.map((parte, i) =>
-        /^https?:\/\//.test(parte) ? (
+        /^(https?:\/\/|\/continuar\?)/.test(parte) ? (
           <a
             key={i}
             href={parte}
