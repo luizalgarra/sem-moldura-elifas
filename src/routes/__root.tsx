@@ -276,7 +276,12 @@ function Conteudo() {
     }
   }
 
-  const mostrarLayout = !emConstrucao && !ehAuth;
+  // A conversa com o Anfitrião (e a ponte /continuar) roda em tela limpa:
+  // sem cabeçalho nem rodapé, só a conversa ocupa a tela.
+  const telaLimpa =
+    pathname === "/continuar" || pathname.startsWith("/rede-alem-da-moldura/conversa");
+
+  const mostrarLayout = !emConstrucao && !ehAuth && !telaLimpa;
 
   return (
     <div className="flex min-h-screen flex-col">

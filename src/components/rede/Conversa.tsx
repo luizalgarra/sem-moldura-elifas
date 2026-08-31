@@ -5,7 +5,17 @@ import { chamarRede, type RespostaConversa } from "@/lib/rede-backend";
 
 export type Turno = { de: "anfitriao" | "pessoa"; texto: string };
 
+/** Estado mínimo para montar a tela da conversa sem chamar o servidor. */
+export type EstadoTela = {
+  conversaId: string;
+  sessao: string;
+  turnos: Turno[];
+  faltam: number;
+  ferramentas: string[];
+};
+
 const CHAVE_SESSAO = "rede-conversa";
+const CHAVE_ESTADO = "rede-estado";
 
 export function guardarSessao(conversa_id: string, sessao: string) {
   try {
@@ -24,9 +34,28 @@ export function lerSessao(): { conversa_id: string; sessao: string } | null {
   }
 }
 
+/** Guarda o estado inicial da conversa, para a tela limpa abrir sem nova chamada. */
+export function guardarEstado(estado: EstadoTela) {
+  try {
+    sessionStorage.setItem(CHAVE_ESTADO, JSON.stringify(estado));
+  } catch {
+    /* idem */
+  }
+}
+
+export function lerEstado(): EstadoTela | null {
+  try {
+    const bruto = sessionStorage.getItem(CHAVE_ESTADO);
+    return bruto ? (JSON.parse(bruto) as EstadoTela) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function limparSessao() {
   try {
     sessionStorage.removeItem(CHAVE_SESSAO);
+    sessionStorage.removeItem(CHAVE_ESTADO);
   } catch {
     /* idem */
   }

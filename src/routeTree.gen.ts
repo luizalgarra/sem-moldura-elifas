@@ -28,6 +28,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcervoRouteImport } from './routes/acervo'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RedeAlemDaMolduraIndexRouteImport } from './routes/rede-alem-da-moldura.index'
 import { Route as QrcodesIndexRouteImport } from './routes/qrcodes.index'
 import { Route as PostarIndexRouteImport } from './routes/postar.index'
 import { Route as ParticipeIndexRouteImport } from './routes/participe.index'
@@ -36,6 +37,7 @@ import { Route as InstitutoIndexRouteImport } from './routes/instituto.index'
 import { Route as EspacosDeMemoriaIndexRouteImport } from './routes/espacos-de-memoria.index'
 import { Route as ElifasAndreatoIndexRouteImport } from './routes/elifas-andreato.index'
 import { Route as AcervoIndexRouteImport } from './routes/acervo.index'
+import { Route as RedeAlemDaMolduraConversaRouteImport } from './routes/rede-alem-da-moldura.conversa'
 import { Route as QrcodesImprimirRouteImport } from './routes/qrcodes.imprimir'
 import { Route as PostarNumRouteImport } from './routes/postar.$num'
 import { Route as ParticipePatrocineRouteImport } from './routes/participe.patrocine'
@@ -168,6 +170,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RedeAlemDaMolduraIndexRoute = RedeAlemDaMolduraIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RedeAlemDaMolduraRoute,
+} as any)
 const QrcodesIndexRoute = QrcodesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -208,6 +215,12 @@ const AcervoIndexRoute = AcervoIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AcervoRoute,
 } as any)
+const RedeAlemDaMolduraConversaRoute =
+  RedeAlemDaMolduraConversaRouteImport.update({
+    id: '/conversa',
+    path: '/conversa',
+    getParentRoute: () => RedeAlemDaMolduraRoute,
+  } as any)
 const QrcodesImprimirRoute = QrcodesImprimirRouteImport.update({
   id: '/imprimir',
   path: '/imprimir',
@@ -421,7 +434,7 @@ export interface FileRoutesByFullPath {
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
-  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRoute
+  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRouteWithChildren
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
   '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
@@ -454,6 +467,7 @@ export interface FileRoutesByFullPath {
   '/participe/patrocine': typeof ParticipePatrocineRoute
   '/postar/$num': typeof PostarNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/rede-alem-da-moldura/conversa': typeof RedeAlemDaMolduraConversaRoute
   '/acervo/': typeof AcervoIndexRoute
   '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
   '/espacos-de-memoria/': typeof EspacosDeMemoriaIndexRoute
@@ -462,6 +476,7 @@ export interface FileRoutesByFullPath {
   '/participe/': typeof ParticipeIndexRoute
   '/postar/': typeof PostarIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
+  '/rede-alem-da-moldura/': typeof RedeAlemDaMolduraIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
   '/api/public/rede/conversa': typeof ApiPublicRedeConversaRoute
@@ -480,7 +495,6 @@ export interface FileRoutesByTo {
   '/linhas-da-vida': typeof LinhasDaVidaRoute
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRoute
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
   '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
@@ -513,6 +527,7 @@ export interface FileRoutesByTo {
   '/participe/patrocine': typeof ParticipePatrocineRoute
   '/postar/$num': typeof PostarNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/rede-alem-da-moldura/conversa': typeof RedeAlemDaMolduraConversaRoute
   '/acervo': typeof AcervoIndexRoute
   '/elifas-andreato': typeof ElifasAndreatoIndexRoute
   '/espacos-de-memoria': typeof EspacosDeMemoriaIndexRoute
@@ -521,6 +536,7 @@ export interface FileRoutesByTo {
   '/participe': typeof ParticipeIndexRoute
   '/postar': typeof PostarIndexRoute
   '/qrcodes': typeof QrcodesIndexRoute
+  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
   '/api/public/rede/conversa': typeof ApiPublicRedeConversaRoute
@@ -546,7 +562,7 @@ export interface FileRoutesById {
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
   '/qrcodes': typeof QrcodesRouteWithChildren
-  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRoute
+  '/rede-alem-da-moldura': typeof RedeAlemDaMolduraRouteWithChildren
   '/sobre': typeof SobreRoute
   '/acervo/busca': typeof AcervoBuscaRoute
   '/acervo/cadernos-e-manuscritos': typeof AcervoCadernosEManuscritosRoute
@@ -579,6 +595,7 @@ export interface FileRoutesById {
   '/participe/patrocine': typeof ParticipePatrocineRoute
   '/postar/$num': typeof PostarNumRoute
   '/qrcodes/imprimir': typeof QrcodesImprimirRoute
+  '/rede-alem-da-moldura/conversa': typeof RedeAlemDaMolduraConversaRoute
   '/acervo/': typeof AcervoIndexRoute
   '/elifas-andreato/': typeof ElifasAndreatoIndexRoute
   '/espacos-de-memoria/': typeof EspacosDeMemoriaIndexRoute
@@ -587,6 +604,7 @@ export interface FileRoutesById {
   '/participe/': typeof ParticipeIndexRoute
   '/postar/': typeof PostarIndexRoute
   '/qrcodes/': typeof QrcodesIndexRoute
+  '/rede-alem-da-moldura/': typeof RedeAlemDaMolduraIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
   '/api/public/rede/conversa': typeof ApiPublicRedeConversaRoute
@@ -646,6 +664,7 @@ export interface FileRouteTypes {
     | '/participe/patrocine'
     | '/postar/$num'
     | '/qrcodes/imprimir'
+    | '/rede-alem-da-moldura/conversa'
     | '/acervo/'
     | '/elifas-andreato/'
     | '/espacos-de-memoria/'
@@ -654,6 +673,7 @@ export interface FileRouteTypes {
     | '/participe/'
     | '/postar/'
     | '/qrcodes/'
+    | '/rede-alem-da-moldura/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
     | '/api/public/rede/conversa'
@@ -672,7 +692,6 @@ export interface FileRouteTypes {
     | '/linhas-da-vida'
     | '/postagens'
     | '/privacidade'
-    | '/rede-alem-da-moldura'
     | '/sobre'
     | '/acervo/busca'
     | '/acervo/cadernos-e-manuscritos'
@@ -705,6 +724,7 @@ export interface FileRouteTypes {
     | '/participe/patrocine'
     | '/postar/$num'
     | '/qrcodes/imprimir'
+    | '/rede-alem-da-moldura/conversa'
     | '/acervo'
     | '/elifas-andreato'
     | '/espacos-de-memoria'
@@ -713,6 +733,7 @@ export interface FileRouteTypes {
     | '/participe'
     | '/postar'
     | '/qrcodes'
+    | '/rede-alem-da-moldura'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
     | '/api/public/rede/conversa'
@@ -770,6 +791,7 @@ export interface FileRouteTypes {
     | '/participe/patrocine'
     | '/postar/$num'
     | '/qrcodes/imprimir'
+    | '/rede-alem-da-moldura/conversa'
     | '/acervo/'
     | '/elifas-andreato/'
     | '/espacos-de-memoria/'
@@ -778,6 +800,7 @@ export interface FileRouteTypes {
     | '/participe/'
     | '/postar/'
     | '/qrcodes/'
+    | '/rede-alem-da-moldura/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
     | '/api/public/rede/conversa'
@@ -803,7 +826,7 @@ export interface RootRouteChildren {
   PostagensRoute: typeof PostagensRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   QrcodesRoute: typeof QrcodesRouteWithChildren
-  RedeAlemDaMolduraRoute: typeof RedeAlemDaMolduraRoute
+  RedeAlemDaMolduraRoute: typeof RedeAlemDaMolduraRouteWithChildren
   SobreRoute: typeof SobreRoute
   ObrasNumRoute: typeof ObrasNumRoute
   PostarNumRoute: typeof PostarNumRoute
@@ -951,6 +974,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rede-alem-da-moldura/': {
+      id: '/rede-alem-da-moldura/'
+      path: '/'
+      fullPath: '/rede-alem-da-moldura/'
+      preLoaderRoute: typeof RedeAlemDaMolduraIndexRouteImport
+      parentRoute: typeof RedeAlemDaMolduraRoute
+    }
     '/qrcodes/': {
       id: '/qrcodes/'
       path: '/'
@@ -1006,6 +1036,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/acervo/'
       preLoaderRoute: typeof AcervoIndexRouteImport
       parentRoute: typeof AcervoRoute
+    }
+    '/rede-alem-da-moldura/conversa': {
+      id: '/rede-alem-da-moldura/conversa'
+      path: '/conversa'
+      fullPath: '/rede-alem-da-moldura/conversa'
+      preLoaderRoute: typeof RedeAlemDaMolduraConversaRouteImport
+      parentRoute: typeof RedeAlemDaMolduraRoute
     }
     '/qrcodes/imprimir': {
       id: '/qrcodes/imprimir'
@@ -1391,6 +1428,19 @@ const QrcodesRouteChildren: QrcodesRouteChildren = {
 const QrcodesRouteWithChildren =
   QrcodesRoute._addFileChildren(QrcodesRouteChildren)
 
+interface RedeAlemDaMolduraRouteChildren {
+  RedeAlemDaMolduraConversaRoute: typeof RedeAlemDaMolduraConversaRoute
+  RedeAlemDaMolduraIndexRoute: typeof RedeAlemDaMolduraIndexRoute
+}
+
+const RedeAlemDaMolduraRouteChildren: RedeAlemDaMolduraRouteChildren = {
+  RedeAlemDaMolduraConversaRoute: RedeAlemDaMolduraConversaRoute,
+  RedeAlemDaMolduraIndexRoute: RedeAlemDaMolduraIndexRoute,
+}
+
+const RedeAlemDaMolduraRouteWithChildren =
+  RedeAlemDaMolduraRoute._addFileChildren(RedeAlemDaMolduraRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcervoRoute: AcervoRouteWithChildren,
@@ -1409,7 +1459,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostagensRoute: PostagensRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   QrcodesRoute: QrcodesRouteWithChildren,
-  RedeAlemDaMolduraRoute: RedeAlemDaMolduraRoute,
+  RedeAlemDaMolduraRoute: RedeAlemDaMolduraRouteWithChildren,
   SobreRoute: SobreRoute,
   ObrasNumRoute: ObrasNumRoute,
   PostarNumRoute: PostarNumRoute,

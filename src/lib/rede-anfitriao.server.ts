@@ -412,6 +412,32 @@ export async function tratarConversa(req: Request): Promise<Response> {
       return json({ ok: true });
     }
 
+    // Reconstroi a tela da conversa depois de um refresh: historico, o que
+    // falta e se ha ficha proposta esperando aprovacao.
+    if (c.action === "estado") {
+      const { data: conv } = await sb.from("conversas").select("*").eq("id", c.conversa_id).maybeSingle();
+      if (!conv || (conv as any).sessao_hash !== (await sha256(String(c.sessao ?? "")))) return json({ erro: "sessao invalida" }, 401);
+
+      const { data: hist } = await sb.from("mensagens").select("papel,conteudo").eq("conversa_id", (conv as any).id).order("criado_em", { ascending: true }).limit(80);
+      const st = await estado(sb, (conv as any).membro_id);
+      const faltam = abertas(st.fechado, (conv as any).etapa);
+      const { data: mem } = await sb.from("membros").select("ficha_texto,ficha_aprovada_em").eq("id", (conv as any).membro_id).single();
+
+      const ferramentas: string[] = (conv as any).encerrada_em
+        ? ["emitir_link_retomada"]
+        : (mem as any)?.ficha_texto && !(mem as any)?.ficha_aprovada_em
+          ? ["propor_ficha"]
+          : [];
+
+      return json({
+        conversa_id: (conv as any).id,
+        etapa: (conv as any).etapa,
+        turnos: (hist ?? []).map((m: any) => ({ de: m.papel === "pessoa" ? "pessoa" : "anfitriao", texto: m.conteudo })),
+        faltam,
+        ferramentas,
+      });
+    }
+
     return json({ erro: `acao desconhecida: ${c.action}` }, 400);
   } catch (e: any) {
     const msg = e?.message ?? JSON.stringify(e);
