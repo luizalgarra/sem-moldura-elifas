@@ -215,6 +215,13 @@ function RootComponent() {
   );
 }
 
+/** O aviso de instalação é fixo na base e taparia o campo da conversa. */
+function DicaSeCabe() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (pathname.startsWith("/rede-alem-da-moldura/conversa")) return null;
+  return <DicaInstalacao />;
+}
+
 function Conteudo() {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
