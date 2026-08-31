@@ -4,12 +4,12 @@ import { Loader2 } from "lucide-react";
 
 import {
   chamarRede,
-  redeConfigurada,
   PERFIS,
   type Perfil,
   type RespostaConversa,
   type RespostaInscrever,
 } from "@/lib/rede-backend";
+
 import { Conversa, guardarSessao, type Turno } from "@/components/rede/Conversa";
 
 
