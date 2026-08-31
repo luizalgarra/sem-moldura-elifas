@@ -316,7 +316,7 @@ export async function tratarConversa(req: Request): Promise<Response> {
       if (jaMembro) {
         const membro_id = (jaMembro as any).id;
         const { data: viva } = await sb.from("conversas").select("*").eq("membro_id", membro_id)
-          .is("encerrada_em", null).order("criado_em", { ascending: false }).limit(1).maybeSingle();
+          .is("encerrada_em", null).order("iniciada_em", { ascending: false }).limit(1).maybeSingle();
 
         if (viva) {
           // Sessao nova a cada volta: so quem acabou de provar o e-mail escreve.
