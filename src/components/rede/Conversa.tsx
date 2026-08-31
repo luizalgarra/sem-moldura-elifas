@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { chamarRede, type RespostaConversa } from "@/lib/rede-backend";
 
 export type Turno = { de: "anfitriao" | "pessoa"; texto: string };
@@ -92,6 +93,7 @@ type Props = {
   turnosIniciais: Turno[];
   faltamIniciais: number;
   ferramentasIniciais: string[];
+  className?: string;
 };
 
 export function Conversa({
@@ -100,6 +102,7 @@ export function Conversa({
   turnosIniciais,
   faltamIniciais,
   ferramentasIniciais,
+  className,
 }: Props) {
   const [turnos, setTurnos] = useState<Turno[]>(turnosIniciais);
   const [texto, setTexto] = useState("");
@@ -112,11 +115,14 @@ export function Conversa({
   // O total inicial de pendências é a régua da barra: ela avança conforme faltam[] encolhe.
   const totalRef = useRef(Math.max(faltamIniciais, 1));
   const [faltam, setFaltam] = useState(faltamIniciais);
+  const mensagensRef = useRef<HTMLDivElement | null>(null);
   const fimRef = useRef<HTMLDivElement | null>(null);
   const campoRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
-    fimRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const el = mensagensRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [turnos, enviando]);
 
   const encerrada = ferramentas.includes("emitir_link_retomada") || aprovada;
@@ -178,135 +184,148 @@ export function Conversa({
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className={cn("flex flex-col", className)}>
       {/* Barra sem rótulo: mostra que a conversa anda, sem contar etapas. */}
-      <div
-        className="h-0.5 w-full overflow-hidden rounded-full bg-border"
-        role="presentation"
-      >
+      <div className="shrink-0 px-4 pt-4">
         <div
-          className="h-full bg-accent transition-[width] duration-700 ease-out"
-          style={{ width: `${progresso}%` }}
-        />
+          className="h-0.5 w-full overflow-hidden rounded-full bg-border"
+          role="presentation"
+        >
+          <div
+            className="h-full bg-accent transition-[width] duration-700 ease-out"
+            style={{ width: `${progresso}%` }}
+          />
+        </div>
       </div>
 
-      <div className="mt-8 space-y-4" aria-live="polite">
-        {turnos.map((turno, i) => (
-          <div
-            key={i}
-            className={turno.de === "pessoa" ? "flex justify-end" : "flex justify-start"}
-          >
+      {/* Área de mensagens: ocupa o espaço restante e rola para cima. */}
+      <div
+        ref={mensagensRef}
+        className="flex-1 overflow-y-auto px-4 py-4"
+        aria-live="polite"
+      >
+        <div className="mx-auto max-w-2xl space-y-4">
+          {turnos.map((turno, i) => (
             <div
-              className={
-                turno.de === "pessoa"
-                  ? "max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-3 text-primary-foreground"
-                  : "max-w-[85%] rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 text-card-foreground"
-              }
+              key={i}
+              className={turno.de === "pessoa" ? "flex justify-end" : "flex justify-start"}
             >
-              {turno.de === "anfitriao" && (
-                <p className="mb-1 text-xs tracking-[0.14em] text-accent uppercase">
-                  Anfitrião
-                </p>
-              )}
-              <div className="leading-relaxed">
-                <TextoComLinks texto={turno.texto} />
+              <div
+                className={
+                  turno.de === "pessoa"
+                    ? "max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-3 text-primary-foreground"
+                    : "max-w-[85%] rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 text-card-foreground"
+                }
+              >
+                {turno.de === "anfitriao" && (
+                  <p className="mb-1 text-xs tracking-[0.14em] text-accent uppercase">
+                    Anfitrião
+                  </p>
+                )}
+                <div className="leading-relaxed">
+                  <TextoComLinks texto={turno.texto} />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {enviando && (
-          <div className="flex justify-start">
-            <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              <span className="text-sm">digitando…</span>
+          {enviando && (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                <span className="text-sm">digitando…</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {propoeFicha && !enviando && (
-          <div className="flex flex-wrap gap-3 pt-1">
-            <button
-              type="button"
-              onClick={aprovarFicha}
-              className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-5 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              Está certo assim
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPropostaVisivel(false);
-                campoRef.current?.focus();
-              }}
-              className="inline-flex min-h-[44px] items-center rounded-md border border-border px-5 font-medium text-foreground transition-colors hover:bg-secondary"
-            >
-              Quero mudar algo
-            </button>
-          </div>
-        )}
+          {propoeFicha && !enviando && (
+            <div className="flex flex-wrap gap-3 pt-1">
+              <button
+                type="button"
+                onClick={aprovarFicha}
+                className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-5 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Está certo assim
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPropostaVisivel(false);
+                  campoRef.current?.focus();
+                }}
+                className="inline-flex min-h-[44px] items-center rounded-md border border-border px-5 font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                Quero mudar algo
+              </button>
+            </div>
+          )}
 
-        {aprovada && (
-          <p className="rounded-lg border border-accent/40 bg-secondary/40 p-5 text-muted-foreground">
-            Pronto. Sua ficha foi para o Guardião da Rede, que vai te chamar para a próxima
-            roda. Obrigado pelo tempo.
-          </p>
-        )}
+          {aprovada && (
+            <p className="rounded-lg border border-accent/40 bg-secondary/40 p-5 text-muted-foreground">
+              Pronto. Sua ficha foi para o Guardião da Rede, que vai te chamar para a próxima
+              roda. Obrigado pelo tempo.
+            </p>
+          )}
 
-        <div ref={fimRef} />
+          <div ref={fimRef} />
+        </div>
       </div>
 
-      {erro && (
-        <p role="alert" className="mt-4 text-sm text-destructive">
-          {erro}
-        </p>
-      )}
+      {/* Campo de texto fixo na parte inferior. */}
+      <div className="shrink-0 border-t border-border/50 bg-background px-4 py-4">
+        <div className="mx-auto max-w-2xl">
+          {erro && (
+            <p role="alert" className="mb-3 text-sm text-destructive">
+              {erro}
+            </p>
+          )}
 
-      {!encerrada && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void falar();
-          }}
-          className="mt-6"
-        >
-          <label htmlFor="resposta" className="sr-only">
-            Sua resposta
-          </label>
-          <textarea
-            id="resposta"
-            ref={campoRef}
-            value={texto}
-            rows={1}
-            onChange={(e) => {
-              setTexto(e.target.value);
-              const el = e.target;
-              el.style.height = "auto";
-              el.style.height = `${Math.min(el.scrollHeight, 240)}px`;
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+          {!encerrada && (
+            <form
+              onSubmit={(e) => {
                 e.preventDefault();
                 void falar();
-              }
-            }}
-            placeholder="Escreva aqui…"
-            className="w-full resize-none rounded-md border border-input bg-background px-3 py-3 text-foreground placeholder:text-muted-foreground/60 focus-visible:border-accent focus-visible:outline-none"
-          />
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">
-              Enter envia · Shift+Enter quebra linha
-            </p>
-            <button
-              type="submit"
-              disabled={enviando || !texto.trim()}
-              className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-5 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              }}
             >
-              Enviar
-            </button>
-          </div>
-        </form>
-      )}
+              <label htmlFor="resposta" className="sr-only">
+                Sua resposta
+              </label>
+              <textarea
+                id="resposta"
+                ref={campoRef}
+                value={texto}
+                rows={1}
+                onChange={(e) => {
+                  setTexto(e.target.value);
+                  const el = e.target;
+                  el.style.height = "auto";
+                  el.style.height = `${Math.min(el.scrollHeight, 240)}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void falar();
+                  }
+                }}
+                placeholder="Escreva aqui…"
+                className="w-full resize-none rounded-md border border-input bg-background px-3 py-3 text-foreground placeholder:text-muted-foreground/60 focus-visible:border-accent focus-visible:outline-none"
+              />
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">
+                  Enter envia · Shift+Enter quebra linha
+                </p>
+                <button
+                  type="submit"
+                  disabled={enviando || !texto.trim()}
+                  className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-5 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+                >
+                  Enviar
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
