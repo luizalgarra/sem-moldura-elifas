@@ -272,6 +272,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rede_lista_espera: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          origem: string | null
+          perfil: string | null
+          vinculo: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          nome: string
+          origem?: string | null
+          perfil?: string | null
+          vinculo?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          origem?: string | null
+          perfil?: string | null
+          vinculo?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

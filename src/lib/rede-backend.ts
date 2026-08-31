@@ -3,10 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * Back-end da Rede Além da Moldura.
  *
- * Fica no mesmo projeto Supabase que o resto do site — nenhum endereço de banco
- * é escrito à mão aqui. Consumimos o que já existe lá: as Edge Functions
- * `rede-inscrever`, `rede-conversa` e `rede-saude`, e o schema `rede`
- * (leitura/decisão do Guardião via RLS).
+ * A conversa do Anfitrião roda no servidor do próprio site, em
+ * `/api/public/rede/{inscrever,conversa,saude}`. O schema `rede` do banco é
+ * lido direto aqui só no painel do Guardião (leitura/decisão via RLS).
  */
 export const REDE_URL: string =
   (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) ??
@@ -20,14 +19,12 @@ export const REDE_CHAVE_PUBLICAVEL: string =
 export const redeConfigurada = REDE_URL.length > 0 && REDE_CHAVE_PUBLICAVEL.length > 0;
 
 
-/** Chama uma Edge Function da Rede e devolve o JSON já convertido. */
+/** Chama um endpoint da Rede no próprio site e devolve o JSON já convertido. */
 export async function chamarRede<T>(funcao: string, corpo: unknown): Promise<T> {
-  const resposta = await fetch(`${REDE_URL}/functions/v1/${funcao}`, {
+  const caminho = funcao.replace(/^rede-/, "");
+  const resposta = await fetch(`/api/public/rede/${caminho}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${REDE_CHAVE_PUBLICAVEL}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(corpo),
   });
 
@@ -50,6 +47,7 @@ export async function chamarRede<T>(funcao: string, corpo: unknown): Promise<T> 
 
   return dados as T;
 }
+
 
 function criarClienteRede() {
   return createClient(REDE_URL, REDE_CHAVE_PUBLICAVEL, {

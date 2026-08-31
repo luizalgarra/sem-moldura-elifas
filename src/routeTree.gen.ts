@@ -67,6 +67,9 @@ import { Route as AcervoComoCitarRouteImport } from './routes/acervo.como-citar'
 import { Route as AcervoCapasDeDiscosERevistasRouteImport } from './routes/acervo.capas-de-discos-e-revistas'
 import { Route as AcervoCadernosEManuscritosRouteImport } from './routes/acervo.cadernos-e-manuscritos'
 import { Route as AcervoBuscaRouteImport } from './routes/acervo.busca'
+import { Route as ApiPublicRedeSaudeRouteImport } from './routes/api/public/rede/saude'
+import { Route as ApiPublicRedeInscreverRouteImport } from './routes/api/public/rede/inscrever'
+import { Route as ApiPublicRedeConversaRouteImport } from './routes/api/public/rede/conversa'
 import { Route as ApiPublicObraImagemNumRouteImport } from './routes/api/public/obra-imagem.$num'
 import { Route as ApiPublicObraAudioNumRouteImport } from './routes/api/public/obra-audio.$num'
 
@@ -374,6 +377,21 @@ const AcervoBuscaRoute = AcervoBuscaRouteImport.update({
   path: '/busca',
   getParentRoute: () => AcervoRoute,
 } as any)
+const ApiPublicRedeSaudeRoute = ApiPublicRedeSaudeRouteImport.update({
+  id: '/api/public/rede/saude',
+  path: '/api/public/rede/saude',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicRedeInscreverRoute = ApiPublicRedeInscreverRouteImport.update({
+  id: '/api/public/rede/inscrever',
+  path: '/api/public/rede/inscrever',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicRedeConversaRoute = ApiPublicRedeConversaRouteImport.update({
+  id: '/api/public/rede/conversa',
+  path: '/api/public/rede/conversa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicObraImagemNumRoute = ApiPublicObraImagemNumRouteImport.update({
   id: '/api/public/obra-imagem/$num',
   path: '/api/public/obra-imagem/$num',
@@ -446,6 +464,9 @@ export interface FileRoutesByFullPath {
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
+  '/api/public/rede/conversa': typeof ApiPublicRedeConversaRoute
+  '/api/public/rede/inscrever': typeof ApiPublicRedeInscreverRoute
+  '/api/public/rede/saude': typeof ApiPublicRedeSaudeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -502,6 +523,9 @@ export interface FileRoutesByTo {
   '/qrcodes': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
+  '/api/public/rede/conversa': typeof ApiPublicRedeConversaRoute
+  '/api/public/rede/inscrever': typeof ApiPublicRedeInscreverRoute
+  '/api/public/rede/saude': typeof ApiPublicRedeSaudeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -565,6 +589,9 @@ export interface FileRoutesById {
   '/qrcodes/': typeof QrcodesIndexRoute
   '/api/public/obra-audio/$num': typeof ApiPublicObraAudioNumRoute
   '/api/public/obra-imagem/$num': typeof ApiPublicObraImagemNumRoute
+  '/api/public/rede/conversa': typeof ApiPublicRedeConversaRoute
+  '/api/public/rede/inscrever': typeof ApiPublicRedeInscreverRoute
+  '/api/public/rede/saude': typeof ApiPublicRedeSaudeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -629,6 +656,9 @@ export interface FileRouteTypes {
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
+    | '/api/public/rede/conversa'
+    | '/api/public/rede/inscrever'
+    | '/api/public/rede/saude'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -685,6 +715,9 @@ export interface FileRouteTypes {
     | '/qrcodes'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
+    | '/api/public/rede/conversa'
+    | '/api/public/rede/inscrever'
+    | '/api/public/rede/saude'
   id:
     | '__root__'
     | '/'
@@ -747,6 +780,9 @@ export interface FileRouteTypes {
     | '/qrcodes/'
     | '/api/public/obra-audio/$num'
     | '/api/public/obra-imagem/$num'
+    | '/api/public/rede/conversa'
+    | '/api/public/rede/inscrever'
+    | '/api/public/rede/saude'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -775,6 +811,9 @@ export interface RootRouteChildren {
   PostarIndexRoute: typeof PostarIndexRoute
   ApiPublicObraAudioNumRoute: typeof ApiPublicObraAudioNumRoute
   ApiPublicObraImagemNumRoute: typeof ApiPublicObraImagemNumRoute
+  ApiPublicRedeConversaRoute: typeof ApiPublicRedeConversaRoute
+  ApiPublicRedeInscreverRoute: typeof ApiPublicRedeInscreverRoute
+  ApiPublicRedeSaudeRoute: typeof ApiPublicRedeSaudeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1185,6 +1224,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcervoBuscaRouteImport
       parentRoute: typeof AcervoRoute
     }
+    '/api/public/rede/saude': {
+      id: '/api/public/rede/saude'
+      path: '/api/public/rede/saude'
+      fullPath: '/api/public/rede/saude'
+      preLoaderRoute: typeof ApiPublicRedeSaudeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/rede/inscrever': {
+      id: '/api/public/rede/inscrever'
+      path: '/api/public/rede/inscrever'
+      fullPath: '/api/public/rede/inscrever'
+      preLoaderRoute: typeof ApiPublicRedeInscreverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/rede/conversa': {
+      id: '/api/public/rede/conversa'
+      path: '/api/public/rede/conversa'
+      fullPath: '/api/public/rede/conversa'
+      preLoaderRoute: typeof ApiPublicRedeConversaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/obra-imagem/$num': {
       id: '/api/public/obra-imagem/$num'
       path: '/api/public/obra-imagem/$num'
@@ -1357,6 +1417,9 @@ const rootRouteChildren: RootRouteChildren = {
   PostarIndexRoute: PostarIndexRoute,
   ApiPublicObraAudioNumRoute: ApiPublicObraAudioNumRoute,
   ApiPublicObraImagemNumRoute: ApiPublicObraImagemNumRoute,
+  ApiPublicRedeConversaRoute: ApiPublicRedeConversaRoute,
+  ApiPublicRedeInscreverRoute: ApiPublicRedeInscreverRoute,
+  ApiPublicRedeSaudeRoute: ApiPublicRedeSaudeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
