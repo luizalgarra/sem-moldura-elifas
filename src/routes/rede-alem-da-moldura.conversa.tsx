@@ -121,22 +121,27 @@ function TelaConversa() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 pt-6">
-      <button
-        type="button"
-        onClick={sair}
-        className="inline-flex min-h-[44px] items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        Sair da conversa
-      </button>
-      <Conversa
-        conversaId={estado.conversaId}
-        sessao={estado.sessao}
-        turnosIniciais={estado.turnos}
-        faltamIniciais={estado.faltam}
-        ferramentasIniciais={estado.ferramentas}
-      />
+    <div className="flex h-dvh flex-col">
+      <div className="mx-auto w-full max-w-2xl px-4 pt-4">
+        <button
+          type="button"
+          onClick={sair}
+          className="inline-flex min-h-[44px] items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Sair da conversa
+        </button>
+      </div>
+      <div className="min-h-0 flex-1">
+        <Conversa
+          className="h-full"
+          conversaId={estado.conversaId}
+          sessao={estado.sessao}
+          turnosIniciais={estado.turnos}
+          faltamIniciais={estado.faltam}
+          ferramentasIniciais={estado.ferramentas}
+        />
+      </div>
     </div>
   );
 }
