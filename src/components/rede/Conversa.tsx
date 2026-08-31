@@ -201,7 +201,7 @@ export function Conversa({
       {/* Área de mensagens: ocupa o espaço restante e rola para cima. */}
       <div
         ref={mensagensRef}
-        className="flex-1 overflow-y-auto px-4 py-4"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4"
         aria-live="polite"
       >
         <div className="mx-auto max-w-2xl space-y-4">
@@ -272,7 +272,10 @@ export function Conversa({
       </div>
 
       {/* Campo de texto fixo na parte inferior. */}
-      <div className="shrink-0 border-t border-border/50 bg-background px-4 py-4">
+      <div
+        className="shrink-0 border-t border-border/50 bg-background px-4 pt-4"
+        style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+      >
         <div className="mx-auto max-w-2xl">
           {erro && (
             <p role="alert" className="mb-3 text-sm text-destructive">

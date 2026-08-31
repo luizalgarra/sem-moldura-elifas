@@ -86,6 +86,20 @@ function TelaConversa() {
     })();
   }, [navigate]);
 
+  // Enquanto a tela limpa está montada, o documento não rola: só a área de
+  // mensagens rola, e o campo fica preso na base da viewport.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const antes = { html: html.style.overflow, body: body.style.overflow };
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = antes.html;
+      body.style.overflow = antes.body;
+    };
+  }, []);
+
   function sair() {
     limparSessao();
     void navigate({ to: "/rede-alem-da-moldura" });
@@ -121,7 +135,7 @@ function TelaConversa() {
   }
 
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="fixed inset-0 z-40 flex flex-col bg-background" style={{ height: "100dvh" }}>
       <div className="mx-auto w-full max-w-2xl px-4 pt-4">
         <button
           type="button"
