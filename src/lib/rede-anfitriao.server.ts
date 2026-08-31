@@ -332,10 +332,11 @@ export async function tratarConversa(req: Request): Promise<Response> {
       await sb.from("tokens_retomada").update({ usado_em: new Date().toISOString() }).eq("token_hash", (reg as any).token_hash);
 
       const sessao = segredo();
-      const { data: conv } = await sb.from("conversas").insert({
+      const { data: conv, error: eConv } = await sb.from("conversas").insert({
         membro_id: (reg as any).membro_id, etapa: "B", canal: c.canal ?? "web",
         sessao_hash: await sha256(sessao), estado_atual: "S6_RETOMADA",
       }).select("id").single();
+      if (eConv || !conv) throw new Error(`nao foi possivel retomar a conversa: ${eConv?.message ?? "sem retorno do banco"}`);
       await sb.from("sinais").insert({ membro_id: (reg as any).membro_id, tipo: "retorno_etapa_b" });
 
       const st = await estado(sb, (reg as any).membro_id);
