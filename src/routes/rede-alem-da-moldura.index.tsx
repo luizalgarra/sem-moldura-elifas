@@ -159,10 +159,15 @@ function Formulario() {
       guardarEstado({
         conversaId: aberta.conversa_id,
         sessao: aberta.sessao,
-        turnos: [{ de: "anfitriao", texto: aberta.mensagem }],
+        // Quem já se cadastrou volta com o histórico inteiro; quem chega
+        // agora tem só a primeira fala do Anfitrião.
+        turnos: aberta.turnos?.length
+          ? aberta.turnos
+          : [{ de: "anfitriao", texto: aberta.mensagem }],
         faltam: aberta.faltam?.length ?? 1,
         ferramentas: aberta.ferramentas ?? [],
       });
+
       void navigate({ to: "/rede-alem-da-moldura/conversa" });
     } catch (err) {
       setEnviando(false);

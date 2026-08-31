@@ -88,7 +88,10 @@ export type RespostaConversa = {
   conversa_id: string;
   sessao: string;
   mensagem: string;
+  /** Histórico completo quando alguém já cadastrado reabre a conversa. */
+  turnos?: { de: "pessoa" | "anfitriao"; texto: string }[];
   faltam?: string[];
   completo?: boolean;
   ferramentas?: string[];
 };
+
