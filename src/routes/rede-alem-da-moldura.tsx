@@ -4,12 +4,12 @@ import { Loader2 } from "lucide-react";
 
 import {
   chamarRede,
-  redeConfigurada,
   PERFIS,
   type Perfil,
   type RespostaConversa,
   type RespostaInscrever,
 } from "@/lib/rede-backend";
+
 import { Conversa, guardarSessao, type Turno } from "@/components/rede/Conversa";
 
 
@@ -184,11 +184,8 @@ function Formulario({ aoAbrir }: { aoAbrir: (estado: EstadoConversa) => void }) 
         nesta página, do seu jeito e no seu tempo.
       </p>
 
-      {!redeConfigurada && (
-        <p role="alert" className="mt-4 text-sm text-destructive">
-          A chave publicável do back-end da Rede ainda não foi configurada.
-        </p>
-      )}
+
+
 
 
       <form onSubmit={enviar} className="mt-6 space-y-4">

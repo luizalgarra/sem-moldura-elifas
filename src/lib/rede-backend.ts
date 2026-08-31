@@ -3,20 +3,22 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * Back-end da Rede Além da Moldura.
  *
- * É um projeto Supabase próprio, separado do backend do catálogo. Aqui só
- * consumimos o que já existe lá: as Edge Functions `rede-inscrever` e
- * `rede-conversa`, e o schema `rede` (leitura/decisão do Guardião via RLS).
+ * Fica no mesmo projeto Supabase que o resto do site — nenhum endereço de banco
+ * é escrito à mão aqui. Consumimos o que já existe lá: as Edge Functions
+ * `rede-inscrever`, `rede-conversa` e `rede-saude`, e o schema `rede`
+ * (leitura/decisão do Guardião via RLS).
  */
-export const REDE_URL = "https://ghtqfxjpgnjbdfjxfjhq.supabase.co";
+export const REDE_URL: string =
+  (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) ??
+  (typeof process !== "undefined" ? (process.env["SUPABASE_URL"] ?? "") : "");
 
-/**
- * Chave publicável (anon) do projeto da Rede. É pública por natureza — a RLS
- * é quem protege os dados. Preencha com a chave anon do projeto acima.
- */
-export const REDE_CHAVE_PUBLICAVEL =
-  (import.meta.env["VITE_REDE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined) ?? "";
+/** Chave publicável (anon). É pública por natureza — a RLS é quem protege. */
+export const REDE_CHAVE_PUBLICAVEL: string =
+  (import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined) ??
+  (typeof process !== "undefined" ? (process.env["SUPABASE_PUBLISHABLE_KEY"] ?? "") : "");
 
-export const redeConfigurada = REDE_CHAVE_PUBLICAVEL.length > 0;
+export const redeConfigurada = REDE_URL.length > 0 && REDE_CHAVE_PUBLICAVEL.length > 0;
+
 
 /** Chama uma Edge Function da Rede e devolve o JSON já convertido. */
 export async function chamarRede<T>(funcao: string, corpo: unknown): Promise<T> {
