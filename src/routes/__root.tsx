@@ -208,7 +208,7 @@ function RootComponent() {
             Pular para o conteúdo
           </a>
           <Conteudo />
-          <DicaInstalacao />
+          <DicaSeCabe />
         </AcessibilidadeProvider>
       </AdminAuthProvider>
     </QueryClientProvider>
