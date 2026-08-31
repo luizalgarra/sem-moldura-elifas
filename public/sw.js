@@ -1,7 +1,7 @@
 /* Elifas Andreato — Além da Moldura
    Service worker do catálogo. Suba CACHE_VERSION para invalidar tudo. */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const SHELL = `shell-${CACHE_VERSION}`;
 const ASSETS = `assets-${CACHE_VERSION}`;
 const IMAGES = `images-${CACHE_VERSION}`;
@@ -15,7 +15,9 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(SHELL)
-      .then((c) => c.addAll(["/", OFFLINE_URL]))
+      // A tela que o ícone abre também entra no precache: sem ela, abrir o app
+      // offline cairia direto na página de fallback.
+      .then((c) => c.addAll(["/", "/rede-alem-da-moldura", OFFLINE_URL]))
       .then(() => self.skipWaiting())
   );
 });
