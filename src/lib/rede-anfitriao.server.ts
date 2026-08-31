@@ -308,6 +308,58 @@ export async function tratarConversa(req: Request): Promise<Response> {
       if (!f) return json({ erro: "inscricao nao encontrada" }, 404);
       if (String(f["email"]).toLowerCase() !== String(c.email ?? "").toLowerCase()) return json({ erro: "e-mail nao confere" }, 403);
 
+      // Quem ja se cadastrou volta para a propria conversa: nada de cadastro
+      // novo, nada de comecar do zero. A inscricao e unica por e-mail, entao o
+      // lista_espera_id identifica a pessoa.
+      const { data: jaMembro } = await sb.from("membros").select("id").eq("lista_espera_id", f["id"]).order("criado_em", { ascending: false }).limit(1).maybeSingle();
+
+      if (jaMembro) {
+        const membro_id = (jaMembro as any).id;
+        const { data: viva } = await sb.from("conversas").select("*").eq("membro_id", membro_id)
+          .is("encerrada_em", null).order("criado_em", { ascending: false }).limit(1).maybeSingle();
+
+        if (viva) {
+          // Sessao nova a cada volta: so quem acabou de provar o e-mail escreve.
+          const sessao = segredo();
+          await sb.from("conversas").update({ sessao_hash: await sha256(sessao) }).eq("id", (viva as any).id);
+
+          const etapaViva: Etapa = (viva as any).etapa;
+          const { data: hist } = await sb.from("mensagens").select("papel,conteudo").eq("conversa_id", (viva as any).id).order("criado_em", { ascending: true }).limit(80);
+          const st = await estado(sb, membro_id);
+          const faltam = abertas(st.fechado, etapaViva);
+          const { data: mem } = await sb.from("membros").select("ficha_texto,ficha_aprovada_em").eq("id", membro_id).single();
+          const turnos = (hist ?? []).map((m: any) => ({ de: m.papel === "pessoa" ? "pessoa" : "anfitriao", texto: m.conteudo }));
+
+          return json({
+            conversa_id: (viva as any).id,
+            sessao,
+            etapa: etapaViva,
+            mensagem: turnos.length ? turnos[turnos.length - 1].texto : "",
+            turnos,
+            faltam,
+            ferramentas: (mem as any)?.ficha_texto && !(mem as any)?.ficha_aprovada_em ? ["propor_ficha"] : [],
+          });
+        }
+
+        // Todas encerradas: conversa nova para o mesmo cadastro, sem duplicar.
+        const st = await estado(sb, membro_id);
+        const etapaNova: Etapa = abertas(st.fechado, "A").length ? "A" : "B";
+        const faltam = abertas(st.fechado, etapaNova);
+        const sessao = segredo();
+        const { data: nova, error: eNova } = await sb.from("conversas").insert({
+          membro_id, etapa: etapaNova, canal: c.canal ?? "web",
+          sessao_hash: await sha256(sessao), estado_atual: "S6_RETOMADA",
+        }).select("id").single();
+        if (eNova || !nova) throw new Error(`nao foi possivel reabrir a conversa: ${eNova?.message ?? "sem retorno do banco"}`);
+
+        const resp = await conversar(prompt(st, etapaNova, faltam, faltam[0] ?? null, 0),
+          [{ role: "user", content: "[a pessoa ja conversou antes e voltou agora. Cumprimente pelo nome, cite em uma frase o que ela ja contou, e puxe o primeiro assunto que falta]" }], ferramentas(false, etapaNova));
+        const fala = falaDe(resp);
+        await sb.from("mensagens").insert({ conversa_id: (nova as any).id, papel: "agente", estado: "S6_RETOMADA", conteudo: fala });
+
+        return json({ conversa_id: (nova as any).id, sessao, etapa: etapaNova, mensagem: fala, faltam });
+      }
+
       const { data: membro, error: eMembro } = await sb.from("membros").insert({
         nome: f["nome"], email: f["email"], vinculo: f["vinculo"], origem: f["origem"] ?? "formulario",
         status: "rascunho", lista_espera_id: f["id"], formulario: f,
@@ -330,6 +382,7 @@ export async function tratarConversa(req: Request): Promise<Response> {
       await sb.from("mensagens").insert({ conversa_id: (conv as any).id, papel: "agente", estado: "S0_ACOLHIMENTO", conteudo: fala });
 
       return json({ conversa_id: (conv as any).id, sessao, etapa: "A", mensagem: fala, faltam });
+
     }
 
     if (c.action === "retomar") {
