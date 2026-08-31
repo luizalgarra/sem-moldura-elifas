@@ -300,16 +300,19 @@ export async function tratarConversa(req: Request): Promise<Response> {
       if (!f) return json({ erro: "inscricao nao encontrada" }, 404);
       if (String(f["email"]).toLowerCase() !== String(c.email ?? "").toLowerCase()) return json({ erro: "e-mail nao confere" }, 403);
 
-      const { data: membro } = await sb.from("membros").insert({
+      const { data: membro, error: eMembro } = await sb.from("membros").insert({
         nome: f["nome"], email: f["email"], vinculo: f["vinculo"], origem: f["origem"] ?? "formulario",
         status: "rascunho", lista_espera_id: f["id"], formulario: f,
       }).select("id").single();
+      if (eMembro || !membro) throw new Error(`nao foi possivel abrir seu cadastro: ${eMembro?.message ?? "sem retorno do banco"}`);
 
       const sessao = segredo();
-      const { data: conv } = await sb.from("conversas").insert({
+      const { data: conv, error: eConv } = await sb.from("conversas").insert({
         membro_id: (membro as any).id, etapa: "A", canal: c.canal ?? "web",
         sessao_hash: await sha256(sessao), estado_atual: "S0_ACOLHIMENTO",
       }).select("id").single();
+      if (eConv || !conv) throw new Error(`nao foi possivel abrir a conversa: ${eConv?.message ?? "sem retorno do banco"}`);
+
 
       const st = await estado(sb, (membro as any).id);
       const faltam = abertas(st.fechado, "A");
@@ -329,10 +332,11 @@ export async function tratarConversa(req: Request): Promise<Response> {
       await sb.from("tokens_retomada").update({ usado_em: new Date().toISOString() }).eq("token_hash", (reg as any).token_hash);
 
       const sessao = segredo();
-      const { data: conv } = await sb.from("conversas").insert({
+      const { data: conv, error: eConv } = await sb.from("conversas").insert({
         membro_id: (reg as any).membro_id, etapa: "B", canal: c.canal ?? "web",
         sessao_hash: await sha256(sessao), estado_atual: "S6_RETOMADA",
       }).select("id").single();
+      if (eConv || !conv) throw new Error(`nao foi possivel retomar a conversa: ${eConv?.message ?? "sem retorno do banco"}`);
       await sb.from("sinais").insert({ membro_id: (reg as any).membro_id, tipo: "retorno_etapa_b" });
 
       const st = await estado(sb, (reg as any).membro_id);
