@@ -121,7 +121,7 @@ function TelaConversa() {
   }
 
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="fixed inset-0 z-40 flex flex-col bg-background" style={{ height: "100dvh" }}>
       <div className="mx-auto w-full max-w-2xl px-4 pt-4">
         <button
           type="button"
