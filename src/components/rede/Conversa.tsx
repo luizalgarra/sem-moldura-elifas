@@ -201,7 +201,7 @@ export function Conversa({
       {/* Área de mensagens: ocupa o espaço restante e rola para cima. */}
       <div
         ref={mensagensRef}
-        className="flex-1 overflow-y-auto px-4 py-4"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4"
         aria-live="polite"
       >
         <div className="mx-auto max-w-2xl space-y-4">
