@@ -49,11 +49,11 @@ function TelaConversa() {
     if (iniciado.current) return;
     iniciado.current = true;
 
+    // Pintura imediata com o que está no navegador; em seguida o servidor
+    // manda a versão de verdade — num refresh o sessionStorage sobrevive e
+    // estaria desatualizado (só tem o primeiro turno).
     const guardado = lerEstado();
-    if (guardado) {
-      setEstado(guardado);
-      return;
-    }
+    if (guardado) setEstado(guardado);
 
     const sessao = lerSessao();
     if (!sessao) {
@@ -78,6 +78,8 @@ function TelaConversa() {
         guardarEstado(reconstruido);
         setEstado(reconstruido);
       } catch (e) {
+        // Com estado guardado, uma falha de rede não derruba a tela.
+        if (guardado) return;
         limparSessao();
         setErro(e instanceof Error ? e.message : "Não foi possível reabrir a conversa.");
       }
