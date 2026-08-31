@@ -272,7 +272,10 @@ export function Conversa({
       </div>
 
       {/* Campo de texto fixo na parte inferior. */}
-      <div className="shrink-0 border-t border-border/50 bg-background px-4 py-4">
+      <div
+        className="shrink-0 border-t border-border/50 bg-background px-4 pt-4"
+        style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+      >
         <div className="mx-auto max-w-2xl">
           {erro && (
             <p role="alert" className="mb-3 text-sm text-destructive">
