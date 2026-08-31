@@ -5,7 +5,7 @@
   "lang": "pt-BR",
   "dir": "ltr",
   "id": "/",
-  "start_url": "/?utm_source=pwa",
+  "start_url": "/rede-alem-da-moldura?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -18,6 +18,7 @@
     { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
+    { "name": "Catálogo da exposição", "short_name": "Catálogo", "url": "/" },
     { "name": "Ver todas as obras", "short_name": "Obras", "url": "/obras" },
     { "name": "Linha do Tempo", "short_name": "Linha do Tempo", "url": "/linhas-da-vida" }
   ]
