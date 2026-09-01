@@ -213,7 +213,7 @@ function esquemaGoogle(schema: any) {
   return schema;
 }
 
-function paraGoogle(sys: string, historico: any[], tools: any[]) {
+function paraGoogle(sys: string, historico: any[], tools: any[], opcoes: OpcoesGeracao = {}) {
   const nomePorId = new Map<string, string>();
   const contents: any[] = [];
   for (const m of historico) {
@@ -254,7 +254,10 @@ function paraGoogle(sys: string, historico: any[], tools: any[]) {
     contents,
     systemInstruction: { parts: [{ text: sys }] },
     ...(declaracoes.length ? { tools: [{ functionDeclarations: declaracoes }] } : {}),
-    generationConfig: { maxOutputTokens: 1024 },
+    generationConfig: {
+      maxOutputTokens: opcoes.maxTokens ?? 1024,
+      ...(opcoes.temperatura != null ? { temperature: opcoes.temperatura } : {}),
+    },
   };
 }
 
@@ -273,19 +276,26 @@ function deGoogle(dados: any): RespostaModelo {
 
 /* ----------------------------- chamada única ------------------------------ */
 
+export interface OpcoesGeracao {
+  temperatura?: number;
+  maxTokens?: number;
+}
+
 async function umaChamada(
   escolha: Escolha,
   chave: string,
   sys: string,
   historico: any[],
   tools: any[],
+  opcoes: OpcoesGeracao = {},
 ): Promise<Response> {
   if (escolha.provedor === "anthropic") {
     return fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": chave, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: JSON.stringify({
-        model: escolha.modelo, max_tokens: 1024, system: sys, messages: historico,
+        model: escolha.modelo, max_tokens: opcoes.maxTokens ?? 1024, system: sys, messages: historico,
+        ...(opcoes.temperatura != null ? { temperature: opcoes.temperatura } : {}),
         ...(tools.length ? { tools } : {}),
       }),
     });
@@ -296,7 +306,7 @@ async function umaChamada(
     return fetch(url, {
       method: "POST",
       headers: { "x-goog-api-key": chave, "content-type": "application/json" },
-      body: JSON.stringify(paraGoogle(sys, historico, tools)),
+      body: JSON.stringify(paraGoogle(sys, historico, tools, opcoes)),
     });
   }
 
@@ -309,7 +319,8 @@ async function umaChamada(
     method: "POST",
     headers: { authorization: `Bearer ${chave}`, "content-type": "application/json" },
     body: JSON.stringify({
-      model: escolha.modelo, max_tokens: 1024, messages,
+      model: escolha.modelo, max_tokens: opcoes.maxTokens ?? 1024, messages,
+      ...(opcoes.temperatura != null ? { temperature: opcoes.temperatura } : {}),
       ...(ferr.length ? { tools: ferr } : {}),
     }),
   });
@@ -325,6 +336,7 @@ export async function conversarCom(
   historico: any[],
   tools: any[],
   origem: string = "conversa",
+  opcoes: OpcoesGeracao = {},
 ): Promise<RespostaModelo> {
   const chave = chaveDe(escolha.provedor);
   if (!chave) throw new Error(`modelo sem chave: falta o segredo do provedor ${escolha.provedor}`);
@@ -334,7 +346,7 @@ export async function conversarCom(
   for (let tentativa = 0; tentativa < 3; tentativa++) {
     let r: Response;
     try {
-      r = await umaChamada(escolha, chave, sys, historico, tools);
+      r = await umaChamada(escolha, chave, sys, historico, tools, opcoes);
     } catch (e: any) {
       ultimo = `modelo indisponivel: ${e?.message ?? e}`;
       await dorme(700 * (tentativa + 1));
