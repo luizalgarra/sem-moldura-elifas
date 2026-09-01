@@ -34,6 +34,7 @@ export const PROVEDORES: ProvedorInfo[] = [
     modelos: [
       { id: "gpt-4.1", rotulo: "GPT-4.1 — equilíbrio" },
       { id: "gpt-4.1-mini", rotulo: "GPT-4.1 mini — rápido e barato" },
+      { id: "gpt-5.1", rotulo: "GPT-5.1 — mais capaz" },
       { id: "gpt-4o", rotulo: "GPT-4o" },
       { id: "gpt-4o-mini", rotulo: "GPT-4o mini" },
     ],
@@ -43,9 +44,9 @@ export const PROVEDORES: ProvedorInfo[] = [
     nome: "Google (Gemini)",
     segredo: "GOOGLE_AI_API_KEY",
     modelos: [
-      { id: "gemini-2.5-flash", rotulo: "Gemini 2.5 Flash — rápido" },
-      { id: "gemini-2.5-pro", rotulo: "Gemini 2.5 Pro — mais capaz" },
-      { id: "gemini-2.0-flash", rotulo: "Gemini 2.0 Flash" },
+      { id: "gemini-3.6-flash", rotulo: "Gemini 3.6 Flash — rápido" },
+      { id: "gemini-3.1-pro-preview", rotulo: "Gemini 3.1 Pro (preview) — mais capaz" },
+      { id: "gemini-3.5-flash", rotulo: "Gemini 3.5 Flash" },
     ],
   },
   {
