@@ -95,6 +95,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ia_uso: {
+        Row: {
+          created_at: string
+          erro: string | null
+          id: string
+          modelo: string
+          ms: number
+          ok: boolean
+          origem: string
+          provedor: string
+          tokens_entrada: number
+          tokens_saida: number
+        }
+        Insert: {
+          created_at?: string
+          erro?: string | null
+          id?: string
+          modelo: string
+          ms?: number
+          ok?: boolean
+          origem?: string
+          provedor: string
+          tokens_entrada?: number
+          tokens_saida?: number
+        }
+        Update: {
+          created_at?: string
+          erro?: string | null
+          id?: string
+          modelo?: string
+          ms?: number
+          ok?: boolean
+          origem?: string
+          provedor?: string
+          tokens_entrada?: number
+          tokens_saida?: number
+        }
+        Relationships: []
+      }
       obra_overrides: {
         Row: {
           ano: string | null
