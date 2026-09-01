@@ -29,6 +29,47 @@ export function chaveDe(provedor: Provedor): string | undefined {
   return v && v.length > 0 ? v : undefined;
 }
 
+/**
+ * Confere se a chave do provedor ainda vale, com uma consulta barata
+ * (lista de modelos). Nunca devolve a chave nem parte dela.
+ */
+export async function verificarChaveProvedor(
+  provedor: Provedor,
+): Promise<{ ok: boolean; status?: number; erro?: string }> {
+  const chave = chaveDe(provedor);
+  if (!chave) return { ok: false, erro: "Chave ausente." };
+
+  const alvos: Record<Provedor, { url: string; headers: Record<string, string> }> = {
+    anthropic: {
+      url: "https://api.anthropic.com/v1/models?limit=1",
+      headers: { "x-api-key": chave, "anthropic-version": "2023-06-01" },
+    },
+    openai: {
+      url: "https://api.openai.com/v1/models",
+      headers: { authorization: `Bearer ${chave}` },
+    },
+    google: {
+      url: "https://generativelanguage.googleapis.com/v1beta/models",
+      headers: { "x-goog-api-key": chave },
+    },
+    nvidia: {
+      url: "https://integrate.api.nvidia.com/v1/models",
+      headers: { authorization: `Bearer ${chave}` },
+    },
+  };
+
+  const alvo = alvos[provedor];
+  try {
+    const r = await fetch(alvo.url, { headers: alvo.headers });
+    if (r.ok) return { ok: true, status: r.status };
+    const texto = (await r.text()).slice(0, 200);
+    return { ok: false, status: r.status, erro: `${r.status}: ${texto}` };
+  } catch (e: any) {
+    return { ok: false, erro: String(e?.message ?? e).slice(0, 200) };
+  }
+}
+
+
 /** Lê a escolha guardada em `public.ia_config`. Cai no padrão se algo faltar. */
 export async function modeloAtivo(): Promise<Escolha> {
   try {
