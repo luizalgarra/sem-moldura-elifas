@@ -4,9 +4,11 @@
 // esquemas das ferramentas, regras de segurança e retry vêm palavra por palavra
 // do original. Só o encanamento mudou (Deno.serve -> rota do próprio site).
 //
-// Precisa dos segredos ANTHROPIC_API_KEY e, opcionalmente, MODELO.
+// A chave depende do provedor escolhido em /modelos (ANTHROPIC_API_KEY,
+// OPENAI_API_KEY, GOOGLE_AI_API_KEY ou NVIDIA_API_KEY).
 
 import { createClient } from "@supabase/supabase-js";
+import { conversarCom, modeloAtivo } from "./ia-provedores.server";
 
 export type Etapa = "A" | "B";
 
@@ -37,7 +39,7 @@ export const json = (c: unknown, s = 200) =>
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 export const sha256 = async (t: string) => hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)));
 export const segredo = () => { const b = new Uint8Array(32); crypto.getRandomValues(b); return hex(b.buffer); };
-const dorme = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 
 export const limpa = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max) || null;
 
@@ -250,31 +252,13 @@ async function executar(sb: any, membro_id: string, conversa_id: string, nome: s
   return "ferramenta desconhecida";
 }
 
-// Um 5xx passageiro do modelo nao pode custar a conversa de uma pessoa.
+// O provedor e o modelo vem de `public.ia_config` (tela /modelos). O retry e a
+// traducao de formatos moram em ia-provedores.server.ts.
 async function conversar(sys: string, historico: any[], tools: any[]) {
-  let ultimo = "modelo: sem resposta";
-  for (let tentativa = 0; tentativa < 3; tentativa++) {
-    let r: Response;
-    try {
-      r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "x-api-key": process.env["ANTHROPIC_API_KEY"]!, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-        body: JSON.stringify({ model: process.env["MODELO"] ?? "claude-sonnet-5", max_tokens: 1024, system: sys, tools, messages: historico }),
-      });
-    } catch (e: any) {
-      ultimo = `modelo indisponivel: ${e?.message ?? e}`;
-      await dorme(700 * (tentativa + 1));
-      continue;
-    }
-    if (r.ok) return await r.json();
-    ultimo = `modelo ${r.status}: ${(await r.text()).slice(0, 300)}`;
-    // 4xx que nao seja excesso de chamadas e erro nosso: repetir nao resolve.
-    if (r.status < 500 && r.status !== 429) break;
-    console.error("modelo instavel, tentando de novo:", ultimo);
-    await dorme(700 * (tentativa + 1));
-  }
-  throw new Error(ultimo);
+  const escolha = await modeloAtivo();
+  return await conversarCom(escolha, sys, historico, tools);
 }
+
 
 const falaDe = (resp: any) => (resp.content ?? []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
 

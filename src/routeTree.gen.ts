@@ -15,6 +15,7 @@ import { Route as QrcodesRouteImport } from './routes/qrcodes'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PostagensRouteImport } from './routes/postagens'
 import { Route as ParticipeRouteImport } from './routes/participe'
+import { Route as ModelosRouteImport } from './routes/modelos'
 import { Route as LinhasDaVidaRouteImport } from './routes/linhas-da-vida'
 import { Route as InstitutoRouteImport } from './routes/instituto'
 import { Route as GuardiaoRouteImport } from './routes/guardiao'
@@ -103,6 +104,11 @@ const PostagensRoute = PostagensRouteImport.update({
 const ParticipeRoute = ParticipeRouteImport.update({
   id: '/participe',
   path: '/participe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelosRoute = ModelosRouteImport.update({
+  id: '/modelos',
+  path: '/modelos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LinhasDaVidaRoute = LinhasDaVidaRouteImport.update({
@@ -430,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/guardiao': typeof GuardiaoRoute
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/modelos': typeof ModelosRoute
   '/participe': typeof ParticipeRouteWithChildren
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -493,6 +500,7 @@ export interface FileRoutesByTo {
   '/entrar-na-rede': typeof EntrarNaRedeRoute
   '/guardiao': typeof GuardiaoRoute
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/modelos': typeof ModelosRoute
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sobre': typeof SobreRoute
@@ -558,6 +566,7 @@ export interface FileRoutesById {
   '/guardiao': typeof GuardiaoRoute
   '/instituto': typeof InstitutoRouteWithChildren
   '/linhas-da-vida': typeof LinhasDaVidaRoute
+  '/modelos': typeof ModelosRoute
   '/participe': typeof ParticipeRouteWithChildren
   '/postagens': typeof PostagensRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -627,6 +636,7 @@ export interface FileRouteTypes {
     | '/guardiao'
     | '/instituto'
     | '/linhas-da-vida'
+    | '/modelos'
     | '/participe'
     | '/postagens'
     | '/privacidade'
@@ -690,6 +700,7 @@ export interface FileRouteTypes {
     | '/entrar-na-rede'
     | '/guardiao'
     | '/linhas-da-vida'
+    | '/modelos'
     | '/postagens'
     | '/privacidade'
     | '/sobre'
@@ -754,6 +765,7 @@ export interface FileRouteTypes {
     | '/guardiao'
     | '/instituto'
     | '/linhas-da-vida'
+    | '/modelos'
     | '/participe'
     | '/postagens'
     | '/privacidade'
@@ -822,6 +834,7 @@ export interface RootRouteChildren {
   GuardiaoRoute: typeof GuardiaoRoute
   InstitutoRoute: typeof InstitutoRouteWithChildren
   LinhasDaVidaRoute: typeof LinhasDaVidaRoute
+  ModelosRoute: typeof ModelosRoute
   ParticipeRoute: typeof ParticipeRouteWithChildren
   PostagensRoute: typeof PostagensRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -881,6 +894,13 @@ declare module '@tanstack/react-router' {
       path: '/participe'
       fullPath: '/participe'
       preLoaderRoute: typeof ParticipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modelos': {
+      id: '/modelos'
+      path: '/modelos'
+      fullPath: '/modelos'
+      preLoaderRoute: typeof ModelosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/linhas-da-vida': {
@@ -1455,6 +1475,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuardiaoRoute: GuardiaoRoute,
   InstitutoRoute: InstitutoRouteWithChildren,
   LinhasDaVidaRoute: LinhasDaVidaRoute,
+  ModelosRoute: ModelosRoute,
   ParticipeRoute: ParticipeRouteWithChildren,
   PostagensRoute: PostagensRoute,
   PrivacidadeRoute: PrivacidadeRoute,
