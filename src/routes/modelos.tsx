@@ -7,6 +7,7 @@ import { Check, Loader2, KeyRound, AlertTriangle, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PROVEDORES, type Provedor } from "@/lib/ia-modelos";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   lerConfigIA,
   salvarConfigIA,
@@ -45,8 +46,14 @@ function Modelos() {
   const ler = useServerFn(lerConfigIA);
   const salvar = useServerFn(salvarConfigIA);
   const testar = useServerFn(testarModelo);
+  const { carregando, isAdmin } = useAdminAuth();
 
-  const config = useQuery({ queryKey: ["ia-config"], queryFn: () => ler({}) });
+  const config = useQuery({
+    queryKey: ["ia-config"],
+    queryFn: () => ler({}),
+    enabled: !carregando && isAdmin,
+    retry: false,
+  });
 
   const [salvando, setSalvando] = useState<string | null>(null);
   const [testando, setTestando] = useState<string | null>(null);
