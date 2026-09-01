@@ -104,6 +104,7 @@ export const testarModelo = createServerFn({ method: "POST" })
         "Responda em português, em uma frase curta.",
         [{ role: "user", content: "oi, tudo bem?" }],
         [],
+        "teste",
       );
       const texto = r.content
         .filter((b: any) => b.type === "text")
