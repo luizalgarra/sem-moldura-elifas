@@ -8,7 +8,8 @@
 // OPENAI_API_KEY, GOOGLE_AI_API_KEY ou NVIDIA_API_KEY).
 
 import { createClient } from "@supabase/supabase-js";
-import { conversarCom, modeloAtivo } from "./ia-provedores.server";
+import { chaveDe, conversarCom, modeloAtivo, type OpcoesGeracao } from "./ia-provedores.server";
+import { ehProvedor, type Escolha } from "./ia-modelos";
 
 export type Etapa = "A" | "B";
 
@@ -253,11 +254,73 @@ async function executar(sb: any, membro_id: string, conversa_id: string, nome: s
   return "ferramenta desconhecida";
 }
 
-// O provedor e o modelo vem de `public.ia_config` (tela /modelos). O retry e a
+export type AgenteCfg = {
+  instrucoes: string | null;
+  regras_extras: string | null;
+  temperatura: number;
+  max_tokens: number;
+  modelo_etapa_a: string | null;
+  modelo_etapa_b: string | null;
+  modelo_fallback: string | null;
+};
+
+const AGENTE_PADRAO: AgenteCfg = {
+  instrucoes: null,
+  regras_extras: null,
+  temperatura: 0.7,
+  max_tokens: 1024,
+  modelo_etapa_a: null,
+  modelo_etapa_b: null,
+  modelo_fallback: null,
+};
+
+/** Le a configuracao do Anfitriao; qualquer falha devolve o padrao e segue o jogo. */
+export async function configAgente(): Promise<AgenteCfg> {
+  try {
+    const { data, error } = await dbPublico().from("agente_config").select("*").eq("id", 1).maybeSingle();
+    if (error || !data) return AGENTE_PADRAO;
+    const d = data as any;
+    return {
+      instrucoes: d.instrucoes ?? null,
+      regras_extras: d.regras_extras ?? null,
+      temperatura: d.temperatura != null ? Number(d.temperatura) : 0.7,
+      max_tokens: d.max_tokens ?? 1024,
+      modelo_etapa_a: d.modelo_etapa_a ?? null,
+      modelo_etapa_b: d.modelo_etapa_b ?? null,
+      modelo_fallback: d.modelo_fallback ?? null,
+    };
+  } catch {
+    return AGENTE_PADRAO;
+  }
+}
+
+/** "provedor:modelo" -> Escolha; texto vazio ou invalido vira null. */
+function escolhaDeTexto(v: string | null | undefined): Escolha | null {
+  if (!v) return null;
+  const i = v.indexOf(":");
+  if (i <= 0) return null;
+  const provedor = v.slice(0, i);
+  const modelo = v.slice(i + 1);
+  return ehProvedor(provedor) && modelo ? { provedor, modelo } : null;
+}
+
+// O provedor e o modelo vem de `public.ia_config` (tela /modelos) ou da
+// escolha por etapa em `public.agente_config` (tela /agente). O retry e a
 // traducao de formatos moram em ia-provedores.server.ts.
-async function conversar(sys: string, historico: any[], tools: any[]) {
-  const escolha = await modeloAtivo();
-  return await conversarCom(escolha, sys, historico, tools);
+async function conversar(sys: string, historico: any[], tools: any[], etapa: Etapa, cfg: AgenteCfg) {
+  const porEtapa = escolhaDeTexto(etapa === "A" ? cfg.modelo_etapa_a : cfg.modelo_etapa_b);
+  const escolha = porEtapa ?? (await modeloAtivo());
+  const opcoes: OpcoesGeracao = { temperatura: cfg.temperatura, maxTokens: cfg.max_tokens };
+  try {
+    return await conversarCom(escolha, sys, historico, tools, "conversa", opcoes);
+  } catch (e: any) {
+    const reserva = escolhaDeTexto(cfg.modelo_fallback);
+    if (reserva && (reserva.provedor !== escolha.provedor || reserva.modelo !== escolha.modelo) && chaveDe(reserva.provedor)) {
+      console.error(`modelo ${escolha.provedor}/${escolha.modelo} falhou, tentando reserva ${reserva.provedor}/${reserva.modelo}:`, e?.message ?? e);
+      return await conversarCom(reserva, sys, historico, tools, "conversa_fallback", opcoes);
+    }
+    throw e;
+  }
 }
 
 
