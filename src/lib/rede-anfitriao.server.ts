@@ -8,8 +8,8 @@
 // OPENAI_API_KEY, GOOGLE_AI_API_KEY ou NVIDIA_API_KEY).
 
 import { createClient } from "@supabase/supabase-js";
-import { chaveDe, conversarCom, modeloAtivo, type OpcoesGeracao } from "./ia-provedores.server";
-import { ehProvedor, type Escolha } from "./ia-modelos";
+import { chaveDe, conversarCom, modeloAtivo, type Escolha, type OpcoesGeracao } from "./ia-provedores.server";
+import { ehProvedor } from "./ia-modelos";
 
 export type Etapa = "A" | "B";
 
