@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      agente_config: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          id: number
+          instrucoes: string | null
+          max_tokens: number
+          modelo_etapa_a: string | null
+          modelo_etapa_b: string | null
+          modelo_fallback: string | null
+          regras_extras: string | null
+          temperatura: number
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: number
+          instrucoes?: string | null
+          max_tokens?: number
+          modelo_etapa_a?: string | null
+          modelo_etapa_b?: string | null
+          modelo_fallback?: string | null
+          regras_extras?: string | null
+          temperatura?: number
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: number
+          instrucoes?: string | null
+          max_tokens?: number
+          modelo_etapa_a?: string | null
+          modelo_etapa_b?: string | null
+          modelo_fallback?: string | null
+          regras_extras?: string | null
+          temperatura?: number
+        }
+        Relationships: []
+      }
       geracoes_audio: {
         Row: {
           caracteres: number
