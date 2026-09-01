@@ -45,8 +45,14 @@ function Modelos() {
   const ler = useServerFn(lerConfigIA);
   const salvar = useServerFn(salvarConfigIA);
   const testar = useServerFn(testarModelo);
+  const { carregando, isAdmin } = useAdminAuth();
 
-  const config = useQuery({ queryKey: ["ia-config"], queryFn: () => ler({}) });
+  const config = useQuery({
+    queryKey: ["ia-config"],
+    queryFn: () => ler({}),
+    enabled: !carregando && isAdmin,
+    retry: false,
+  });
 
   const [salvando, setSalvando] = useState<string | null>(null);
   const [testando, setTestando] = useState<string | null>(null);
