@@ -332,6 +332,7 @@ export async function tratarConversa(req: Request): Promise<Response> {
   try { c = await req.json(); } catch { return json({ erro: "corpo invalido" }, 400); }
 
   const sb = db();
+  const cfg = await configAgente();
   // O cliente so manda base_url no "abrir"; no "falar" derivamos do Origin,
   // senao o link de retomada sai relativo e nao vira clicavel na tela.
   let base_url = String(c.base_url ?? "").replace(/\/$/, "");
