@@ -221,3 +221,141 @@ export const resumoUsoIA = createServerFn({ method: "POST" })
       dias: [...porDia.values()].sort((a, b) => a.dia.localeCompare(b.dia)),
     };
   });
+
+/* ------------------------------ agente ------------------------------ */
+
+export type AgenteConfig = {
+  instrucoes: string;
+  regras_extras: string;
+  temperatura: number;
+  max_tokens: number;
+  modelo_etapa_a: string;
+  modelo_etapa_b: string;
+  modelo_fallback: string;
+  atualizado_em: string | null;
+};
+
+const AGENTE_VAZIO: AgenteConfig = {
+  instrucoes: "",
+  regras_extras: "",
+  temperatura: 0.7,
+  max_tokens: 1024,
+  modelo_etapa_a: "",
+  modelo_etapa_b: "",
+  modelo_fallback: "",
+  atualizado_em: null,
+};
+
+/** Valor "provedor:modelo" ou vazio (= modelo global da tela /modelos). */
+const modeloOuVazio = z
+  .string()
+  .trim()
+  .max(160)
+  .refine((v) => v === "" || (/^[^:]+:.+/.test(v) && ehProvedor(v.split(":")[0])), {
+    message: "modelo inválido",
+  });
+
+const AgenteEntrada = z.object({
+  instrucoes: z.string().max(4000),
+  regras_extras: z.string().max(4000),
+  temperatura: z.number().min(0).max(1),
+  max_tokens: z.number().int().min(64).max(8192),
+  modelo_etapa_a: modeloOuVazio,
+  modelo_etapa_b: modeloOuVazio,
+  modelo_fallback: modeloOuVazio,
+});
+
+/** Lê a configuração do Anfitrião (tela `/agente`). */
+export const lerAgenteConfig = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AgenteConfig> => {
+    if (!(await ehAdmin(context))) throw new Error(ERRO_NAO_AUTORIZADO);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("agente_config")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+    if (!data) return AGENTE_VAZIO;
+    const d = data as any;
+    return {
+      instrucoes: d.instrucoes ?? "",
+      regras_extras: d.regras_extras ?? "",
+      temperatura: d.temperatura != null ? Number(d.temperatura) : 0.7,
+      max_tokens: d.max_tokens ?? 1024,
+      modelo_etapa_a: d.modelo_etapa_a ?? "",
+      modelo_etapa_b: d.modelo_etapa_b ?? "",
+      modelo_fallback: d.modelo_fallback ?? "",
+      atualizado_em: d.atualizado_em ?? null,
+    };
+  });
+
+/** Salva a configuração do Anfitrião. Vale para a próxima mensagem já. */
+export const salvarAgenteConfig = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => AgenteEntrada.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: boolean; erro?: string }> => {
+    if (!(await ehAdmin(context))) return { ok: false, erro: ERRO_NAO_AUTORIZADO };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("agente_config").upsert(
+      {
+        id: 1,
+        instrucoes: data.instrucoes || null,
+        regras_extras: data.regras_extras || null,
+        temperatura: data.temperatura,
+        max_tokens: data.max_tokens,
+        modelo_etapa_a: data.modelo_etapa_a || null,
+        modelo_etapa_b: data.modelo_etapa_b || null,
+        modelo_fallback: data.modelo_fallback || null,
+        atualizado_em: new Date().toISOString(),
+        atualizado_por: context.userId,
+      },
+      { onConflict: "id" },
+    );
+    if (error) return { ok: false, erro: error.message };
+    return { ok: true };
+  });
+
+/**
+ * Manda uma mensagem de teste ao Anfitrião com a configuração salva,
+ * sem ferramentas e sem gravar nada. Serve para sentir o tom.
+ */
+export const testarAgente = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ mensagem: z.string().trim().min(1).max(500) }).parse(input))
+  .handler(async ({ data, context }): Promise<Teste> => {
+    if (!(await ehAdmin(context))) return { ok: false, ms: 0, erro: ERRO_NAO_AUTORIZADO };
+
+    const { conversarCom, modeloAtivo } = await import("@/lib/ia-provedores.server");
+    const { configAgente } = await import("@/lib/rede-anfitriao.server");
+    const cfg = await configAgente();
+
+    const sys = [
+      "Você é o Anfitrião da Rede Além da Moldura — a rede de pessoas em torno da obra de Elifas Andreato. Responda em pt-BR, com acolhimento, duas a quatro frases, sem emoji.",
+      cfg.instrucoes ? `\nPERSONALIDADE E TOM (definido pela curadoria)\n${cfg.instrucoes}` : "",
+      cfg.regras_extras ? `\nREGRAS EXTRAS (definidas pela curadoria)\n${cfg.regras_extras}` : "",
+    ].join("");
+
+    const escolha = (await modeloAtivo());
+    const inicio = Date.now();
+    try {
+      const r = await conversarCom(
+        escolha,
+        sys,
+        [{ role: "user", content: data.mensagem }],
+        [],
+        "teste_agente",
+        { temperatura: cfg.temperatura, maxTokens: cfg.max_tokens },
+      );
+      const texto = r.content
+        .filter((b: any) => b.type === "text")
+        .map((b: any) => b.text)
+        .join(" ")
+        .trim();
+      return { ok: true, ms: Date.now() - inicio, resposta: texto.slice(0, 600) };
+    } catch (e: any) {
+      return { ok: false, ms: Date.now() - inicio, erro: String(e?.message ?? e).slice(0, 400) };
+    }
+  });
