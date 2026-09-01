@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Check, Loader2, KeyRound, KeyOff, Play } from "lucide-react";
+import { Check, Loader2, KeyRound, AlertTriangle, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,7 +137,7 @@ function Modelos() {
                   {temChave ? (
                     <KeyRound className="size-3.5" aria-hidden="true" />
                   ) : (
-                    <KeyOff className="size-3.5" aria-hidden="true" />
+                    <AlertTriangle className="size-3.5" aria-hidden="true" />
                   )}
                   {temChave ? "chave presente" : "falta a chave"}
                 </span>
