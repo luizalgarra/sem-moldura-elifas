@@ -128,6 +128,11 @@ function Modelos() {
         </p>
       )}
 
+      {ativo && <SecaoChaves chaves={ativo.chaves} />}
+
+      <SecaoConsumo pronto={!carregando && isAdmin} />
+
+
       {ativo &&
         PROVEDORES.map((p) => {
           const temChave = ativo.chaves[p.id];
