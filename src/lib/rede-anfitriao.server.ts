@@ -400,8 +400,8 @@ export async function tratarConversa(req: Request): Promise<Response> {
         }).select("id").single();
         if (eNova || !nova) throw new Error(`nao foi possivel reabrir a conversa: ${eNova?.message ?? "sem retorno do banco"}`);
 
-        const resp = await conversar(prompt(st, etapaNova, faltam, faltam[0] ?? null, 0),
-          [{ role: "user", content: "[a pessoa ja conversou antes e voltou agora. Cumprimente pelo nome, cite em uma frase o que ela ja contou, e puxe o primeiro assunto que falta]" }], ferramentas(false, etapaNova));
+        const resp = await conversar(prompt(st, etapaNova, faltam, faltam[0] ?? null, 0, cfg),
+          [{ role: "user", content: "[a pessoa ja conversou antes e voltou agora. Cumprimente pelo nome, cite em uma frase o que ela ja contou, e puxe o primeiro assunto que falta]" }], ferramentas(false, etapaNova), etapaNova, cfg);
         const fala = falaDe(resp);
         await sb.from("mensagens").insert({ conversa_id: (nova as any).id, papel: "agente", estado: "S6_RETOMADA", conteudo: fala });
 
@@ -424,8 +424,8 @@ export async function tratarConversa(req: Request): Promise<Response> {
 
       const st = await estado(sb, (membro as any).id);
       const faltam = abertas(st.fechado, "A");
-      const resp = await conversar(prompt(st, "A", faltam, faltam[0] ?? null, 0),
-        [{ role: "user", content: "[a pessoa acabou de enviar o formulario e abriu a conversa. Cumprimente pelo nome, diga em duas frases o que vai acontecer e quanto tempo leva, e puxe o primeiro assunto que falta]" }], ferramentas(false, "A"));
+      const resp = await conversar(prompt(st, "A", faltam, faltam[0] ?? null, 0, cfg),
+        [{ role: "user", content: "[a pessoa acabou de enviar o formulario e abriu a conversa. Cumprimente pelo nome, diga em duas frases o que vai acontecer e quanto tempo leva, e puxe o primeiro assunto que falta]" }], ferramentas(false, "A"), "A", cfg);
       const fala = falaDe(resp);
       await sb.from("mensagens").insert({ conversa_id: (conv as any).id, papel: "agente", estado: "S0_ACOLHIMENTO", conteudo: fala });
 
@@ -450,8 +450,8 @@ export async function tratarConversa(req: Request): Promise<Response> {
 
       const st = await estado(sb, (reg as any).membro_id);
       const faltam = abertas(st.fechado, "B");
-      const resp = await conversar(prompt(st, "B", faltam, faltam[0] ?? null, 0),
-        [{ role: "user", content: "[a pessoa voltou para a segunda conversa. Retome o fio pelo nome, cite o que ela ja contou, confirme que ela tem uns dez minutos e puxe o primeiro assunto que falta]" }], ferramentas(false, "B"));
+      const resp = await conversar(prompt(st, "B", faltam, faltam[0] ?? null, 0, cfg),
+        [{ role: "user", content: "[a pessoa voltou para a segunda conversa. Retome o fio pelo nome, cite o que ela ja contou, confirme que ela tem uns dez minutos e puxe o primeiro assunto que falta]" }], ferramentas(false, "B"), "B", cfg);
       const fala = falaDe(resp);
       await sb.from("mensagens").insert({ conversa_id: (conv as any).id, papel: "agente", estado: "S6_RETOMADA", conteudo: fala });
 
@@ -477,7 +477,7 @@ export async function tratarConversa(req: Request): Promise<Response> {
       const historico: any[] = (hist ?? []).map((m: any) => ({ role: m.papel === "pessoa" ? "user" : "assistant", content: m.conteudo }));
       if (historico[0]?.role !== "user") historico.unshift({ role: "user", content: "[inicio]" });
 
-      let resp = await conversar(prompt(st0, etapa, faltam0, foco, tent), historico, tools);
+      let resp = await conversar(prompt(st0, etapa, faltam0, foco, tent, cfg), historico, tools, etapa, cfg);
       const usadas: string[] = [];
 
       for (let i = 0; i < 3 && resp.stop_reason === "tool_use"; i++) {
@@ -490,7 +490,7 @@ export async function tratarConversa(req: Request): Promise<Response> {
         historico.push({ role: "assistant", content: resp.content });
         historico.push({ role: "user", content: resultados });
         const st1 = await estado(sb, membro_id);
-        resp = await conversar(prompt(st1, etapa, abertas(st1.fechado, etapa), foco, tent), historico, tools);
+        resp = await conversar(prompt(st1, etapa, abertas(st1.fechado, etapa), foco, tent, cfg), historico, tools, etapa, cfg);
       }
 
       const fala = falaDe(resp);
