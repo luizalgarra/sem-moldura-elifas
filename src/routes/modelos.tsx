@@ -231,6 +231,21 @@ function Modelos() {
                   Usar
                 </Button>
               </div>
+
+              {(() => {
+                const id = (livre[p.id] ?? "").trim();
+                const t = id ? testes[chave(p.id, id)] : undefined;
+                if (!t) return null;
+                return (
+                  <p
+                    className={"mt-2 text-sm " + (t.ok ? "text-muted-foreground" : "text-destructive")}
+                  >
+                    {t.ok
+                      ? `respondeu em ${t.ms} ms: ${t.resposta || "(sem texto)"}`
+                      : `falhou em ${t.ms} ms: ${t.erro}`}
+                  </p>
+                );
+              })()}
             </section>
           );
         })}
