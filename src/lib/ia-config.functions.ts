@@ -116,3 +116,108 @@ export const testarModelo = createServerFn({ method: "POST" })
       return { ok: false, ms: Date.now() - inicio, erro: String(e?.message ?? e).slice(0, 400) };
     }
   });
+
+/* ------------------------------ chaves ------------------------------ */
+
+export type ChaveStatus = { ok: boolean; status?: number; erro?: string };
+
+/** Confere se a chave do provedor ainda é aceita. Nunca expõe o valor. */
+export const verificarChave = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ provedor: z.enum(provedores) }).parse(input))
+  .handler(async ({ data, context }): Promise<ChaveStatus> => {
+    if (!(await ehAdmin(context))) return { ok: false, erro: ERRO_NAO_AUTORIZADO };
+    const { verificarChaveProvedor } = await import("@/lib/ia-provedores.server");
+    return verificarChaveProvedor(data.provedor);
+  });
+
+/* ------------------------------ consumo ------------------------------ */
+
+export type LinhaUso = {
+  provedor: string;
+  modelo: string;
+  chamadas: number;
+  erros: number;
+  tokens_entrada: number;
+  tokens_saida: number;
+};
+
+export type DiaUso = { dia: string; tokens: number; chamadas: number };
+
+export type ResumoUso = {
+  periodo: string;
+  linhas: LinhaUso[];
+  dias: DiaUso[];
+};
+
+const PERIODOS = ["hoje", "7d", "30d", "tudo"] as const;
+export type Periodo = (typeof PERIODOS)[number];
+
+function desdeQuando(periodo: Periodo): string | null {
+  const agora = new Date();
+  if (periodo === "hoje") {
+    const d = new Date(agora);
+    d.setUTCHours(0, 0, 0, 0);
+    return d.toISOString();
+  }
+  if (periodo === "7d") return new Date(agora.getTime() - 7 * 864e5).toISOString();
+  if (periodo === "30d") return new Date(agora.getTime() - 30 * 864e5).toISOString();
+  return null;
+}
+
+/** Consumo agregado por modelo e por dia. */
+export const resumoUsoIA = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ periodo: z.enum(PERIODOS) }).parse(input))
+  .handler(async ({ data, context }): Promise<ResumoUso> => {
+    if (!(await ehAdmin(context))) throw new Error(ERRO_NAO_AUTORIZADO);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let consulta = supabaseAdmin
+      .from("ia_uso")
+      .select("provedor,modelo,tokens_entrada,tokens_saida,ok,created_at")
+      .order("created_at", { ascending: false })
+      .limit(20000);
+
+    const desde = desdeQuando(data.periodo);
+    if (desde) consulta = consulta.gte("created_at", desde);
+
+    const { data: linhas, error } = await consulta;
+    if (error) throw new Error(error.message);
+
+    const porModelo = new Map<string, LinhaUso>();
+    const porDia = new Map<string, DiaUso>();
+
+    for (const r of (linhas ?? []) as any[]) {
+      const chave = `${r.provedor}:${r.modelo}`;
+      const atual =
+        porModelo.get(chave) ??
+        {
+          provedor: r.provedor,
+          modelo: r.modelo,
+          chamadas: 0,
+          erros: 0,
+          tokens_entrada: 0,
+          tokens_saida: 0,
+        };
+      atual.chamadas += 1;
+      if (!r.ok) atual.erros += 1;
+      atual.tokens_entrada += Number(r.tokens_entrada ?? 0);
+      atual.tokens_saida += Number(r.tokens_saida ?? 0);
+      porModelo.set(chave, atual);
+
+      const dia = String(r.created_at).slice(0, 10);
+      const d = porDia.get(dia) ?? { dia, tokens: 0, chamadas: 0 };
+      d.tokens += Number(r.tokens_entrada ?? 0) + Number(r.tokens_saida ?? 0);
+      d.chamadas += 1;
+      porDia.set(dia, d);
+    }
+
+    return {
+      periodo: data.periodo,
+      linhas: [...porModelo.values()].sort(
+        (a, b) => b.tokens_entrada + b.tokens_saida - (a.tokens_entrada + a.tokens_saida),
+      ),
+      dias: [...porDia.values()].sort((a, b) => a.dia.localeCompare(b.dia)),
+    };
+  });
