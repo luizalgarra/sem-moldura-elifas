@@ -187,7 +187,10 @@ async function umaChamada(
     return fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": chave, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: escolha.modelo, max_tokens: 1024, system: sys, tools, messages: historico }),
+      body: JSON.stringify({
+        model: escolha.modelo, max_tokens: 1024, system: sys, messages: historico,
+        ...(tools.length ? { tools } : {}),
+      }),
     });
   }
 
@@ -208,7 +211,10 @@ async function umaChamada(
   return fetch(base, {
     method: "POST",
     headers: { authorization: `Bearer ${chave}`, "content-type": "application/json" },
-    body: JSON.stringify({ model: escolha.modelo, max_tokens: 1024, messages, tools: ferr }),
+    body: JSON.stringify({
+      model: escolha.modelo, max_tokens: 1024, messages,
+      ...(ferr.length ? { tools: ferr } : {}),
+    }),
   });
 }
 
