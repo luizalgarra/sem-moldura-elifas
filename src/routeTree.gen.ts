@@ -26,6 +26,7 @@ import { Route as EditarRouteImport } from './routes/editar'
 import { Route as ContinuarRouteImport } from './routes/continuar'
 import { Route as ComoUsarRouteImport } from './routes/como-usar'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AgenteRouteImport } from './routes/agente'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcervoRouteImport } from './routes/acervo'
 import { Route as IndexRouteImport } from './routes/index'
@@ -160,6 +161,11 @@ const ComoUsarRoute = ComoUsarRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgenteRoute = AgenteRouteImport.update({
+  id: '/agente',
+  path: '/agente',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -432,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acervo': typeof AcervoRouteWithChildren
   '/admin': typeof AdminRoute
+  '/agente': typeof AgenteRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/continuar': typeof ContinuarRoute
@@ -500,6 +507,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agente': typeof AgenteRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/continuar': typeof ContinuarRoute
@@ -564,6 +572,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/acervo': typeof AcervoRouteWithChildren
   '/admin': typeof AdminRoute
+  '/agente': typeof AgenteRoute
   '/auth': typeof AuthRoute
   '/como-usar': typeof ComoUsarRoute
   '/continuar': typeof ContinuarRoute
@@ -635,6 +644,7 @@ export interface FileRouteTypes {
     | '/'
     | '/acervo'
     | '/admin'
+    | '/agente'
     | '/auth'
     | '/como-usar'
     | '/continuar'
@@ -703,6 +713,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/agente'
     | '/auth'
     | '/como-usar'
     | '/continuar'
@@ -766,6 +777,7 @@ export interface FileRouteTypes {
     | '/'
     | '/acervo'
     | '/admin'
+    | '/agente'
     | '/auth'
     | '/como-usar'
     | '/continuar'
@@ -836,6 +848,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcervoRoute: typeof AcervoRouteWithChildren
   AdminRoute: typeof AdminRoute
+  AgenteRoute: typeof AgenteRoute
   AuthRoute: typeof AuthRoute
   ComoUsarRoute: typeof ComoUsarRoute
   ContinuarRoute: typeof ContinuarRoute
@@ -984,6 +997,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agente': {
+      id: '/agente'
+      path: '/agente'
+      fullPath: '/agente'
+      preLoaderRoute: typeof AgenteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1485,6 +1505,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcervoRoute: AcervoRouteWithChildren,
   AdminRoute: AdminRoute,
+  AgenteRoute: AgenteRoute,
   AuthRoute: AuthRoute,
   ComoUsarRoute: ComoUsarRoute,
   ContinuarRoute: ContinuarRoute,

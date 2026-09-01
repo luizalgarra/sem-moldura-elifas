@@ -101,7 +101,12 @@ function Modelos() {
       <h1 className="font-serif text-3xl font-bold text-foreground">Modelos de IA</h1>
       <p className="mt-2 text-muted-foreground">
         Escolha qual modelo responde nas conversas da Rede Além da Moldura. A troca vale para
-        todas as conversas assim que você salva.
+        todas as conversas assim que você salva. Para ajustar personalidade, tom, regras e
+        modelo por etapa, use a página{" "}
+        <Link to="/agente" className="underline underline-offset-2">
+          /agente
+        </Link>
+        .
       </p>
 
       {config.isLoading && (
