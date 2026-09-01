@@ -149,17 +149,14 @@ function paraGoogle(sys: string, historico: any[], tools: any[]) {
       if (parts.length) contents.push({ role: "user", parts });
     }
   }
+  const declaracoes = tools.map((t) => {
+    const p = esquemaGoogle(t.input_schema);
+    return { name: t.name, description: t.description, ...(p ? { parameters: p } : {}) };
+  });
   return {
     contents,
     systemInstruction: { parts: [{ text: sys }] },
-    tools: [
-      {
-        functionDeclarations: tools.map((t) => {
-          const p = esquemaGoogle(t.input_schema);
-          return { name: t.name, description: t.description, ...(p ? { parameters: p } : {}) };
-        }),
-      },
-    ],
+    ...(declaracoes.length ? { tools: [{ functionDeclarations: declaracoes }] } : {}),
     generationConfig: { maxOutputTokens: 1024 },
   };
 }
