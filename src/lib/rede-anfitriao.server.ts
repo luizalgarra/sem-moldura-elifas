@@ -37,7 +37,7 @@ export const json = (c: unknown, s = 200) =>
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 export const sha256 = async (t: string) => hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)));
 export const segredo = () => { const b = new Uint8Array(32); crypto.getRandomValues(b); return hex(b.buffer); };
-const dorme = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 
 export const limpa = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max) || null;
 
