@@ -61,6 +61,7 @@ import { Route as ElifasAndreatoMusicaPopularBrasileiraRouteImport } from './rou
 import { Route as ElifasAndreatoCarreiraEditorialRouteImport } from './routes/elifas-andreato.carreira-editorial'
 import { Route as ElifasAndreatoBiografiaRouteImport } from './routes/elifas-andreato.biografia'
 import { Route as ElifasAndreatoArteEResistenciaRouteImport } from './routes/elifas-andreato.arte-e-resistencia'
+import { Route as ApiNvidiaNemotronRouteImport } from './routes/api/nvidia-nemotron'
 import { Route as AcervoQuadrosEIlustracoesRouteImport } from './routes/acervo.quadros-e-ilustracoes'
 import { Route as AcervoFotografiasECromosRouteImport } from './routes/acervo.fotografias-e-cromos'
 import { Route as AcervoExposicoesVirtuaisRouteImport } from './routes/acervo.exposicoes-virtuais'
@@ -344,6 +345,11 @@ const ElifasAndreatoArteEResistenciaRoute =
     path: '/arte-e-resistencia',
     getParentRoute: () => ElifasAndreatoRoute,
   } as any)
+const ApiNvidiaNemotronRoute = ApiNvidiaNemotronRouteImport.update({
+  id: '/api/nvidia-nemotron',
+  path: '/api/nvidia-nemotron',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcervoQuadrosEIlustracoesRoute =
   AcervoQuadrosEIlustracoesRouteImport.update({
     id: '/quadros-e-ilustracoes',
@@ -452,6 +458,7 @@ export interface FileRoutesByFullPath {
   '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
   '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
   '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
+  '/api/nvidia-nemotron': typeof ApiNvidiaNemotronRoute
   '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
   '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
@@ -513,6 +520,7 @@ export interface FileRoutesByTo {
   '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
   '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
   '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
+  '/api/nvidia-nemotron': typeof ApiNvidiaNemotronRoute
   '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
   '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
@@ -582,6 +590,7 @@ export interface FileRoutesById {
   '/acervo/exposicoes-virtuais': typeof AcervoExposicoesVirtuaisRoute
   '/acervo/fotografias-e-cromos': typeof AcervoFotografiasECromosRoute
   '/acervo/quadros-e-ilustracoes': typeof AcervoQuadrosEIlustracoesRoute
+  '/api/nvidia-nemotron': typeof ApiNvidiaNemotronRoute
   '/elifas-andreato/arte-e-resistencia': typeof ElifasAndreatoArteEResistenciaRoute
   '/elifas-andreato/biografia': typeof ElifasAndreatoBiografiaRoute
   '/elifas-andreato/carreira-editorial': typeof ElifasAndreatoCarreiraEditorialRoute
@@ -652,6 +661,7 @@ export interface FileRouteTypes {
     | '/acervo/exposicoes-virtuais'
     | '/acervo/fotografias-e-cromos'
     | '/acervo/quadros-e-ilustracoes'
+    | '/api/nvidia-nemotron'
     | '/elifas-andreato/arte-e-resistencia'
     | '/elifas-andreato/biografia'
     | '/elifas-andreato/carreira-editorial'
@@ -713,6 +723,7 @@ export interface FileRouteTypes {
     | '/acervo/exposicoes-virtuais'
     | '/acervo/fotografias-e-cromos'
     | '/acervo/quadros-e-ilustracoes'
+    | '/api/nvidia-nemotron'
     | '/elifas-andreato/arte-e-resistencia'
     | '/elifas-andreato/biografia'
     | '/elifas-andreato/carreira-editorial'
@@ -781,6 +792,7 @@ export interface FileRouteTypes {
     | '/acervo/exposicoes-virtuais'
     | '/acervo/fotografias-e-cromos'
     | '/acervo/quadros-e-ilustracoes'
+    | '/api/nvidia-nemotron'
     | '/elifas-andreato/arte-e-resistencia'
     | '/elifas-andreato/biografia'
     | '/elifas-andreato/carreira-editorial'
@@ -841,6 +853,7 @@ export interface RootRouteChildren {
   QrcodesRoute: typeof QrcodesRouteWithChildren
   RedeAlemDaMolduraRoute: typeof RedeAlemDaMolduraRouteWithChildren
   SobreRoute: typeof SobreRoute
+  ApiNvidiaNemotronRoute: typeof ApiNvidiaNemotronRoute
   ObrasNumRoute: typeof ObrasNumRoute
   PostarNumRoute: typeof PostarNumRoute
   ObrasIndexRoute: typeof ObrasIndexRoute
@@ -1218,6 +1231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ElifasAndreatoArteEResistenciaRouteImport
       parentRoute: typeof ElifasAndreatoRoute
     }
+    '/api/nvidia-nemotron': {
+      id: '/api/nvidia-nemotron'
+      path: '/api/nvidia-nemotron'
+      fullPath: '/api/nvidia-nemotron'
+      preLoaderRoute: typeof ApiNvidiaNemotronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/acervo/quadros-e-ilustracoes': {
       id: '/acervo/quadros-e-ilustracoes'
       path: '/quadros-e-ilustracoes'
@@ -1482,6 +1502,7 @@ const rootRouteChildren: RootRouteChildren = {
   QrcodesRoute: QrcodesRouteWithChildren,
   RedeAlemDaMolduraRoute: RedeAlemDaMolduraRouteWithChildren,
   SobreRoute: SobreRoute,
+  ApiNvidiaNemotronRoute: ApiNvidiaNemotronRoute,
   ObrasNumRoute: ObrasNumRoute,
   PostarNumRoute: PostarNumRoute,
   ObrasIndexRoute: ObrasIndexRoute,
