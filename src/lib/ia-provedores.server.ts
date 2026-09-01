@@ -29,6 +29,47 @@ export function chaveDe(provedor: Provedor): string | undefined {
   return v && v.length > 0 ? v : undefined;
 }
 
+/**
+ * Confere se a chave do provedor ainda vale, com uma consulta barata
+ * (lista de modelos). Nunca devolve a chave nem parte dela.
+ */
+export async function verificarChaveProvedor(
+  provedor: Provedor,
+): Promise<{ ok: boolean; status?: number; erro?: string }> {
+  const chave = chaveDe(provedor);
+  if (!chave) return { ok: false, erro: "Chave ausente." };
+
+  const alvos: Record<Provedor, { url: string; headers: Record<string, string> }> = {
+    anthropic: {
+      url: "https://api.anthropic.com/v1/models?limit=1",
+      headers: { "x-api-key": chave, "anthropic-version": "2023-06-01" },
+    },
+    openai: {
+      url: "https://api.openai.com/v1/models",
+      headers: { authorization: `Bearer ${chave}` },
+    },
+    google: {
+      url: "https://generativelanguage.googleapis.com/v1beta/models",
+      headers: { "x-goog-api-key": chave },
+    },
+    nvidia: {
+      url: "https://integrate.api.nvidia.com/v1/models",
+      headers: { authorization: `Bearer ${chave}` },
+    },
+  };
+
+  const alvo = alvos[provedor];
+  try {
+    const r = await fetch(alvo.url, { headers: alvo.headers });
+    if (r.ok) return { ok: true, status: r.status };
+    const texto = (await r.text()).slice(0, 200);
+    return { ok: false, status: r.status, erro: `${r.status}: ${texto}` };
+  } catch (e: any) {
+    return { ok: false, erro: String(e?.message ?? e).slice(0, 200) };
+  }
+}
+
+
 /** Lê a escolha guardada em `public.ia_config`. Cai no padrão se algo faltar. */
 export async function modeloAtivo(): Promise<Escolha> {
   try {
@@ -49,6 +90,62 @@ export async function modeloAtivo(): Promise<Escolha> {
     console.error("ia_config indisponivel:", e?.message ?? e);
   }
   return { ...PADRAO, modelo: process.env["MODELO"] ?? PADRAO.modelo };
+}
+
+/* ----------------------------- registro de uso ---------------------------- */
+
+/** Tokens de entrada/saída, no formato de cada provedor. */
+function tokensDe(provedor: Provedor, dados: any): { entrada: number; saida: number } {
+  if (provedor === "anthropic") {
+    return {
+      entrada: Number(dados?.usage?.input_tokens ?? 0),
+      saida: Number(dados?.usage?.output_tokens ?? 0),
+    };
+  }
+  if (provedor === "google") {
+    return {
+      entrada: Number(dados?.usageMetadata?.promptTokenCount ?? 0),
+      saida: Number(dados?.usageMetadata?.candidatesTokenCount ?? 0),
+    };
+  }
+  return {
+    entrada: Number(dados?.usage?.prompt_tokens ?? 0),
+    saida: Number(dados?.usage?.completion_tokens ?? 0),
+  };
+}
+
+type Uso = {
+  provedor: Provedor;
+  modelo: string;
+  tokens_entrada: number;
+  tokens_saida: number;
+  ms: number;
+  origem: string;
+  ok: boolean;
+  erro?: string | null;
+};
+
+/** Grava uma linha em `public.ia_uso`. Nunca derruba a conversa se falhar. */
+async function registrarUso(uso: Uso): Promise<void> {
+  try {
+    const sb = createClient(
+      process.env["SUPABASE_URL"]!,
+      process.env["SUPABASE_SERVICE_ROLE_KEY"]!,
+      { auth: { persistSession: false } },
+    );
+    await sb.from("ia_uso").insert({
+      provedor: uso.provedor,
+      modelo: uso.modelo,
+      tokens_entrada: uso.tokens_entrada,
+      tokens_saida: uso.tokens_saida,
+      ms: uso.ms,
+      origem: uso.origem,
+      ok: uso.ok,
+      erro: uso.erro ? String(uso.erro).slice(0, 400) : null,
+    });
+  } catch (e: any) {
+    console.error("ia_uso nao registrado:", e?.message ?? e);
+  }
 }
 
 /* ------------------------- tradutores por provedor ------------------------- */
@@ -227,10 +324,12 @@ export async function conversarCom(
   sys: string,
   historico: any[],
   tools: any[],
+  origem: string = "conversa",
 ): Promise<RespostaModelo> {
   const chave = chaveDe(escolha.provedor);
   if (!chave) throw new Error(`modelo sem chave: falta o segredo do provedor ${escolha.provedor}`);
 
+  const inicio = Date.now();
   let ultimo = "modelo: sem resposta";
   for (let tentativa = 0; tentativa < 3; tentativa++) {
     let r: Response;
@@ -243,6 +342,16 @@ export async function conversarCom(
     }
     if (r.ok) {
       const dados = await r.json();
+      const t = tokensDe(escolha.provedor, dados);
+      await registrarUso({
+        provedor: escolha.provedor,
+        modelo: escolha.modelo,
+        tokens_entrada: t.entrada,
+        tokens_saida: t.saida,
+        ms: Date.now() - inicio,
+        origem,
+        ok: true,
+      });
       if (escolha.provedor === "anthropic") {
         return { content: dados.content ?? [], stop_reason: dados.stop_reason ?? "end_turn" };
       }
@@ -254,5 +363,15 @@ export async function conversarCom(
     console.error("modelo instavel, tentando de novo:", ultimo);
     await dorme(700 * (tentativa + 1));
   }
+  await registrarUso({
+    provedor: escolha.provedor,
+    modelo: escolha.modelo,
+    tokens_entrada: 0,
+    tokens_saida: 0,
+    ms: Date.now() - inicio,
+    origem,
+    ok: false,
+    erro: ultimo,
+  });
   throw new Error(ultimo);
 }

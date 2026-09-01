@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PROVEDORES, type Provedor } from "@/lib/ia-modelos";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { SecaoChaves } from "@/components/ia/SecaoChaves";
+import { SecaoConsumo } from "@/components/ia/SecaoConsumo";
 import {
   lerConfigIA,
   salvarConfigIA,
@@ -125,6 +127,11 @@ function Modelos() {
           Em uso agora: <strong>{ativo.provedor}</strong> — <code>{ativo.modelo}</code>
         </p>
       )}
+
+      {ativo && <SecaoChaves chaves={ativo.chaves} />}
+
+      <SecaoConsumo pronto={!carregando && isAdmin} />
+
 
       {ativo &&
         PROVEDORES.map((p) => {
