@@ -7,6 +7,7 @@ import { Check, Loader2, KeyRound, AlertTriangle, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PROVEDORES, type Provedor } from "@/lib/ia-modelos";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   lerConfigIA,
   salvarConfigIA,
