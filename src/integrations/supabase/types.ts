@@ -71,6 +71,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ia_config: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          id: number
+          modelo: string
+          provedor: string
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: number
+          modelo?: string
+          provedor?: string
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: number
+          modelo?: string
+          provedor?: string
+        }
+        Relationships: []
+      }
       obra_overrides: {
         Row: {
           ano: string | null
