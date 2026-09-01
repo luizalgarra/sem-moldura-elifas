@@ -283,10 +283,12 @@ export async function conversarCom(
   sys: string,
   historico: any[],
   tools: any[],
+  origem: string = "conversa",
 ): Promise<RespostaModelo> {
   const chave = chaveDe(escolha.provedor);
   if (!chave) throw new Error(`modelo sem chave: falta o segredo do provedor ${escolha.provedor}`);
 
+  const inicio = Date.now();
   let ultimo = "modelo: sem resposta";
   for (let tentativa = 0; tentativa < 3; tentativa++) {
     let r: Response;
@@ -299,6 +301,16 @@ export async function conversarCom(
     }
     if (r.ok) {
       const dados = await r.json();
+      const t = tokensDe(escolha.provedor, dados);
+      await registrarUso({
+        provedor: escolha.provedor,
+        modelo: escolha.modelo,
+        tokens_entrada: t.entrada,
+        tokens_saida: t.saida,
+        ms: Date.now() - inicio,
+        origem,
+        ok: true,
+      });
       if (escolha.provedor === "anthropic") {
         return { content: dados.content ?? [], stop_reason: dados.stop_reason ?? "end_turn" };
       }
@@ -310,5 +322,15 @@ export async function conversarCom(
     console.error("modelo instavel, tentando de novo:", ultimo);
     await dorme(700 * (tentativa + 1));
   }
+  await registrarUso({
+    provedor: escolha.provedor,
+    modelo: escolha.modelo,
+    tokens_entrada: 0,
+    tokens_saida: 0,
+    ms: Date.now() - inicio,
+    origem,
+    ok: false,
+    erro: ultimo,
+  });
   throw new Error(ultimo);
 }
