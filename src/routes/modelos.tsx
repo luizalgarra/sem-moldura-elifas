@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PROVEDORES, type Provedor } from "@/lib/ia-modelos";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { SecaoChaves } from "@/components/ia/SecaoChaves";
+import { SecaoConsumo } from "@/components/ia/SecaoConsumo";
 import {
   lerConfigIA,
   salvarConfigIA,
