@@ -51,6 +51,62 @@ export async function modeloAtivo(): Promise<Escolha> {
   return { ...PADRAO, modelo: process.env["MODELO"] ?? PADRAO.modelo };
 }
 
+/* ----------------------------- registro de uso ---------------------------- */
+
+/** Tokens de entrada/saída, no formato de cada provedor. */
+function tokensDe(provedor: Provedor, dados: any): { entrada: number; saida: number } {
+  if (provedor === "anthropic") {
+    return {
+      entrada: Number(dados?.usage?.input_tokens ?? 0),
+      saida: Number(dados?.usage?.output_tokens ?? 0),
+    };
+  }
+  if (provedor === "google") {
+    return {
+      entrada: Number(dados?.usageMetadata?.promptTokenCount ?? 0),
+      saida: Number(dados?.usageMetadata?.candidatesTokenCount ?? 0),
+    };
+  }
+  return {
+    entrada: Number(dados?.usage?.prompt_tokens ?? 0),
+    saida: Number(dados?.usage?.completion_tokens ?? 0),
+  };
+}
+
+type Uso = {
+  provedor: Provedor;
+  modelo: string;
+  tokens_entrada: number;
+  tokens_saida: number;
+  ms: number;
+  origem: string;
+  ok: boolean;
+  erro?: string | null;
+};
+
+/** Grava uma linha em `public.ia_uso`. Nunca derruba a conversa se falhar. */
+async function registrarUso(uso: Uso): Promise<void> {
+  try {
+    const sb = createClient(
+      process.env["SUPABASE_URL"]!,
+      process.env["SUPABASE_SERVICE_ROLE_KEY"]!,
+      { auth: { persistSession: false } },
+    );
+    await sb.from("ia_uso").insert({
+      provedor: uso.provedor,
+      modelo: uso.modelo,
+      tokens_entrada: uso.tokens_entrada,
+      tokens_saida: uso.tokens_saida,
+      ms: uso.ms,
+      origem: uso.origem,
+      ok: uso.ok,
+      erro: uso.erro ? String(uso.erro).slice(0, 400) : null,
+    });
+  } catch (e: any) {
+    console.error("ia_uso nao registrado:", e?.message ?? e);
+  }
+}
+
 /* ------------------------- tradutores por provedor ------------------------- */
 
 const textoDos = (blocos: Bloco[]) =>
