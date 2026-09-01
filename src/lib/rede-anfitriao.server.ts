@@ -4,9 +4,11 @@
 // esquemas das ferramentas, regras de segurança e retry vêm palavra por palavra
 // do original. Só o encanamento mudou (Deno.serve -> rota do próprio site).
 //
-// Precisa dos segredos ANTHROPIC_API_KEY e, opcionalmente, MODELO.
+// A chave depende do provedor escolhido em /modelos (ANTHROPIC_API_KEY,
+// OPENAI_API_KEY, GOOGLE_AI_API_KEY ou NVIDIA_API_KEY).
 
 import { createClient } from "@supabase/supabase-js";
+import { conversarCom, modeloAtivo } from "./ia-provedores.server";
 
 export type Etapa = "A" | "B";
 
